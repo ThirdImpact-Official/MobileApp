@@ -4,7 +4,9 @@
     "appVersionSource": "remote"
   },
   "build": {
+
     "development": {
+       "preInstallCommand": "expo install react-native-reanimated",
       "developmentClient": true,
       "distribution": "internal"
     },

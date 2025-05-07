@@ -6,7 +6,7 @@ import Animated, {
   useAnimatedStyle,
   useScrollViewOffset,
 } from 'react-native-reanimated';
-
+import { ScrollView } from 'react-native-reanimated/lib/typescript/Animated';
 import { ThemedView } from '@/components/ThemedView';
 import { useBottomTabOverflow } from '@/components/ui/TabBarBackground';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -24,9 +24,11 @@ export default function ParallaxScrollView({
   headerBackgroundColor,
 }: Props) {
   const colorScheme = useColorScheme() ?? 'light';
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  // Properly typed ref with ScrollView methods
+  const scrollRef = useAnimatedRef<ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollRef);
   const bottom = useBottomTabOverflow();
+  
   const headerAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
@@ -49,6 +51,7 @@ export default function ParallaxScrollView({
       <Animated.ScrollView
         ref={scrollRef}
         scrollEventThrottle={16}
+        contentInsetAdjustmentBehavior="automatic"
         scrollIndicatorInsets={{ bottom }}
         contentContainerStyle={{ paddingBottom: bottom }}>
         <Animated.View
@@ -71,6 +74,8 @@ const styles = StyleSheet.create({
   },
   header: {
     height: HEADER_HEIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
     overflow: 'hidden',
   },
   content: {
