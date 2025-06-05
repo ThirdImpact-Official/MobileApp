@@ -3,7 +3,7 @@ import FormUtils from "@/classes/FormUtils";
 export interface GetSessionGameDto {
     segId: number;
     escapeGameId: number;
-    date: Date;
+    gameDate: Date;
     price: number;
     isReserved: boolean;
     placeAvailable: number;
@@ -14,7 +14,7 @@ export interface GetSessionGameDto {
 export const Sessioncolumns: Array<{ label: string; accessor: keyof GetSessionGameDto }> = [
     FormUtils.TableMapper("ID", "segId"),
     FormUtils.TableMapper("Escape Game ID", "escapeGameId"),
-    FormUtils.TableMapper("Date", "date"),
+    FormUtils.TableMapper("Date", "gameDate"),
     FormUtils.TableMapper("Price", "price"),
     FormUtils.TableMapper("Is Reserved", "isReserved"),
     FormUtils.TableMapper("Places Available", "placeAvailable"),

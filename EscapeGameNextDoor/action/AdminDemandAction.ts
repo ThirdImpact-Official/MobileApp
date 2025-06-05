@@ -1,10 +1,9 @@
 import { HttpClient } from './httpClient';
 import { GetAdminDemandDto } from '../interfaces/AdminDemand/GetAdminDemand';
 import { ServiceResponse,PaginationResponse } from '@/interfaces/ServiceResponse';
-import {  } from '@/interfaces/ServiceResponse';
 import { CreateAdminDemandDto } from '@/interfaces/AdminDemand/CreateAdminDemand';
-import { Update } from 'vite/types/hmrPayload.js';
 import { ResponseAdminDemandDto } from '@/interfaces/AdminDemand/ResponseAdminDemand';
+
 export class AdminDemandAction{
     private HttpClient: HttpClient ;
 
@@ -59,7 +58,7 @@ export class AdminDemandAction{
      * @param demand 
      * @returns ServiceResponse<GetAdminDemandDto>
      */
-    public async UpdateDemand(demand: Update): Promise<ServiceResponse<GetAdminDemandDto> | PaginationResponse<GetAdminDemandDto>> {
+    public async UpdateDemand(demand: any): Promise<ServiceResponse<GetAdminDemandDto> | PaginationResponse<GetAdminDemandDto>> {
         return this.HttpClient
             .PutRequestType("")
             .setData(demand)

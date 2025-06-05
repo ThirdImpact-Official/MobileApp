@@ -47,10 +47,5 @@
         "projectId": "653e3f0a-ed0d-4894-a7cb-2301670f97ce"
       }
     }
-  },
-  "extra": {
-    "devServer": {
-      "port": 19001
-    }
   }
 }

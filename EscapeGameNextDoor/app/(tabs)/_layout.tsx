@@ -9,6 +9,9 @@ import { useAuth } from '@/context/ContextHook/AuthContext';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { Redirect } from 'expo-router';
 import {styles} from '../../constants/styles';
+import { NotificationsOutlined, Person, Person2 } from '@mui/icons-material';
+import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from '@/components/ThemedText';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -78,20 +81,34 @@ export default function TabLayout() {
           }}
           />
         <Tabs.Screen
+          name="Notification"
+          options={{
+            title: 'Notification',
+            tabBarIcon: ({ color }) => (
+              <>
+              <IconSymbol size={28} name="bell" color={color} />
+              <ThemedView>
+                <ThemedText>
+                  <NotificationsOutlined />
+                  </ThemedText>
+              </ThemedView>
+              </>
+            ),
+          }}
+          />
+             <Tabs.Screen
           name="profile"
           options={{
             title: 'Profile',
             tabBarIcon: ({ color }) => (
+              <>
               <IconSymbol size={28} name="person.fill" color={color} />
-            ),
-          }}
-          />
-        <Tabs.Screen
-          name="settings"
-          options={{
-            title: 'Settings',
-            tabBarIcon: ({ color }) => (
-              <IconSymbol size={28} name="gearshape.fill" color={color} />
+              <ThemedView>
+                <ThemedText>
+                  <Person2 />
+                </ThemedText>
+              </ThemedView>
+              </>
             ),
           }}
           />

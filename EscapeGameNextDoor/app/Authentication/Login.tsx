@@ -2,12 +2,13 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { Text, Image, StyleSheet, } from "react-native";
 import { Box, TextField, Typography, Button, InputAdornment, IconButton, Stack as MUIStack, Input, InputLabel } from "@mui/material";
 import { LoginCredentials } from "@/interfaces/Credentials/loginDto";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth, AuthContext } from '../../context/ContextHook/AuthContext';
 import { Redirect, Stack, useRouter } from "expo-router";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
+import AppView from "@/components/ui/AppView";
 
 export default function LoginScreen() {
   const Route = useRouter();
@@ -63,16 +64,15 @@ export default function LoginScreen() {
     console.log("automated " + AuthContext.isAuthenticated);
     Route.push("/");
   }
+  useEffect(()=> {
+    if(isAuthenticated)
+    {
+      automamated()
+    }
+  },[isAuthenticated])
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }
-    >
+<AppView>
       <Box className="items-center justify-center text-center flex flex-col">
         <ThemedText>
           <Typography variant="h4">
@@ -80,7 +80,8 @@ export default function LoginScreen() {
           </Typography>
         </ThemedText>
         <ThemedView>
-          <MUIStack spacing={2}
+          <MUIStack spacing={2} 
+            className="border-2 border-slate-500 rounded-lg p-4 bg-slate-500"
             sx={{ width: "100%" }}>
             <Box >
               <ThemedText>
@@ -144,7 +145,7 @@ export default function LoginScreen() {
           </MUIStack>
         </ThemedView>
       </Box>
-    </ParallaxScrollView>
+ </AppView>
   );
 }
 const styles = StyleSheet.create({

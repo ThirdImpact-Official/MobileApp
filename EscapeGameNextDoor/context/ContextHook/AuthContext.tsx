@@ -5,6 +5,10 @@ import * as SecureStore from 'expo-secure-store';
 import { LoginCredentials } from "@/interfaces/login/loginCredentials";
 import { CreadentialAction } from "@/action/CreadentialAction";
 import { UnitofAction } from '../../action/UnitofAction';
+import { Platform } from "react-native";
+import { GetUserDto } from "@/interfaces/User/GetUserDto";
+import { SecureStoreApp } from "@/classes/SecureStore";
+import { jwtDecode } from 'jwt-decode';
 
 // Constants for SecureStore Keys 
 const AUTH_TOKEN_KEY = "Token"; 
@@ -15,6 +19,7 @@ const AUTH_STATUS_KEY = "isAuthenticated";
 interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
+  user:GetUserDto;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -52,11 +57,42 @@ interface AuthProviderProps {
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true); // Start with loading true
+  const [user,setUser] = useState<GetUserDto>({
+    username: "",
+    id: 0,
+    firstName: "",
+    lastName: "",
+    email: "",
+    picture: "",
+    phoneNumber: "",
+    emailVerified: false,
+    reportCount: 0,
+    roleId: 0,
+    lastLogin: "",
+  });
   const action =new UnitofAction();
+  const SecureAction=new SecureStoreApp();
+  //storage methodes 
+  const getStorageItem= async(key:string):Promise<string> =>{
+    return await SecureAction.getValueFor(key);
+  }
 
+  const setStorageItem= async (key: string, value: string)=> {
+    await SecureAction.save(key, value);
+  }
+
+  const deleteStorageItem=async(key: string)=>{
+    await SecureAction.removeValueFrom(key);
+  }
+  //
+  const getUserInformation = async () => {
+    const userfromtoken = await getStorageItem(AUTH_TOKEN_KEY);
+    const response = jwtDecode<GetUserDto>(userfromtoken);
+    setUser(response);
+  }
   const loadAuthState = async () => {
     try {
-      const authStatus = await SecureStore.getItemAsync(AUTH_STATUS_KEY);
+      const authStatus = await getStorageItem(AUTH_STATUS_KEY);
       setIsAuthenticated(authStatus === 'true');
       setIsLoading(false);
     } catch (error) {
@@ -86,19 +122,22 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       console.log(response.Success);
 
       if (response.Success) {
-        console.log(response.Data);
-        
+        console.log('Data : ',response.Data);
+        console.log('response message : '
+          ,response.Message);
         // Store token if available
         if (response.Data) {
           const authResult = response.Data as AuthResponse;
           if (authResult.token) {
-            await SecureStore.setItemAsync(AUTH_TOKEN_KEY, authResult.token);
+            await setStorageItem(AUTH_TOKEN_KEY, authResult.token);
+            getUserInformation();
           }
         }
-        
         await persistentAuthentication(true);
       } else {
         await persistentAuthentication(false);
+        console.log('response message : '
+        ,response.Message);
         throw new Error("Login failed");
       }
     } catch (error) {
@@ -202,13 +241,14 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated,
     login,
     logout,
+    user,
     isLoading, // Fixed casing for consistency
   };
 
   // Helper function to persist authentication state
   async function persistentAuthentication(valueToStore: boolean) {
     try {
-      await SecureStore.setItemAsync(AUTH_STATUS_KEY, valueToStore.toString());
+      await setStorageItem(AUTH_STATUS_KEY, valueToStore.toString());
       setIsAuthenticated(valueToStore);
       setIsLoading(false);
       console.log("Auth state persisted:", valueToStore);
@@ -221,8 +261,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   // Helper function to remove authentication
   async function removeAuth() {
     try {
-      await SecureStore.deleteItemAsync(AUTH_STATUS_KEY);
-      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+      await deleteStorageItem(AUTH_STATUS_KEY);
+      await deleteStorageItem(AUTH_TOKEN_KEY);
       setIsAuthenticated(false);
       setIsLoading(false);
       console.log("Auth state removed");

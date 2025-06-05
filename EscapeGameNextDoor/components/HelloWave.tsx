@@ -1,40 +1,64 @@
-import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
+import React, { useEffect } from 'react';
+import { StyleSheet, View, Text, Platform } from 'react-native';
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
   withTiming,
-  withRepeat,
-  withSequence,
+  withRepeat
 } from 'react-native-reanimated';
 
-import { ThemedText } from '@/components/ThemedText';
-
-export function HelloWave() {
-  const rotationAnimation = useSharedValue(0);
-
+export default function HelloWave() {
+  const offset = useSharedValue(0);
+  
+  // Fix for web environment
+  const isWeb = Platform.OS === 'web';
+  
   useEffect(() => {
-    rotationAnimation.value = withRepeat(
-      withSequence(withTiming(25, { duration: 150 }), withTiming(0, { duration: 150 })),
-      4 // Run the animation 4 times
-    );
+    // Only use animations on native platforms or if properly set up on web
+    if (!isWeb) {
+      offset.value = withRepeat(
+        withTiming(10, { duration: 1000 }), 
+        -1, 
+        true
+      );
+    } else {
+      // Simple fallback for web if reanimated isn't properly set up
+      console.log('Wave animation is limited on web platform');
+    }
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotationAnimation.value}deg` }],
-  }));
+  const animatedStyles = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: offset.value }],
+    };
+  });
 
   return (
-    <Animated.View style={animatedStyle}>
-      <ThemedText style={styles.text}>👋</ThemedText>
-    </Animated.View>
+    <View style={styles.container}>
+      <Text style={styles.text}>Hello!</Text>
+      {isWeb ? (
+        // Fallback for web
+        <Text style={styles.wave}>👋</Text>
+      ) : (
+        // Animated version for native
+        <Animated.Text style={[styles.wave, animatedStyles]}>👋</Animated.Text>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
   text: {
-    fontSize: 28,
-    lineHeight: 32,
-    marginTop: -6,
+    fontSize: 24,
+    marginRight: 10,
+  },
+  wave: {
+    fontSize: 24,
   },
 });

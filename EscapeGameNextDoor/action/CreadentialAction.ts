@@ -22,7 +22,7 @@ export class CreadentialAction
     public async Login(credentials: LoginCredentials): Promise<ServiceResponse<AuthResponse> |PaginationResponse<AuthResponse>> {
     
             return await this._httpClient
-                                       .PostRequestType("account/login")
+                                       .PostRequestType("account/login/mobile")
                                         .setData(credentials)
                                         .execute<AuthResponse>();
        

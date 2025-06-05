@@ -1,7 +1,6 @@
 import FormUtils from "@/classes/FormUtils";
 import { GetDifficultyLevelDto } from "../DifficultyLevel/getDifficultyLevelDto";
 import { GetPriceDto } from "../Price/getPriceDto";
-import EscapeGame from '../../../pages/app/Escapgame';
 
 export interface GetEscapeGameDto {
     esgId: number;
