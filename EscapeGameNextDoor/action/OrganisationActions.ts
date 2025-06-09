@@ -46,7 +46,7 @@ export class OrganisationAction {
      *          be false.
      * @throws {Error} If the request to retrieve all organisations fails.
      */
-    public async GetAllOrganisation(page:number ,pageSize: number): Promise<ServiceResponse<GetOrganisationDto> | PaginationResponse<GetOrganisationDto>> {
+    public async GetAllOrganisation(page:number ,pageSize: number): Promise<PaginationResponse<GetOrganisationDto>> {
             const param: string =`?page=${page}&pageSize=${pageSize}`;
             return await this._httpClient.GetRequestType(param)
                 .executePagination<GetOrganisationDto>();

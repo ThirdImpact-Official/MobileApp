@@ -1,4 +1,4 @@
-export interface AddAdressDto {
+export interface AddAddressDto {
     street: string;
     postalCode: string;
     city: string;

@@ -4,6 +4,7 @@ export interface GetAnnonceDto{
     id: number;
     name: string;
     description: string;
+    image: string;
     createdDate: string;
     updatedDate: string;
 }

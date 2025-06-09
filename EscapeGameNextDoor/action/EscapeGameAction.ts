@@ -10,6 +10,8 @@ import { UpdateEscapeGameDto } from "@/interfaces/EscapeGameInterface/EscapeGame
 import { AddEventDto } from "@/interfaces/EscapeGameInterface/Event/addEventDto";
 import { GetEventDto } from "@/interfaces/EscapeGameInterface/Event/getEventDto";
 import { UpdateEventDto } from "@/interfaces/EscapeGameInterface/Event/updateEventDto";
+import { GetDifficultyLevelDto } from '../interfaces/EscapeGameInterface/DifficultyLevel/getDifficultyLevelDto';
+import { GetPriceDto } from '../interfaces/EscapeGameInterface/Price/getPriceDto';
 
 export class EscapeGameAction {
     private readonly httpClient: HttpClient;
@@ -21,13 +23,37 @@ export class EscapeGameAction {
         this.httpClient.setBaseUrl(this.apibaseurl);
     }
 
-    public async getAllEscapeGames(page: number, pageSize: number): Promise<ServiceResponse<GetEscapeGameDto> | PaginationResponse<GetEscapeGameDto>> {
+    public async getAllEscapeGames(page: number, pageSize: number): Promise<PaginationResponse<GetEscapeGameDto>> {
         const params=`?page=${page}&pageSize=${pageSize}`;
         return await this.httpClient
-            .GetRequestType("escapegame")
-            .execute<GetEscapeGameDto>();
+            .GetRequestType("escapegame"+`${params}`)
+            .executePagination<GetEscapeGameDto>();
     }
-    public async getAllEscapeGamesFromOrganisation(orgId:number,page:number, pageSize: number ): Promise<ServiceResponse<GetEscapeGameDto> | PaginationResponse<GetEscapeGameDto>> {
+    public async GetAllEscapeGames(catId:number | null,priceId:number| null,diflId:number| null, page: number, pageSize: number): Promise<PaginationResponse<GetEscapeGameDto>> {
+         const urlparams:string="";
+        if(catId==null)
+        {
+            const catparams=`?categoryId=${catId}`;
+            urlparams.concat(catparams);
+        }
+        if(priceId==null)
+        {
+            const priceParams=`?priceId=${priceId}`;
+            urlparams.concat(priceParams);
+        }
+        if(diflId==null)
+        {
+            const diflParams =`?difficultyLevelId=${diflId}`;
+            urlparams.concat(diflParams);	
+        }
+      
+        const params=`?page=${page}&pageSize=${pageSize}`;
+        
+        return await this.httpClient
+            .GetRequestType("escapegame"+urlparams+`${params}`)
+            .executePagination<GetEscapeGameDto>();
+    }
+    public async getAllEscapeGamesFromOrganisation(orgId:number,page:number, pageSize: number ): Promise< PaginationResponse<GetEscapeGameDto>> {
         const params=`?page=${page}&pageSize=${pageSize}`;
         return await this.httpClient
             .GetRequestType("escapegame/organisation/"+orgId+`${params}`)
@@ -138,5 +164,15 @@ export class EscapeGameAction {
         return await this.httpClient
             .DeleteRequestType(`escapegame/event/${id}`)
             .execute<GetEventDto>();
+    }
+    public async GetPriceIndice(): Promise<ServiceResponse<GetPriceDto[]>> {
+        return await this.httpClient
+            .GetRequestType('escapegame/price')
+            .execute<GetPriceDto[]>();
+    }
+    public async GetDifficultyLevelDto(): Promise<ServiceResponse<GetDifficultyLevelDto[]>> {
+        return await this.httpClient
+            .GetRequestType('escapegame/difficulty')
+            .execute<GetDifficultyLevelDto[]>();
     }
 }

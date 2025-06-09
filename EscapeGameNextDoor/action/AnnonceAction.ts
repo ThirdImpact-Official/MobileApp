@@ -20,7 +20,12 @@ export class AnnonceService {
             .GetRequestType(param)
             .executePagination<GetAnnonceDto>();
     }
-
+    public async GetAllAnnonceByOrganisationId(id: number, page: number, pageSize: number): Promise<ServiceResponse<GetAnnonceDto> | PaginationResponse<GetAnnonceDto>> {
+        const param: string =`?page=${page}&pageSize=${pageSize}`;
+        return await this.httpClient
+            .GetRequestType(`/organisation/${id}`+param)
+            .executePagination<GetAnnonceDto>();
+    }
     public async getAnnonceById(id: number): Promise<ServiceResponse<GetAnnonceDto> | PaginationResponse<GetAnnonceDto>> {
         return await this.httpClient
             .GetRequestType(`/${id}`)
