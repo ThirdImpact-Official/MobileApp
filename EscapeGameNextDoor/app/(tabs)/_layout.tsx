@@ -112,6 +112,22 @@ export default function TabLayout() {
             ),
           }}
           />
+            <Tabs.Screen
+          name="Forum"
+          options={{
+            title: 'Forum',
+            tabBarIcon: ({ color }) => (
+              <>
+              <IconSymbol size={28} name="person.fill" color={color} />
+              <ThemedView>
+                <ThemedText>
+                  <Person2 />
+                </ThemedText>
+              </ThemedView>
+              </>
+            ),
+          }}
+          />
       </Tabs>
       
     );

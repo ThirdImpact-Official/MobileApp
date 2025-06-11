@@ -39,7 +39,11 @@ export default function TabTwoScreen() {
 
   if (isLoading) {
     return (
-      <AppView>
+      <AppView
+       padding={true}
+       centered={true}
+       headerHeight = "medium"
+      >
         <ActivityIndicator size="large" color="#0000ff" />
         <Text> Loading...</Text>
         <Text>Chargement...</Text>
@@ -60,7 +64,11 @@ export default function TabTwoScreen() {
   } else {
     // Content for authenticated users
     return (
-      <AppView>
+      <AppView 
+           padding={true}
+       centered={true}
+       headerHeight = "medium"
+      >
         <Box className="flex flex-row justify-center items-center space-x-4 gap-4 p-4 ">
           <Box
             className='border  rounded-sm'
@@ -313,10 +321,10 @@ export function EscapeGameSelection() {
   }, [page, selectCategory, selectPrice, selectDifficulty]);
   return (
     <>
-      <Stack>
+      <Stack className="flex flex-col justify-center items-center w-full md:w-1/2">
 
         <Paper elevation={2} className="p-4 m-4">
-          <Box className="flex flex-row justify-center items-center space-x-4 m-4">
+          <Box className="flex flex-row justify-center items-center space-x-4 m-4 w-full md:w-2/3">
             <Picker
               onValueChange={(value) => {
                 setSelectCategory(value as GetCategoryDto);
@@ -361,7 +369,7 @@ export function EscapeGameSelection() {
             </FormControl>
           </Box>
           <Box >
-            <List className='space-y-4'>
+            <List className='space-y-4 w-1/2 md:w-1/4'>
 
               {!isLoading && escapeGames.map((escapeGame) => (
                 <ListItem>
@@ -370,7 +378,7 @@ export function EscapeGameSelection() {
 
                     key={escapeGame.esgId}
                     name={escapeGame.esgNom}
-                    header={escapeGame.esgContent}
+                    header={escapeGame.esgNom}
                     img={escapeGame.esgImgResources}
                     onClick={()=>{router.push(
                       {

@@ -6,7 +6,7 @@ import { GetRatingDto} from "@/interfaces/EscapeGameInterface/Rating/getRatingDt
 export class AccueilAction
 {
     private HttpClient: HttpClient;
-    private apibaseurl: string = "http://localhost:7159/escape-game/accueil";
+    private apibaseurl: string = "http://localhost:7159/escape-game/accueil/";
     constructor()
     {
         
@@ -47,7 +47,7 @@ export class AccueilAction
     {
          const params=`?page=${page}&pageSize=${pageSize}`;
         return await this.HttpClient
-            .GetRequestType("escapegame/recommanded"+params)
+            .GetRequestType("escapegame/recomanded"+params)
             .executePagination<GetEscapeGameDto>();
     }
     /**

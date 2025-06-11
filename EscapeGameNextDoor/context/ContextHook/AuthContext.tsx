@@ -1,11 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, FC } from "react";
 import axios from "axios";
 import { AuthResponse } from "@/interfaces/User/Authresponse";
-import * as SecureStore from 'expo-secure-store';
 import { LoginCredentials } from "@/interfaces/login/loginCredentials";
-import { CreadentialAction } from "@/action/CreadentialAction";
 import { UnitofAction } from '../../action/UnitofAction';
-import { Platform } from "react-native";
 import { GetUserDto } from "@/interfaces/User/GetUserDto";
 import { SecureStoreApp } from "@/classes/SecureStore";
 import { jwtDecode } from 'jwt-decode';
@@ -87,6 +84,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   //
   const getUserInformation = async () => {
     const userfromtoken = await getStorageItem(AUTH_TOKEN_KEY);
+    console.log("setting user from token",userfromtoken);
     const response = jwtDecode<GetUserDto>(userfromtoken);
     setUser(response);
   }
@@ -204,7 +202,9 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       await removeAuth();
     }
   };
-
+  const getingFormationUser= async ()=>{
+    await getUserInformation();
+  }
   // Set axios defaults
   useEffect(() => {
     axios.defaults.withCredentials = true;

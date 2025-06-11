@@ -20,7 +20,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
           However, body scrolling is often nice to have for mobile web. If you want to enable it, remove this line.
         */}
         <ScrollViewStyleReset />
-
+            qsdqsdqsd
         {/* Add any additional <head> elements that you want globally available on web... */}
       </head>
       <body>{children}</body>

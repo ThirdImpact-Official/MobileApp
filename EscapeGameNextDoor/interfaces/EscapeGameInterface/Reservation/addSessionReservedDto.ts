@@ -1,5 +1,6 @@
 export interface AddSessionReservedDto  {
     content: string;
-    userId: string;
+    placeReserved : number;
+    userId: number;
     sessionGameId: number;
 }

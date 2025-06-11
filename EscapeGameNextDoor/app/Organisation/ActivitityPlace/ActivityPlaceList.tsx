@@ -1,89 +1,133 @@
+'use client';
+import * as React from 'react';
+import { useState, useEffect, FC } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { GetActivityPlaceDto } from '../../../interfaces/EscapeGameInterface/ActivityPlace/getActivityPlaceDto';
-import { Stack, Box, Skeleton } from '@mui/material';
-import { ThemedText } from '@/components/ThemedText';
-import { useState,FC } from 'react';
 import { testActivityPlaces } from '@/TestData/ActivityPlacetestData';
+import { UnitofAction } from '@/action/UnitofAction';
 import AppView from '@/components/ui/AppView';
-import ItemDisplay from '@/components/factory/GenericComponent/ItemDisplay';
-import { useRouter } from 'expo-router';
 
-/**
- * 
- * @returns 
- */
+import Card from '@mui/joy/Card';
+import List from '@mui/joy/List';
+import ListDivider from '@mui/joy/ListDivider';
+import ListItem from '@mui/joy/ListItem';
+import ListItemContent from '@mui/joy/ListItemContent';
+import ListItemButton from '@mui/joy/ListItemButton';
+import AspectRatio from '@mui/joy/AspectRatio';
+import Typography from '@mui/joy/Typography';
+import Skeleton from '@mui/joy/Skeleton';
+import Box from '@mui/joy/Box';
+import Button from '@mui/joy/Button'; // Import manquant
+
 const ActivityPlaceList = () => {
-    const [dataTable, setDataTable] = useState<GetActivityPlaceDto[]>(testActivityPlaces);
-    return (
-        <AppView>
+  const { id } = useLocalSearchParams();
+  const [activityPlaces, setActivityPlaces] = useState<GetActivityPlaceDto[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(1);
+  const action = new UnitofAction();
 
-        <Stack>
-            <Box>
-                <ThemedText>ActivityPlace</ThemedText>
-            </Box>
-            <Box>
-                {
-                    dataTable.map((column) => (<ActivityPlaceItem key={column.acpEsgId} data={column} />))
-                }
-            </Box>
-        </Stack>
-        </AppView>
-    )
-}
+  const fetchActivityPlaces = async () => {
+    setLoading(true);
+    try {
+      const response = await action.escapeGameAction.getActivityPlacesByEscapeGame(Number(id), page, 5);
+      if (response.Success) {
+        const data = response.Data as GetActivityPlaceDto[];
+        setActivityPlaces(data);
+      }
+    } catch (error) {
+      console.error('Error fetching activity places:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchActivityPlaces();
+  }, [id, page]);
+
+  return (
+    <AppView>
+      <Box sx={{ textAlign: 'center', mb: 2 }}>
+        <Typography level="h3">Activity Place List</Typography>
+      </Box>
+      <Card variant="outlined" sx={{ width: 360, mx: 'auto', p: 0 }}>
+        <List sx={{ py: 'var(--ListDivider-gap)' }}>
+          {(loading ? Array.from({ length: 3 }) : activityPlaces).map((item, index) => (
+            <React.Fragment key={index}>
+              <ActivityPlaceItem data={item as GetActivityPlaceDto} loading={loading} />
+              {index !== (loading ? 2 : activityPlaces.length - 1) && <ListDivider />}
+            </React.Fragment>
+          ))}
+        </List>
+      </Card>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+        <Button
+          variant="outlined"
+          size="sm"
+          disabled={page === 1}
+          onClick={() => setPage(page - 1)}
+          sx={{ mr: 1 }}
+        >
+          Previous
+        </Button>
+        <Typography level="body-sm" sx={{ mx: 2, alignSelf: 'center' }}>
+          Page {page}
+        </Typography>
+        <Button
+          variant="outlined"
+          size="sm"
+          onClick={() => setPage(page + 1)}
+        >
+          Next
+        </Button>
+      </Box>
+    </AppView>
+  );
+};
 
 export default ActivityPlaceList;
 
-interface ActivityPlaceListProps {
-    data?: GetActivityPlaceDto | undefined| null;
+interface ActivityPlaceItemProps {
+  data?: GetActivityPlaceDto;
+  loading?: boolean;
 }
-/**
- * ActivityPlaceItem
- */
-const ActivityPlaceItem: FC<ActivityPlaceListProps> = ({ data }) => {
-    const router = useRouter();
 
-    if (!data) {
-        return (
-            <Stack>
-                <div className="rounded-xl flex flex-row items-start h-20 relative">
-                    <div className="rounded-xl flex flex-row items-center flex-1 overflow-hidden">
-                        <div className="p-4 flex flex-row items-center flex-1">
-                            <div className="w-10 h-10 relative overflow-hidden">
-                                <div className="bg-schemes-primary-container rounded-full w-full h-full absolute" />
-                                <div className="text-schemes-on-primary-container text-center font-medium text-base leading-6 absolute left-1/2 top-1/2 w-10 h-10 flex items-center justify-center" style={{ transform: 'translate(-50%, -50%)' }}>
-                                    <Skeleton />
-                                </div>
-                            </div>
-                            <div className="flex flex-col items-start flex-1">
-                                <div className="text-schemes-on-surface text-left font-m3-title-medium relative">
-                                    <Skeleton />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="border-solid border-schemes-outline-variant border-t border-r border-b w-20 relative">
-                            <Skeleton className="absolute inset-0" />
-                        </div>
-                    </div>
-                </div>
-            </Stack>
-        );
+const ActivityPlaceItem: FC<ActivityPlaceItemProps> = ({ data, loading }) => {
+  const router = useRouter();
+
+  const handleClick = () => {
+    if (data) {
+      router.push({
+        pathname: `/Organisation/ActivitityPlace/ActivityPlaceDetail`,
+        params: { id: data.acpId},
+      });
     }
+  };
 
-    return (
-        <Stack>
-            <Box>
-                <ItemDisplay
-                    header={data.name}
-                    letter={data.acpEsgId.toString()}
-                    name={data.address}
-                    img={data.imgressources}
-                    onClick={() =>
-                        router.push({
-                            pathname: `/Organisation/ActivitityPlace/ActivityPlaceDetail`,
-                            params: { id: data.acpId },
-                        })
-                    }
-                />
-            </Box>
-        </Stack>
-    );
+  return (
+    <ListItem>
+      <ListItemButton onClick={handleClick} sx={{ gap: 2 }}>
+        <AspectRatio sx={{ flexBasis: 100 }}>
+          {loading ? (
+            <Skeleton variant="rectangular" width="100%" height="100%" />
+          ) : (
+            <img
+              srcSet={`${data?.imgressources}?w=100&fit=crop&auto=format&dpr=2 2x`}
+              src={`${data?.imgressources}?w=100&fit=crop&auto=format`}
+              alt={data?.name || 'Activity place'}
+              loading="lazy"
+            />
+          )}
+        </AspectRatio>
+        <ListItemContent>
+          <Typography sx={{ fontWeight: 'md' }}>
+            {loading ? <Skeleton width="60%" /> : data?.name}
+          </Typography>
+          <Typography level="body-sm">
+            {loading ? <Skeleton width="80%" /> : data?.description}
+          </Typography>
+        </ListItemContent>
+      </ListItemButton>
+    </ListItem>
+  );
 };

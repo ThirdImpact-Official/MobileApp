@@ -11,7 +11,12 @@ export class PaymentAction{
         this.httpclient = new HttpClient();
         this.httpclient.setBaseUrl(this.apibaseurl);
     }
-
+    public async GetPaymentByReservationId(reservationId: number): Promise<ServiceResponse<GetPaymentDto>> {
+        const res = await this.httpclient
+        .GetRequestType("/reservation/"+reservationId)
+        .execute<GetPaymentDto>();
+        return res;
+    }
     public async CreatePayment(reservationId: number): Promise<ServiceResponse<GetPaymentDto>> {
         const res = await this.httpclient
         .PostRequestType("/createPayment"+reservationId)

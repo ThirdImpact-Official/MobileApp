@@ -3,6 +3,7 @@ import { PaginationResponse, ServiceResponse } from "@/interfaces/ServiceRespons
 import axios, { AxiosInstance } from "axios";
 import { SecureStoreApp } from "@/classes/SecureStore";
 import { Platform } from "react-native";
+import { Token } from "@mui/icons-material";
 
 export class HttpClient {
     private Axios: AxiosInstance;
@@ -20,7 +21,7 @@ export class HttpClient {
             headers: {
                 'Content-Type': 'application/json',
             },
-            withCredentials: true
+           withCredentials: true
         });
 
         this.Axios.interceptors.request.use(async (config) => {
@@ -31,7 +32,12 @@ export class HttpClient {
             return config;
         })
     }
-
+    private setupResponseInterceptors(): void {
+        this.Axios.interceptors.response.use(
+            (response) => response,
+            (error) => Promise.reject(error)
+        );
+    }
     /**
      * Sends a request to the server and returns a promise that resolves with a ServiceResponse object.
      * @param {string} url - The URL of the request.
@@ -67,6 +73,7 @@ export class HttpClient {
                     url: actionurl,
                     method: methodes,
                     data: data
+
                 })
                 .then((axiosResponse) => {
                     const res = axiosResponse.data;
@@ -251,7 +258,7 @@ export class HttpClient {
         try {
             let response: ServiceResponse<T>;
             const fullUrl = `${this.baseUrl}${this.url}`;
-         
+           
             if (this.requestType == RequestType.GET) {
                 response = await this.Sendrequest(fullUrl, this.requestType);
             } else {
@@ -307,10 +314,7 @@ export class HttpClient {
         try {
             let response:PaginationResponse<T>;
             const fullUrl = `${this.baseUrl}${this.url}`;
-            if(!this.hasJwtCookie)
-            {
-                throw new Error('JWT cookie not found');
-            }
+            
             if(this.requestType == RequestType.GET)
             {
                  response = await this.SendPageRequest(fullUrl, this.requestType);

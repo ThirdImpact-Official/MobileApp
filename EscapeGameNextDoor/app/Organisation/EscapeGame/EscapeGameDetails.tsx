@@ -105,9 +105,18 @@ export default function EscapeGameDetails() {
         : 'Date not available';
 
     return (
-        <AppView>
-            <Stack spacing={3} className='p-4'>
-                <Card elevation={3}>
+        <AppView 
+         centered={true}
+         >
+            <Stack spacing={3} className='flex flex-col justify-center items-center p-4'>
+                <Card elevation={3}
+                sx={{
+                    width: '50%',
+                    maxWidth: 600,
+                    margin: 'auto',
+                    padding: 2,
+                }}
+                 >
                     <CardHeader
                         title={state.esgNom || 'Untitled Game'}
                         subheader={`Created: ${formattedDate}`}
@@ -159,8 +168,12 @@ export default function EscapeGameDetails() {
                         <Divider orientation="vertical" flexItem />
                         <Button 
                             variant="outlined"
-                            onClick={() => router.push('/Organisation/ActivitityPlace/ActivityPlaceList')}
-                        >
+                            onClick={() => router.push(
+                                {
+                                    pathname: '/Organisation/ActivitityPlace/ActivityPlaceList',
+                                    params: { id: state.esgId },
+                                }
+                            )}>
                             Activities
                         </Button>
                     </CardActions>

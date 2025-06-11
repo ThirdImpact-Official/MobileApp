@@ -6,7 +6,12 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "types": [
+      "jest",
+      "react-native",
+      "react"
+    ]
   },
   "include": [
     "**/*.ts",

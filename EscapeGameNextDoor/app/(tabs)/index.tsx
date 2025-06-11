@@ -1,61 +1,50 @@
-import { Image, StyleSheet, Platform, ActivityIndicator } from 'react-native';
-
-
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
+import { ActivityIndicator } from 'react-native';
+import { Stack } from '@mui/material';
 import { ThemedView } from '@/components/ThemedView';
-import { Collapsible } from '@/components/Collapsible';
-
+import { ThemedText } from '@/components/ThemedText';
+import { useAuth } from '@/context/ContextHook/AuthContext';
+import AppView from '@/components/ui/AppView';
+import LatestEscapeGames from '../IndexeComponent/latestEscapeGames';
+import TopEscapeGames from '../IndexeComponent/TopEscapeGames';
+import LatestEscapeGamesNoted from '../IndexeComponent/LatestEscapeGameNoted';
+import RecommandedEscapeGames from '../IndexeComponent/RecommandedEscapeGames';
 
 export default function HomeScreen() {
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <AppView>
+        <ActivityIndicator size="large" />
+      </AppView>
+    );
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-     
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-     
-    </ParallaxScrollView>
+    <AppView >
+
+          <ThemedText type="title">Welcome!</ThemedText>
+      <Stack>
+        <ThemedView style={{ flex: 1 }}>
+          <ThemedText>Heureux de vous revoir {user?.username || 'Guest'}</ThemedText>
+
+        </ThemedView>
+        <ThemedView>
+
+        <LatestEscapeGames />
+        </ThemedView>
+        <ThemedView>
+          <LatestEscapeGamesNoted />
+
+        </ThemedView>
+          <ThemedView>
+          <RecommandedEscapeGames />
+
+          </ThemedView>
+          <ThemedView>
+            <TopEscapeGames />
+          </ThemedView>
+      </Stack>
+    </AppView>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});

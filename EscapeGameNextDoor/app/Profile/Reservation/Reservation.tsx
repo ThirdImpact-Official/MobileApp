@@ -8,33 +8,14 @@ import { ThemedView } from "@/components/ThemedView";
 import ItemDisplay from "@/components/factory/GenericComponent/ItemDisplay";
 import { useRouter } from "expo-router";
 import { GetEscapeGameDto } from "@/interfaces/EscapeGameInterface/EscapeGame/getEscapeGameDto";
+import React from "react";
+import ListItemButton from "@mui/material/ListItemButton";
+import AspectRatio from "@mui/joy/AspectRatio";
+import ListItemContent from "@mui/joy/ListItemContent";
+import ListDivider from "@mui/joy/ListDivider";
 
 
-interface ReservationItemProps {
-    reservation: GetSessionReservedDto;
-}
-export function ReservationItem(props: ReservationItemProps) {
-    const [reserv, setreserv] = useState<GetSessionReservedDto>(props.reservation);
-    const rooter = useRouter();
 
-    const Handleredirection = (item: GetSessionReservedDto) => {
-        console.log("Redirecting to reservation details for:", reserv.id);
-        const reservation = JSON.stringify(item);
-        rooter.push({
-            pathname: `/Profile/Reservation/ReservationDetails`,
-            params: { reservation: reservation, }
-        });
-    }
-    return (<>
-        <Box className="flex flex-row  gap-4">
-            <ItemDisplay letter={reserv.id.toString()}
-                name={reserv.content}
-                header={reserv.sessionGame?.gameDate.toDateString()}
-                onClick={() => Handleredirection(reserv)} />
-
-        </Box>
-    </>)
-}
 
 interface ReservationColumnsProps {
     reservationcolumns: GetSessionReservedDto[];
@@ -42,6 +23,16 @@ interface ReservationColumnsProps {
 export function ReservationListe(props: ReservationColumnsProps) {
     const [reserv, setreserv] = useState<GetSessionReservedDto[]>(props.reservationcolumns);
     const [loading, setLoading] = useState<boolean>(false);
+    const router = useRouter();
+     const Handleredirection = (item: GetSessionReservedDto) => {
+        
+        const reservation = JSON.stringify(item);
+        router.push({
+            pathname: `/Profile/Reservation/ReservationDetails`,
+            params: { reservation: reservation, }
+        });
+    }
+
     if (reserv.length === 0) {
         return (
             <Stack>
@@ -56,21 +47,35 @@ export function ReservationListe(props: ReservationColumnsProps) {
         );
     }
     else {
-        return (<>
-            <Stack>
-
-                <Box>
-                    <List>
-                    <ThemedView>
-                        {reserv.map((column) => (<>
-                            <ListItem>
-                                <ReservationItem key={column.id.toString()} reservation={column} />
-                            </ListItem>
-                        </>))}
-                    </ThemedView>
-                    </List>
-                </Box>
-            </Stack>
-        </>)
+        return (
+            <Card variant="outlined" sx={{ width: 350, p: 0 }}>
+            <List sx={{ py: 'var(--ListDivider-gap)' }}>
+                {reserv.map((column, index) => (
+                <React.Fragment key={column.id.toString()}>
+                    <ListItem>
+                    <ListItemButton sx={{ gap: 2 }} onClick={() => {}}>
+                        <AspectRatio sx={{ flexBasis: 80 }}>
+                        {/* Placeholder image or icon */}
+                        <img
+                            src={`https://api.dicebear.com/7.x/identicon/svg?seed=${column.id}`}
+                            alt={column.content}
+                        />
+                        </AspectRatio>
+                        <ListItemContent>
+                        <Typography sx={{ fontWeight: 'md' }}>
+                            {column.content}
+                        </Typography>
+                        <Typography variant="body2">
+                            {column.sessionGame?.gameDate?.toLocaleString?.() || ''}
+                        </Typography>
+                        </ListItemContent>
+                    </ListItemButton>
+                    </ListItem>
+                    {index !== reserv.length - 1 && <ListDivider />}
+                </React.Fragment>
+                ))}
+            </List>
+            </Card>
+        )
     }
 }

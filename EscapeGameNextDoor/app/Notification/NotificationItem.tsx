@@ -46,38 +46,32 @@ export const UserNotificationItem:FC<NotificationItemProps> = (props)=>{
     ], []);
     return (
     <>
-        <Card className='flex justify-evenly flex-grid rounded-lg md:w-1/2 w-full bg-white hover:shadow-lg transition-all'>
-            <CardHeader className="items-start m-1 p-1"
+        <Card variant="outlined" sx={{ width: 300, p: 0 }}>
+            <CardHeader
                 title={
-                    <>
-                    <Box>
-                        <Typography
-                            variant='h6' 
-                            className="items-center p-2">
+                    <Typography variant="h6" sx={{ p: 1 }}>
                         {props.data.title}
-                        </Typography>
-                    </Box>
-                    </>
-                } />
-                
-            <CardContent className="text-end p-2 float-end items-end">
-                
-                <Box>
-                    <Typography>
-                        {FormUtils.FormatDate(props.data.creationDate)}
-                        <></>
-                        <Text>{ " : "+Isread ? "Read" : "unread" }</Text>
-                        <GenericMenu  
-                            items={menupost} menuIcon={<MoreVert />} />
                     </Typography>
-                </Box>
- 
-              <CardActions className='flex justify-end items-end'>
-                <Button onClick={()=>handleonDetails(props.data)}>details</Button>
-              
-              </CardActions>
-            </CardContent>
+                }
+                action={
+                    <GenericMenu items={menupost} menuIcon={<MoreVert />} />
+                }
+                sx={{ p: 1 }}
+            />
             <Divider />
+            <CardContent sx={{ pt: 1, pb: 0 }}>
+                <Typography variant="body2" color="text.secondary">
+                    {FormUtils.FormatDate(props.data.creationDate)}
+                    {" : "}
+                    {Isread ? "Read" : "Unread"}
+                </Typography>
+                <Typography sx={{ mt: 1 }}>
+                    {props.data.description}
+                </Typography>
+            </CardContent>
+            <CardActions sx={{ justifyContent: "flex-end" }}>
+                <Button onClick={() => handleonDetails(props.data)}>Details</Button>
+            </CardActions>
         </Card>
     </>
     )
