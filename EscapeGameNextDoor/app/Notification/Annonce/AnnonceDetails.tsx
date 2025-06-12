@@ -1,35 +1,93 @@
+import React, { useEffect, useState } from "react";
+import { View, Text, ScrollView, ActivityIndicator, StyleSheet } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { UnitofAction } from "@/action/UnitofAction";
-import { Card, CardHeader } from "@mui/material";
-import { useRouter } from "expo-router";
-import { useEffect , useState } from "react";
-import {useLocalSearchParams} from "expo-router";
 import { GetAnnonceDto } from "@/interfaces/NotificationInterface/Annonce/getAnnonceDto";
-export default function AnnonceDetails()
-{
-    const {id}=useLocalSearchParams();
+import AppView from "@/components/ui/AppView";
 
-    const router =useRouter();
-    const action= new UnitofAction();
-    const [annonce,setAnnonce]= useState<GetAnnonceDto>();
-    const fetchActionDetails= async()=> {
-        const response = await action.annonceAction.getAnnonceById(Number(id));
-        if(response.Success)
-        {
+export default function AnnonceDetails() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+  const action = new UnitofAction();
 
-            console.log(response.Data);
-        }
-    };
+  const [annonce, setAnnonce] = useState<GetAnnonceDto | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(()=> {
+  const fetchAnnonceDetails = async () => {
+    try {
+      const response = await action.annonceAction.getAnnonceById(Number(id));
+      if (response.Success) {
+        setAnnonce(response.Data);
+      } else {
+        console.warn("Erreur:", response.Message);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    });
-    return(
-        <>
-            <Card>
-                <CardHeader
-                    title="Annonce"
-                  />
-            </Card>
-        </>
-    )
+  useEffect(() => {
+    if (id) {
+      fetchAnnonceDetails();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <AppView>
+        <ActivityIndicator size="large" />
+      </AppView>
+    );
+  }
+
+  if (!annonce) {
+    return (
+      <AppView>
+        <View style={styles.center}>
+          <Text>Aucune annonce trouvée.</Text>
+        </View>
+      </AppView>
+    );
+  }
+
+  return (
+    <AppView>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Annonce</Text>
+        <Text style={styles.label}>Titre :</Text>
+        <Text style={styles.content}>{annonce.title ?? "-"}</Text>
+
+        <Text style={styles.label}>Description :</Text>
+        <Text style={styles.content}>{annonce.description ?? "-"}</Text>
+
+        {/* Ajoute d'autres champs selon la structure de GetAnnonceDto */}
+      </ScrollView>
+    </AppView>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "700",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  label: {
+    fontWeight: "600",
+    marginTop: 12,
+  },
+  content: {
+    fontSize: 16,
+  },
+});

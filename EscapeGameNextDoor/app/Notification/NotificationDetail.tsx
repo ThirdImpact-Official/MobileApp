@@ -1,54 +1,67 @@
-import { Card, CardContent, CardHeader, Skeleton, Typography } from "@mui/material";
+import React, { useState } from "react";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { GetNotificationDto } from "@/interfaces/NotificationInterface/Notification/getNotificationDto";
-import React from "react";
-import { ThemedText } from '../../components/ThemedText';
 import FormUtils from "@/classes/FormUtils";
 
-
 interface Props {
-    data: GetNotificationDto | undefined | null;
+  data: GetNotificationDto | undefined | null;
 }
 
-export default function NotificationDetail(item:Props) {
-    const [notif, setNotif] = React.useState<GetNotificationDto | undefined | null>(item.data);
+export default function NotificationDetail({ data }: Props) {
+  const [notif, setNotif] = useState<GetNotificationDto | undefined | null>(data);
 
-    console.log(notif);
-    if(notif === null || notif === undefined){ 
-        return (
-            <Card elevation={3} className="flex justify-center items-center md:w-1/2 w-full">
-                <CardHeader title={"Loading..."}
-                    action={<React.Fragment>
-                                <Typography>
-                                    <Skeleton></Skeleton>
-                                </Typography>
-                        </React.Fragment>} />
-                <CardContent>
-                    <ThemedText>
-                        <Typography>
-                            <Skeleton></Skeleton>
-                        </Typography>
-                    </ThemedText>
-                </CardContent>
-            </Card>
-        )
-    }
-    else {     
-        return (
-            <Card elevation={3}>
-                <CardHeader title={notif.title }
-                    action={<React.Fragment>
-                                <Typography>
-                                {FormUtils.FormatDate(notif.creationDate)}
-                                </Typography>
-                        </React.Fragment>} />
-                <CardContent>
-                    <ThemedText>
-                        <Typography>
-                            {notif.content}
-                        </Typography>
-                    </ThemedText>
-                </CardContent>
-            </Card>
-        )
-    }
-}; 
+  if (!notif) {
+    return (
+      <View style={[styles.card, styles.center]}>
+        <Text style={styles.title}>Loading...</Text>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.header}>
+        <Text style={styles.title}>{notif.title}</Text>
+        <Text style={styles.date}>{FormUtils.FormatDate(notif.creationDate)}</Text>
+      </View>
+      <View style={styles.content}>
+        <Text>{notif.content}</Text>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "white",
+    margin: 12,
+    padding: 16,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  center: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: 150,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  date: {
+    fontSize: 14,
+    color: "#666",
+  },
+  content: {
+    fontSize: 16,
+  },
+});

@@ -9,7 +9,8 @@ import { useAuth } from '@/context/ContextHook/AuthContext';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { Redirect } from 'expo-router';
 import {styles} from '../../constants/styles';
-import { NotificationsOutlined, Person, Person2 } from '@mui/icons-material';
+import { NotificationsOutlined, Person, Person2 } from "@mui/icons-material";
+
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 

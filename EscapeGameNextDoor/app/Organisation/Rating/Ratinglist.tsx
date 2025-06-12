@@ -22,7 +22,7 @@ type RatingItemProps = {
 };
 
 // Composant Skeleton pour le loading
-const SkeletonLoader = ({ width: skeletonWidth = '100%' }: { width?: string | number }) => (
+const SkeletonLoader = ({ width: skeletonWidth = '100%' }: { width?: number | `${number}%` }) => (
   <View style={[styles.skeleton, { width: skeletonWidth }]} />
 );
 
@@ -185,8 +185,8 @@ function RatingItem({ data, loading, onPress }: RatingItemProps) {
           {/* Rating stars or note icon */}
           <View style={styles.ratingContainer}>
             <Text style={styles.noteIcon}>📝</Text>
-            {data?.rateValue && (
-              <Text style={styles.ratingValue}>{data.rateValue}/5</Text>
+            {data?.notes && (
+              <Text style={styles.ratingValue}>{data.notes}/5</Text>
             )}
           </View>
         </View>

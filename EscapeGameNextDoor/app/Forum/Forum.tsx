@@ -1,130 +1,142 @@
+import React, { FC, useEffect, useState } from "react";
+import { View, Text, ScrollView, StyleSheet, Image, ActivityIndicator, TouchableOpacity } from "react-native";
+import { useToasted } from "@/context/ContextHook/ToastedContext"; // Adapté React Native toast context
 import { UnitofAction } from "@/action/UnitofAction";
-import { useToasted } from "@/context/ContextHook/ToastedContext";
 import { GetForumDto } from "@/interfaces/PublicationInterface/Forum/getForumDto";
-import { Skeleton, Stack , Paper, Box ,Typography, FormControl } from "@mui/material";
-import { FC ,useEffect,useState } from "react";
-import renderer from 'react-test-renderer';
 
 const Forum = () => {
-    
-    const [forum, setForum] = useState<GetForumDto[] | null>(null);
-    const action = new UnitofAction();
-    const [page,setPage] = useState<number>(1);
-    const notif = useToasted();
-    /**
-     * 
-     * @returns
-     */
-    const fetchForum = async () => {
-        try {
-            const response = await action.forumAction.getAllForums(page,5);
-            
-            if(response.Success) 
-            {
-                setForum(response.Data as GetForumDto[]);
-                notif.isvisible=true;
-                notif.showToast(response.Message,"success");
-            }   
-            else{
-                notif.isvisible=true;
-                notif.showToast(response.Message,"error");
-            }  
-        }   
-        catch (error) {
-            console.error(error);
-        } 
-    };
+  const [forum, setForum] = useState<GetForumDto[] | null>(null);
+  const action = new UnitofAction();
+  const [page, setPage] = useState<number>(1);
+  const notif = useToasted();
 
-    useEffect(() => {
-        fetchForum();
-    },[page]);
+  const fetchForum = async () => {
+    try {
+      const response = await action.forumAction.getAllForums(page, 5);
 
-    return (<>
-        <Paper elevation={2}>
-            <Typography variant="h3" gutterBottom component="div">
-                Forum
-            </Typography>
-            <Box>
-                <FormControl>
-
-                </FormControl>
-                <FormControl>
-
-                </FormControl>
-            </Box>
-            <Box>
-                <ForumList data={forum as GetForumDto[]}></ForumList>
-            </Box>
-
-        </Paper>
-    </>)
-}
-
-export default Forum;
-//--------------------------------
-// -----------------------LIST----
-//--------------------------------
-/**
- * 
- */
-interface ForumListProps {
-    data: GetForumDto[]
-}
-
-const ForumList :FC<ForumListProps> = (props) => { 
-    const [dataList,setDataList] = useState<GetForumDto[] | null >(props.data);
-    
-    if(dataList) {
-        return (
-            <>
-              <Stack>
-                { dataList.map((column) => (<ForumItem key={column.id} data={column} />))}
-            </Stack>
-            </>
-        )
+      if (response.Success) {
+        setForum(response.Data as GetForumDto[]);
+        notif.showToast(response.Message, "success");
+      } else {
+        notif.showToast(response.Message, "error");
+      }
+    } catch (error) {
+      console.error(error);
+      notif.showToast("Erreur réseau", "error");
     }
-    else {
-        return (<>
-            <Stack>
-            { <Skeleton></Skeleton>}
-            </Stack>
-        </>)
-    }
-}
+  };
 
-//------------------------ITEM----
-//------------------------ITEM----
-//------------------------
-interface ForumItemProps {
-    data : GetForumDto
-}
-const ForumItem: FC<ForumItemProps> = ({ data: forum }) => {
+  useEffect(() => {
+    fetchForum();
+  }, [page]);
+
   return (
-    <div className="rounded-xl flex flex-row gap-0 items-start justify-start h-20 relative">
-      <div className="rounded-xl flex flex-row gap-0 items-center justify-start flex-1 relative overflow-hidden">
-        <div className="p-4 flex flex-row gap-4 items-center justify-start self-stretch flex-1 relative">
-          <div className="shrink-0 w-10 h-10 relative overflow-hidden">
-            <div className="bg-schemes-primary-container rounded-[50%] w-[100%] h-[100%] absolute right-[0%] left-[0%] bottom-[0%] top-[0%]" />
-            <div className="text-schemes-on-primary-container text-center font-['Roboto-Medium',_sans-serif] text-base leading-6 font-medium absolute left-[50%] top-[50%] w-10 h-10 flex items-center justify-center" style={{ letterSpacing: "0.1px", translate: "-50% -50%" }}>
-              A
-            </div>
-          </div>
-          <div className="flex flex-col gap-1 items-start justify-start flex-1 relative">
-            <div className="text-schemes-on-surface text-left font-m3-title-medium-font-family text-m3-title-medium-font-size leading-m3-title-medium-line-height font-m3-title-medium-font-weight relative self-stretch" style={{ letterSpacing: "var(--m3-title-medium-letter-spacing, 0.15px)" }}>
-              {forum.title}
-            </div>
-            <div className="text-schemes-on-surface text-left font-m3-body-medium-font-family text-m3-body-medium-font-size leading-m3-body-medium-line-height font-m3-body-medium-font-weight relative self-stretch" style={{ letterSpacing: "var(--m3-body-medium-letter-spacing, 0.25px)" }}>
-              {forum.content}
-            </div>
-          </div>
-        </div>
-        <div className="border-solid border-schemes-outline-variant border-t border-r border-b self-stretch shrink-0 w-20 relative">
-          <img className="absolute right-0 left-0 bottom-0 top-0" style={{ background: "var(--m3-add-on-placeholder-image, linear-gradient(to left, #ece6f0, #ece6f0))", objectFit: "cover" }} src="media1.png" />
-        </div>
-      </div>
-      <div className="bg-schemes-surface rounded-xl border-solid border-schemes-outline-variant border shrink-0 w-[100%] h-[100%] absolute right-[0%] left-[0%] bottom-[0%] top-[0%] overflow-hidden">
-        <div className="p-2.5 flex flex-col gap-2.5 items-center justify-center w-[100%] h-[100%] absolute right-[0%] left-[0%] bottom-[0%] top-[0%]" />
-      </div>
-    </div>
+    <View style={styles.container}>
+      <Text style={styles.title}>Forum</Text>
+
+      {/* Ici tu peux ajouter tes filtres / contrôles */}
+
+      <ScrollView style={styles.listContainer}>
+        {forum ? <ForumList data={forum} /> : <ActivityIndicator size="large" color="#0000ff" />}
+      </ScrollView>
+    </View>
   );
 };
+
+export default Forum;
+
+interface ForumListProps {
+  data: GetForumDto[];
+}
+
+const ForumList: FC<ForumListProps> = ({ data }) => {
+  return (
+    <View>
+      {data.map((item) => (
+        <ForumItem key={item.id} data={item} />
+      ))}
+    </View>
+  );
+};
+
+interface ForumItemProps {
+  data: GetForumDto;
+}
+
+const ForumItem: FC<ForumItemProps> = ({ data: forum }) => {
+  return (
+    <View style={styles.forumItem}>
+      <View style={styles.avatarContainer}>
+        <View style={styles.avatarCircle}>
+          <Text style={styles.avatarLetter}>A</Text>
+        </View>
+      </View>
+      <View style={styles.forumContent}>
+        <Text style={styles.forumTitle}>{forum.title}</Text>
+        <Text style={styles.forumDescription}>{forum.content}</Text>
+      </View>
+      <Image source={{ uri: "https://example.com/media1.png" }} style={styles.forumImage} />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 12,
+  },
+  listContainer: {
+    flex: 1,
+  },
+  forumItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    backgroundColor: "#f9f9f9",
+  },
+  avatarContainer: {
+    marginRight: 12,
+  },
+  avatarCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#aabbcc",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarLetter: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+  forumContent: {
+    flex: 1,
+  },
+  forumTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  forumDescription: {
+    fontSize: 14,
+    color: "#444",
+  },
+  forumImage: {
+    width: 80,
+    height: 60,
+    marginLeft: 12,
+    borderRadius: 6,
+    backgroundColor: "#ece6f0", // placeholder background
+  },
+});

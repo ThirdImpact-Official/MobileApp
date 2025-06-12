@@ -3,10 +3,12 @@ import { GetSessionGameDto } from "../Session/getSessionGameDto";
 import { GetUserDto } from "@/interfaces/User/GetUserDto";
 
 export interface GetSessionReservedDto {
+    gameDate: any;
     id: number;
     content: string;
     userId: string;
     sessionGameId: number;
+    placeReserved: number;
     sessionGame: GetSessionGameDto | null;
     isCancel: boolean;
     cancelReason: string | null;

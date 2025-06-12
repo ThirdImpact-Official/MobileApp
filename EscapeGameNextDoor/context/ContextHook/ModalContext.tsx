@@ -1,106 +1,114 @@
-import { create } from "domain";
-import { createContext, useContext,useEffect,useState} from "react";
-import { Box, Button, Modal,Typography } from "@mui/material";
-import { Alert,Snackbar } from "@mui/material";
-import { data } from 'react-router-dom';
-interface ModalContextType{
-    title:string;
-    description:string;
-    open:boolean;
-    setTitle:(title:string) => void;
-    setDescription:(description:string) => void;
-    setOpen:(open:boolean) => void;
-    handleOpen:() => void;
-    handleClose:() => void;
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Modal, View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
+
+interface ModalContextType {
+  title: string;
+  description: string;
+  open: boolean;
+  setTitle: (title: string) => void;
+  setDescription: (description: string) => void;
+  setOpen: (open: boolean) => void;
+  handleOpen: () => void;
+  handleClose: () => void;
 }
 
-export const ModalContext=createContext<ModalContextType | undefined>(undefined);
-interface ModalProviderProps{
-    children: React.ReactNode;
+export const ModalContext = createContext<ModalContextType | undefined>(undefined);
+
+interface ModalProviderProps {
+  children: React.ReactNode;
 }
 
+export const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
-export const ModalProvider: React.FC<ModalProviderProps> = (props) => {
-    const[open,setOpen] = useState(false);
-    const [description,setDescription] = useState("");
-    const [title,setTitle] = useState("");
-   
-    const handleOpen=()=>{setOpen(true);};
-    const handleClose=()=>{setOpen(false);};
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-   
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setOpen(false);
-        }, 3000);
-
-
-    })
-    
-    const value= {
-        title,
-        description,
-        open,
-        setTitle,
-        setDescription,
-        setOpen,
-        handleOpen,
-        handleClose
-    };
-
-    return (
-        <ModalContext.Provider value={value}>
-            {props.children}
-                <Modal
-                    sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        bgcolor: "background.paper",
-                        borderRadius: 3,
-                        boxShadow: 8,
-                        p: 4,
-                        width: { xs: "90%", sm: 400 },
-                        maxHeight: "90vh",
-                        overflowY: "auto",
-                    }}
-                    open={open}
-                    onClose={handleClose}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                >
-                <Box >
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
-                        {title}
-                    </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                    {description}
-                    </Typography>
-                </Box>
-                </Modal>
-        </ModalContext.Provider>);
-}
-/**
- * Custom hook to access the toasted context.
- *
- * This hook provides access to the toasted context, allowing components
- * to use toast-related state and functions. It must be used within a
- * component wrapped by `ToastedProvider`.
- *
- * @throws {Error} If the hook is used outside of a `ToastedProvider`.
- *
- * @returns {ToastedContextType} The toasted context value.
- */
-
-
-export const useModal=():ModalContextType => {
-    const context=useContext(ModalContext);
-    if(!context)
-    {
-        throw new Error('useToasted must be used within a ToastedProvider');
+  useEffect(() => {
+    if (open) {
+      const timer = setTimeout(() => setOpen(false), 3000);
+      return () => clearTimeout(timer);
     }
-    return context;
+  }, [open]);
+
+  const value: ModalContextType = {
+    title,
+    description,
+    open,
+    setTitle,
+    setDescription,
+    setOpen,
+    handleOpen,
+    handleClose,
+  };
+
+  return (
+    <ModalContext.Provider value={value}>
+      {children}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={open}
+        onRequestClose={handleClose}
+      >
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <Text style={styles.modalDescription}>{description}</Text>
+            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Fermer</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </ModalContext.Provider>
+  );
 };
 
+export const useModal = (): ModalContextType => {
+  const context = useContext(ModalContext);
+  if (!context) {
+    throw new Error("useModal must be used within a ModalProvider");
+  }
+  return context;
+};
+
+const { width } = Dimensions.get("window");
+
+const styles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalView: {
+    width: width * 0.9,
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  modalDescription: {
+    marginTop: 10,
+    fontSize: 16,
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: "#2196F3",
+    borderRadius: 5,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  closeButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+});
+export default ModalProvider;

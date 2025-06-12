@@ -1,73 +1,107 @@
-import FormUtils from "@/classes/FormUtils";
-import {  Stack, Typography,Box } from "@mui/material";
+import React, { FC, useState } from "react";
+import { View, StyleSheet, ScrollView } from "react-native";
+import { Text, Button, Portal, Modal, Provider as PaperProvider } from "react-native-paper";
 
-import { FC } from "react";
-import Item from "./Item";
-
-interface RenderProps {
-    label: string;
-    value?: unknown;
+interface ModalProps {
+  ButtonColor?: "primary" | "secondary" | "error" | "info" | "warning" | "success";
+  ButtonTitle?: string;
+  children: React.ReactNode;
+  Title: string;
+  Description: string;
+  Method?: () => void;
 }
 
-const RenderDetail: FC<RenderProps> = ({ label, value }) => {
+const ModalComponent: FC<ModalProps> = ({
+  ButtonTitle = "Open Modal",
+  ButtonColor = "primary",
+  Title,
+  Description,
+  children,
+  Method,
+}) => {
+  const [visible, setVisible] = useState(false);
 
-    const formatValue = (value: unknown): string => {
-        if (value === null || value === undefined) return '';
+  const handleOpen = () => {
+    setVisible(true);
+    Method?.();
+  };
 
-        if (typeof value === 'number') {
-            return value.toFixed(2);
-        }
+  const handleClose = () => setVisible(false);
 
-        if (typeof value === 'string') {
-            // Vérifie si c'est une date ISO et la convertit
-            if (!isNaN(Date.parse(value))) {
-                const date = new Date(value);
-                return date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                }); // Format MM/DD/YYYY
-            }
-            return value;
-        }
+  return (
+    <PaperProvider>
+      <View style={styles.container}>
+        <Button mode="contained" onPress={handleOpen} buttonColor={getColor(ButtonColor)}>
+          {ButtonTitle}
+        </Button>
 
-        if (typeof value === 'boolean') {
-            return value ? 'true' : 'false';
-        }
-
-        if (value instanceof Date) {
-            return value.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-            }); // Format MM/DD/YYYY
-        }
-
-        if (typeof value === 'object') {
-            if (FormUtils.isGetDifficultyLevelDto(value)) {
-                return value.dowName;
-            }
-
-            if (FormUtils.isGetPriceDto(value)) {
-                return value.indicePrice.toString();
-            }
-
-            return JSON.stringify(value, null, 2); // Format JSON plus lisible
-        }
-
-        return '';
-    };
-
-    return (
-        <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="flex-start" sx={{ width: '100%' }}>
-        <Typography variant="subtitle1" fontWeight={600} color="text.secondary">
-            {label}:
-        </Typography>
-        <Typography variant="body1" color="text.primary" sx={{ whiteSpace: 'pre-wrap', textAlign: 'right' }}>
-            {formatValue(value)}
-        </Typography>
-    </Stack>
-    );
+        <Portal>
+          <Modal
+            visible={visible}
+            onDismiss={handleClose}
+            contentContainerStyle={styles.modalContent}
+          >
+            <ScrollView>
+              <Text variant="titleLarge" style={styles.title}>
+                {Title}
+              </Text>
+              <Text style={styles.description}>{Description}</Text>
+              <View style={{ marginTop: 20 }}>{children}</View>
+              <Button mode="contained" onPress={handleClose} style={styles.closeButton}>
+                Fermer
+              </Button>
+            </ScrollView>
+          </Modal>
+        </Portal>
+      </View>
+    </PaperProvider>
+  );
 };
 
-export default RenderDetail;
+// Utilitaire de couleur (tu peux adapter selon ton thème)
+const getColor = (color: string) => {
+  switch (color) {
+    case "primary":
+      return "#6200ee";
+    case "secondary":
+      return "#03dac6";
+    case "success":
+      return "#4caf50";
+    case "error":
+      return "#f44336";
+    case "warning":
+      return "#ff9800";
+    case "info":
+      return "#2196f3";
+    default:
+      return "#6200ee";
+  }
+};
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    marginHorizontal: 20,
+    borderRadius: 10,
+    maxHeight: "90%",
+  },
+  title: {
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  description: {
+    textAlign: "center",
+    color: "#666",
+  },
+  closeButton: {
+    marginTop: 30,
+    alignSelf: "center",
+  },
+});
+
+export default ModalComponent;

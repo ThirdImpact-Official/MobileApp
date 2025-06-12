@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   Dimensions 
 } from "react-native";
-import { Bell } from "lucide-react";
+import { Bell } from 'react-native-feather';
+
 import { GetNotificationDto } from "@/interfaces/NotificationInterface/Notification/getNotificationDto";
 import UserNotificationComponent from "../Notification/NotificationItem";
 import NotificationDetail from "../Notification/NotificationDetail";
@@ -17,41 +18,7 @@ import { useToasted } from "@/context/ContextHook/ToastedContext";
 
 const { width, height } = Dimensions.get('window');
 
-export const FakeNotifications: GetNotificationDto[] = [
-  {
-    id: 1,
-    title: 'Bienvenue sur notre plateforme !',
-    content: 'Merci de vous être inscrit. Profitez de toutes nos fonctionnalités.',
-    isRead: false,
-    notificationTypeId: 1,
-    notificationType: {} as GetNotificationDto,
-    userId: 101,
-    creationDate: '2025-04-10T10:00:00.000Z',
-    updatedDate: '2025-04-10T10:00:00.000Z',
-  },
-  {
-    id: 2,
-    title: 'Mise à jour disponible',
-    content: 'Une nouvelle version de l'application est disponible. Découvrez les nouveautés !',
-    isRead: true,
-    notificationTypeId: 2,
-    notificationType: {} as GetNotificationDto,
-    userId: 102,
-    creationDate: '2025-04-11T12:30:00.000Z',
-    updatedDate: '2025-04-11T12:30:00.000Z',
-  },
-  {
-    id: 3,
-    title: 'Rappel de sécurité',
-    content: 'Pensez à mettre à jour votre mot de passe régulièrement pour sécuriser votre compte.',
-    isRead: false,
-    notificationTypeId: 3,
-    notificationType: {} as GetNotificationDto,
-    userId: 103,
-    creationDate: '2025-04-12T09:15:00.000Z',
-    updatedDate: '2025-04-12T09:15:00.000Z',
-  },
-];
+
 
 interface TabItem {
   label: string;
@@ -131,7 +98,7 @@ const ParallaxScrollView = ({
 );
 
 export default function Notification() {
-  const [notificationTab, setNotificationTab] = useState<GetNotificationDto[]>(FakeNotifications);
+  const [notificationTab, setNotificationTab] = useState<GetNotificationDto[] | null>();
   const [selectNotification, setSelectNotification] = useState<GetNotificationDto | undefined>(undefined);
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(5);
@@ -150,11 +117,11 @@ export default function Notification() {
   const tabs: TabItem[] = [
     {
       label: "Notifications",
-      icon: <Bell size={16} color="#666" style={{ marginRight: 8 }} />,
+      icon: <Bell color="#666" style={{ marginRight: 8 }} />,
       content: (
         <UserNotificationComponent 
           onDetails={handleOnDetails}
-          dataTable={notificationTab}
+          dataTable={notificationTab ?? []}
         />
       )
     },
