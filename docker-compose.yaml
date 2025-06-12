@@ -1,19 +1,17 @@
+version: "3.9"
 
 services:
-
   expo:
     build:
-      context: .
-      dockerfile: EscapeGamenextDoor/Dockerfile  # Corrigé ici
+      context: ./EscapeGamenextDoor
     ports:
-      - "8081:8081"   # Metro bundler
-      - "19000:19000" # Expo Dev Tools
-      - "19001:19001" # LAN connection
-      - "19002:19002" # Web UI
+      - "8081:8081"
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
     volumes:
-      - .:/app
-      - /app/node_modules
+      - ./EscapeGamenextDoor:/app
+      - /app/node_modules     # Permet à npm install de fonctionner sans conflit
     environment:
       - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
       - CHOKIDAR_USEPOLLING=true
-    command: sh -c "npm install && npx expo start --tunnel"

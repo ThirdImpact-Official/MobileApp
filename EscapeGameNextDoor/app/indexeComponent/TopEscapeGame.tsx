@@ -44,9 +44,7 @@ export default function TopEscapeGames() {
       <ThemedText type="subtitle">Les Meilleurs Escape Games</ThemedText>
 
       <Carousel
-        NextIcon={<NavigateNextIcon />}
-        PrevIcon={<NavigateBeforeIcon />}
-        navButtonsAlwaysVisible
+        navButtonsAlwaysInvisible={false}
         animation="slide"
         autoPlay={false}
         indicators={false}

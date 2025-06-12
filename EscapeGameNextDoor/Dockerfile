@@ -1,5 +1,6 @@
 FROM node:20
 
+# Dépendances pour Expo
 RUN apt update && apt install -y \
   watchman \
   git \
@@ -9,14 +10,10 @@ RUN apt update && apt install -y \
   g++ \
   && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m appuser
-USER appuser
-
 WORKDIR /app
 
-# Juste pour créer l'environnement de base
-COPY --chown=appuser:appuser . .
+# Ports nécessaires
+EXPOSE 8081 19000 19001 19002
 
-EXPOSE 8081
-
-CMD ["npx", "expo", "start", "--tunnel"]
+# Laisse le volume gérer le code + node_modules
+CMD ["sh", "-c", "npm install && npx expo start --tunnel"]
