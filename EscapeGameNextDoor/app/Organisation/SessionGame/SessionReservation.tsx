@@ -42,9 +42,9 @@ export default function SessionReservation() {
                 ) : session ? (
                     <Card>
                         <CardContent>
-                            <Typography variant="h6">{session.name}</Typography>
-                            <Typography>Date : {FormUtils.(session.date}</Typography>
-                            <Typography>Participants : {session.participants}</Typography>
+                            <Typography variant="h6">{session.content}</Typography>
+                            <Typography>Date : {FormUtils.(session.gameDate}</Typography>
+                            <Typography>Participants : {session.}</Typography>
                             <Typography>ID : {session.id}</Typography>
                         </CardContent>
                     </Card>

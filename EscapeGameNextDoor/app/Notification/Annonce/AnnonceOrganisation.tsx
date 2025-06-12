@@ -9,7 +9,7 @@ import {Stack ,Card ,CardContent,CardMedia,CardHeader,CardActionArea,CardActions
 export default function AnnonceOrganisation() {
     const { id } = useLocalSearchParams();
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [annonce, setAnnonce] = useState<any[]>([]);
+    const [annonce, setAnnonce] = useState<GetAnnonceDto[]>([]);
     const [ page,setPage]= useState<number>(1);
     const action = new UnitofAction();
     const fetchAnnonce=async()=>{

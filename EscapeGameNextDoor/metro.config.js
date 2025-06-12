@@ -24,7 +24,6 @@ const nativeWindConfig = {
 // ========================
 // 3. CORE OPTIMIZATIONS
 // ========================
-config.maxWorkers = 2;
 // A. Worker Management
 // Optimal workers are crucial. Too many can lead to EMFILE or context switching overhead.
 // Too few can underutilize CPU. 1 or 2 less than CPU cores is often a good balance.
@@ -74,12 +73,15 @@ config.resolver = {
   unstable_enableSymlinks: false,
   unstable_enablePackageExports: true,
   // Use metro-config's exclusionList helper for robust regex merging
+  
   blockList: exclusionList([
     // Core exclusions for build directories and node_modules within node_modules
     /.*\.test\.(js|ts|tsx)$/, // Exclude test files
     /.*__tests__\/.*/, // Exclude test directories
     /.*__fixtures__\/.*/,
     /\/android\/build\/.*/,
+     /.*\/temp\/.*/,
+      /.*\/logs\/.*/,
     /\/ios\/build\/.*/,
     /\.expo\/.*/,
     /node_modules\/.*\/node_modules\/.*/, // Prevents issues with hoisted modules
