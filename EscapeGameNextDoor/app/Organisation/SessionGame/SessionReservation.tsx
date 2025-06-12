@@ -8,7 +8,7 @@ import { SessionAction } from '../../../action/SessionAction';
 import { UnitofAction } from "@/action/UnitofAction";
 import { GetSessionReservedDto } from "@/interfaces/EscapeGameInterface/Reservation/getSessionReservedDto";
 import { ServiceResponse } from "@/interfaces/ServiceResponse";
-
+import {FormUtils } from "@/classes/FormUtils"
 async function fetchSessionReservationById(id: string): Promise<GetSessionReservedDto> {
     const sessionAction = new SessionAction();
     const response = await sessionAction.getSessionById(Number(id)) as ServiceResponse<GetSessionReservedDto>;
@@ -43,8 +43,8 @@ export default function SessionReservation() {
                     <Card>
                         <CardContent>
                             <Typography variant="h6">{session.content}</Typography>
-                            <Typography>Date : {FormUtils.(session.gameDate}</Typography>
-                            <Typography>Participants : {session.}</Typography>
+                            <Typography>Date : {FormUtils.formatDateString(session.gameDate)}</Typography>
+                            <Typography>Participants : {}</Typography>
                             <Typography>ID : {session.id}</Typography>
                         </CardContent>
                     </Card>

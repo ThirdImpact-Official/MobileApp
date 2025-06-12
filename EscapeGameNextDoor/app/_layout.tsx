@@ -7,10 +7,12 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import "../global.css";
 
+import * as eva from '@eva-design/eva';
+import { ApplicationProvider, Layout, Text } from '@ui-kitten/components';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider } from '@/context/ContextHook/AuthContext';
-import { ToastedProvider } from '@/context/ContextHook/ToastedContext';
 
+import { ToastedProvider } from '@/context/ContextHook/ToastedContext';
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -31,16 +33,18 @@ export default function RootLayout() {
   }
 
   return (
-    <ToastedProvider>
-      <AuthProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </AuthProvider>
-    </ToastedProvider>
+    <ApplicationProvider {...eva} theme={eva.light}>
+      <ToastedProvider>
+        <AuthProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </AuthProvider>
+      </ToastedProvider>
+    </ApplicationProvider>
   );
 }
