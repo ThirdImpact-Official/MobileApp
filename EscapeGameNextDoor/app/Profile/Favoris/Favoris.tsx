@@ -1,78 +1,64 @@
 import { Box, Stack } from "@mui/system";
-import { ThemedText } from '../../../components/ThemedText';
+import { Skeleton } from "@mui/material";
 import { GetEscapeGameDto } from "@/interfaces/EscapeGameInterface/EscapeGame/getEscapeGameDto";
 import ItemDisplay from '@/components/factory/GenericComponent/ItemDisplay';
 import React from 'react';
-import { Skeleton } from "@mui/material";
 import { useRouter } from "expo-router";
-import { GetSessionReservedDto } from "@/interfaces/EscapeGameInterface/Reservation/getSessionReservedDto";
-import { GetSessionGameDto } from '../../../interfaces/EscapeGameInterface/Session/getSessionGameDto';
 
 type Props = {
-    item?: GetEscapeGameDto[]; // Replace 'any' with the actual type of the item
+    item?: GetEscapeGameDto[];
 };
 
-export default function FavorisComponent(props:Props) {
-    const [data, setData] = React.useState<GetEscapeGameDto[] | null | undefined>(props.item || null);
-    const rooter = useRouter();
+export default function FavorisComponent({ item }: Props) {
+    const [data, setData] = React.useState<GetEscapeGameDto[] | null>(item || null);
+    const router = useRouter();
 
-    const HandleRedirection = (item : GetEscapeGameDto) => {
+    // Redirection avec passage des données en stringifiée
+    const HandleRedirection = (item: GetEscapeGameDto) => {
         console.log("Redirecting to favoris details");
-        // Implement redirection logic here if needed
-        const data= JSON.stringify(item);
-         rooter.push({
+        const data = JSON.stringify(item);
+        router.push({
             pathname: `/Organisation/EscapeGame/EscapeGameDetails`,
-            params: { escapeGame: data}
+            params: { escapeGame: data }
         });
-    }
-    if(data === null || data === undefined || data.length === 0)  {
+    };
+
+    if (!data || data.length === 0) {
         return (
             <Stack>
-                <Box >
-                     <Skeleton />
+                <Box>
+                    <Skeleton />
                 </Box>
             </Stack>
         );
     }
-    else
-    {
-        return (
-            <Stack>
-                <Box >
-                  {data.map((item, index) => (
-                    <FavorisItem key={index} item={item} />
-                  ))}
-                </Box>
-            </Stack>
-        )    
 
-    }
+    return (
+        <Stack>
+            <Box>
+                {data.map(item => (
+                    <FavorisItem key={item.esgId?.toString() || Math.random().toString()} item={item} onRedirect={HandleRedirection} />
+                ))}
+            </Box>
+        </Stack>
+    );
 }
 
 type PropsItem = {
-    item: GetEscapeGameDto; // Replace 'any' with the actual type of the item
+    item: GetEscapeGameDto;
+    onRedirect: (item: GetEscapeGameDto) => void;
 };
 
-export function FavorisItem({ item }: PropsItem) {
-  const rooter = useRouter();
-  const HandleRedirection = () => {
-        console.log("Redirecting to favoris details");
-        // Implement redirection logic here if needed
-        const data= JSON.stringify(item);
-         rooter.push({
-            pathname: `/Organisation/EscapeGame/EscapeGameDetails`,
-            params: { escapeGame: data}
-        });
-    }
-  return (
-    <Box className="space-y-2">
-      <ItemDisplay
-        letter={item.esgId.toString()}
-        name={item.esgNom}
-        header={item.esg_CreationDate}
-        img={item.esgImgResources}
-        onClick={HandleRedirection}
-      />
-    </Box>
-  );
+export function FavorisItem({ item, onRedirect }: PropsItem) {
+    return (
+        <Box className="space-y-2">
+            <ItemDisplay
+                letter={item.esgId?.toString() || ""}
+                name={item.esgNom}
+                header={item.esg_CreationDate}
+                img={item.esgImgResources}
+                onClick={() => onRedirect(item)}
+            />
+        </Box>
+    );
 }

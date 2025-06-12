@@ -1,20 +1,22 @@
-import { CardContent, CardHeader, Card, Paper, Typography } from "@mui/material";
+import React from "react";
+import { Card, Title, Paragraph } from "react-native-paper";
+import { View, StyleSheet } from "react-native";
 
-export default function PaymentFaild()
-{
-    return(<>
-        <Paper elevation={2}>
-            <Card elevation={2}>
-                <CardHeader 
-                    title="Payment Failed"
-                    />
-                <CardContent>
-                    <Typography>
-                        Votre payment à echouer
-                    </Typography>
-                </CardContent>
-            </Card>
-        </Paper>
-
-    </>);
+export default function PaymentFailed() {
+  return (
+    <View style={styles.container}>
+      <Card elevation={2}>
+        <Card.Title title="Payment Failed" />
+        <Card.Content>
+          <Paragraph>Votre paiement a échoué</Paragraph>
+        </Card.Content>
+      </Card>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    margin: 16,
+  },
+});

@@ -1,69 +1,130 @@
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { useState, useEffect, useRef } from "react";
-import { Image, Text } from 'react-native';
-import { styles } from '../../constants/styles';
-import { Card, CardContent, CardActions, CardHeader, Stack, Box, Grid, Link, Typography, Divider } from '@mui/material';
+import React, { useState } from "react";
+import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import { Card, Divider } from "react-native-paper";
 import { GetUserDto } from "@/interfaces/User/GetUserDto";
-import { useAuth } from "@/context/ContextHook/AuthContext";
-import { Collapsible } from "@/components/Collapsible";
-import GenericTable from "@/components/factory/GenericComponent/GenericTable";
-import "./ProfileComponent.css"
 import { ThemedText } from "@/components/ThemedText";
 
-type profileprops = {
-    user: GetUserDto;
+type ProfileProps = {
+  user: GetUserDto;
 };
-export default function ProfileComponent(props: profileprops) {
 
-    const Getprofile = props.user;
-    const { isAuthenticated, isLoading } = useAuth();
-    const [profile, setProfile] = useState<GetUserDto>(Getprofile);
+export default function ProfileComponent({ user }: ProfileProps) {
+  const [profile] = useState<GetUserDto>(user);
 
-    return (
-        <Grid container justifyContent="center">
-            <Stack spacing={2} sx={{ width: "100%", maxWidth: 600, margin: "auto", padding: 2 }}>
-                <Card className="card" elevation={3}>
-                    <CardHeader
-                        className="card-header"
-                        title={
-                            <Box>
-                                <ThemedText>
-                                    <Typography component="p">{Date.now().toLocaleString()}</Typography>
-                                    <Typography className="title" variant="h6">{Getprofile.username}</Typography>
-                                </ThemedText>
-                            </Box>
-                        }
-                    />
-                    <CardContent>
-                        <Box className="card-author" display="flex" alignItems="center">
-                            <Link href="#" className="author-avatar">
-                                <span></span>
-                            </Link>
-                            <svg className="half-circle" viewBox="0 0 106 57" style={{ height: 30 }}>
-                                <path d="M102 4c0 27.1-21.9 49-49 49S4 31.1 4 4"></path>
-                            </svg>
-                            <Box className="author-name" ml={2}>
-                                <ThemedText>
-                                    <Typography className="author-name-prefix" variant="caption">Nom</Typography>{" "}
-                                    {Getprofile.firstName + " " + Getprofile.lastName}
-                                    <Divider orientation="horizontal" />
-                                    <Typography className="author-name-prefix" variant="caption">Mail</Typography>{" "}
-                                    {Getprofile.email}
-                                </ThemedText>
-                            </Box>
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Card style={styles.card} elevation={3}>
+        <Card.Title
+          title={
+            <View>
+              <ThemedText>
+                <Text>{new Date().toLocaleString()}</Text>
+                <Text style={styles.title}>{profile.username}</Text>
+              </ThemedText>
+            </View>
+          }
+        />
+        <Card.Content>
+          <View style={styles.authorContainer}>
+            <TouchableOpacity style={styles.avatarContainer}>
+              {/* Si tu as un avatar url dans profile.avatarUrl, sinon avatar par défaut */}
+              <Image
+                source={
+                  profile.picture
+                    ? { uri: profile.picture }
+                    : require("../../assets/default-avatar.png")
+                }
+                style={styles.avatar}
+              />
+            </TouchableOpacity>
 
-                        </Box>
-                    </CardContent>
-                    <CardActions>
+            {/* Demi cercle SVG : React Native ne supporte pas SVG natif sans librairie, on peut l’ignorer ou utiliser react-native-svg */}
 
-                        <Box className="tags" mt={2} display="flex" gap={1} flexWrap="wrap">
-                            <Link href="#" className="tag">Reservation</Link>
-                            <Link href="#" className="tag">Favoris </Link>
-                            <Link href="#" className="tag">Forum</Link>
-                        </Box>
-                    </CardActions>
-                </Card>
-            </Stack>
-        </Grid>
-    );
+            <View style={styles.authorNameContainer}>
+              <ThemedText>
+                <Text style={styles.caption}>Nom </Text>
+                <Text>
+                  {profile.firstName} {profile.lastName}
+                </Text>
+                <Divider style={styles.divider} />
+                <Text style={styles.caption}>Mail </Text>
+                <Text>{profile.email}</Text>
+              </ThemedText>
+            </View>
+          </View>
+        </Card.Content>
+        <Card.Actions style={styles.actions}>
+          <TouchableOpacity style={styles.tagButton} onPress={() => { /* navigation ici */ }}>
+            <Text style={styles.tagText}>Reservation</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tagButton} onPress={() => {}}>
+            <Text style={styles.tagText}>Favoris</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tagButton} onPress={() => {}}>
+            <Text style={styles.tagText}>Forum</Text>
+          </TouchableOpacity>
+        </Card.Actions>
+      </Card>
+    </ScrollView>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    alignItems: "center",
+  },
+  card: {
+    width: "100%",
+    maxWidth: 600,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  authorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  avatarContainer: {
+    borderRadius: 40,
+    overflow: "hidden",
+    width: 80,
+    height: 80,
+    backgroundColor: "#ccc",
+  },
+  avatar: {
+    width: "100%",
+    height: "100%",
+  },
+  authorNameContainer: {
+    marginLeft: 16,
+    flex: 1,
+  },
+  caption: {
+    fontSize: 12,
+    color: "#666",
+  },
+  divider: {
+    marginVertical: 8,
+    height: 1,
+    backgroundColor: "#ccc",
+  },
+  actions: {
+    justifyContent: "flex-start",
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+  },
+  tagButton: {
+    backgroundColor: "#e0e0e0",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    marginRight: 8,
+  },
+  tagText: {
+    fontSize: 14,
+    color: "#333",
+  },
+});

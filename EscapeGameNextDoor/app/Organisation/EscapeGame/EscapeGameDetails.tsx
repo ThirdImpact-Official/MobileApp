@@ -1,50 +1,33 @@
 import React, { useEffect, useState } from 'react';
+import { View, Text, Image, ScrollView, ActivityIndicator, StyleSheet, Button, TouchableOpacity, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { 
-  Card, 
-  CardHeader, 
-  CardContent, 
-  CardActions, 
-  Typography, 
-  Box, 
-  Stack, 
-  CardMedia, 
-  Button, 
-  Divider,
-  Skeleton,
-  Alert
-} from '@mui/material';
 import { GetEscapeGameDto } from '@/interfaces/EscapeGameInterface/EscapeGame/getEscapeGameDto';
 import FormUtils from '@/classes/FormUtils';
-import AppView from '@/components/ui/AppView';
 import { UnitofAction } from '@/action/UnitofAction';
 
 export default function EscapeGameDetails() {
     const { id } = useLocalSearchParams();
+    const router = useRouter();
     const action = new UnitofAction();
+
+    const rawId = Array.isArray(id) ? null : id;
+    const numericId = rawId ? Number(rawId) : null;
+
     const [state, setState] = useState<GetEscapeGameDto | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    const router = useRouter();
 
     const fetchEscapeGame = async () => {
         try {
             setIsLoading(true);
             setError(null);
 
-            // Validate ID
-            if (!id || Array.isArray(id)) {
+            if (!numericId || isNaN(numericId)) {
                 throw new Error('Invalid game ID');
             }
 
-            const numericId = Number(id);
-            if (isNaN(numericId)) {
-                throw new Error('Game ID must be a number');
-            }
-
             const response = await action.escapeGameAction.getEscapeGameById(numericId);
-            
+
             if (!response.Success || !response.Data) {
                 throw new Error(response.Message || 'Failed to load game details');
             }
@@ -56,116 +39,172 @@ export default function EscapeGameDetails() {
         } finally {
             setIsLoading(false);
         }
-    }
+    };
 
     useEffect(() => {
         fetchEscapeGame();
-    }, [id]);
+    }, [numericId]);
 
     if (isLoading) {
         return (
-            <AppView>
-                <Stack spacing={2} className='p-4'>
-                    <Skeleton variant="rectangular" width="100%" height={200} />
-                    <Skeleton variant="text" width="60%" height={40} />
-                    <Skeleton variant="text" width="100%" />
-                    <Skeleton variant="text" width="100%" />
-                    <Skeleton variant="text" width="100%" />
-                </Stack>
-            </AppView>
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" color="#0000ff" />
+            </View>
         );
     }
 
     if (error) {
         return (
-            <AppView>
-                <Alert severity="error" className='m-4'>
-                    {error}
-                    <Button onClick={fetchEscapeGame} color="inherit" size="small">
-                        Retry
-                    </Button>
-                </Alert>
-            </AppView>
+            <View style={styles.container}>
+                <Text style={styles.errorText}>Error: {error}</Text>
+                <Button title="Retry" onPress={fetchEscapeGame} />
+            </View>
         );
     }
 
     if (!state) {
         return (
-            <AppView>
-                <Typography variant="h6" className='text-center p-4'>
-                    No game data available
-                </Typography>
-            </AppView>
+            <View style={styles.container}>
+                <Text style={styles.message}>No game data available</Text>
+            </View>
         );
     }
 
-    // Safe date formatting
     const formattedDate = state.esg_CreationDate 
         ? FormUtils.FormatDate(state.esg_CreationDate.toString()) 
         : 'Date not available';
 
     return (
-        <AppView>
-            <Stack spacing={3} className='p-4'>
-                <Card elevation={3}>
-                    <CardHeader
-                        title={state.esgNom || 'Untitled Game'}
-                        subheader={`Created: ${formattedDate}`}
-                        titleTypographyProps={{ variant: 'h5' }}
-                    />
-                    
-                    <CardMedia 
-                        component="img"
-                        height="240"
-                        image={state.esgImgResources || 'https://via.placeholder.com/300x200?text=No+Image'}
-                        alt={state.esgNom || 'Game image'}
-                        onError={(e) => {
-                            e.currentTarget.src = 'https://via.placeholder.com/300x200?text=Image+Not+Available';
-                        }}
-                    />
-                    
-                    <CardContent>
-                        <Stack spacing={2}>
-                            <Typography variant="body1">
-                                <strong>Description:</strong> {state.esgContent || 'No description available'}
-                            </Typography>
-                            
-                            <Box display="flex" flexDirection="row" flexWrap="wrap" gap={2}>
-                                <Typography variant="body2">
-                                    <strong>Child-friendly:</strong> {state.esg_IsForChildren ? "Yes" : "No"}
-                                </Typography>
-                                <Typography variant="body2">
-                                    <strong>Phone:</strong> {state.esgPhoneNumber || 'Not available'}
-                                </Typography>
-                                <Typography variant="body2">
-                                    <strong>Difficulty:</strong> {state.difficultyLevel?.dowName || 'Not specified'}
-                                </Typography>
-                                <Typography variant="body2">
-                                    <strong>Price:</strong> {state.price?.indicePrice || 'Not specified'}
-                                </Typography>
-                            </Box>
-                        </Stack>
-                    </CardContent>
-                    
-                    <CardActions className='flex flex-row justify-center space-x-2'>
-                        <Button variant="outlined">User Reviews</Button>
-                        <Divider orientation="vertical" flexItem />
-                        <Button 
-                            variant="outlined"
-                            onClick={() => state.esgId && router.push(`/Organisation/SessionGame/SessionGameList?id=${state.esgId}`)}
-                        >
-                            Game Sessions
-                        </Button>
-                        <Divider orientation="vertical" flexItem />
-                        <Button 
-                            variant="outlined"
-                            onClick={() => router.push('/Organisation/ActivitityPlace/ActivityPlaceList')}
-                        >
-                            Activities
-                        </Button>
-                    </CardActions>
-                </Card>
-            </Stack>
-        </AppView>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            <View style={styles.card}>
+                <Text style={styles.title}>{state.esgNom || 'Untitled Game'}</Text>
+                <Text style={styles.subheader}>Created: {formattedDate}</Text>
+
+                <Image
+                    source={{ uri: state.esgImgResources || 'https://via.placeholder.com/300x200?text=No+Image' }}
+                    style={styles.image}
+                    onError={() => Alert.alert('Image not available')}
+                />
+
+                <View style={styles.content}>
+                    <Text style={styles.label}><Text style={{fontWeight:'bold'}}>Description:</Text> {state.esgContent || 'No description available'}</Text>
+
+                    <View style={styles.rowWrap}>
+                        <Text style={styles.label}><Text style={{fontWeight:'bold'}}>Child-friendly:</Text> {state.esg_IsForChildren ? "Yes" : "No"}</Text>
+                        <Text style={styles.label}><Text style={{fontWeight:'bold'}}>Phone:</Text> {state.esgPhoneNumber || 'Not available'}</Text>
+                        <Text style={styles.label}><Text style={{fontWeight:'bold'}}>Difficulty:</Text> {state.difficultyLevel?.dowName || 'Not specified'}</Text>
+                        <Text style={styles.label}><Text style={{fontWeight:'bold'}}>Price:</Text> {state.price?.indicePrice || 'Not specified'}</Text>
+                    </View>
+                </View>
+
+                <View style={styles.actions}>
+                    <TouchableOpacity style={styles.button} onPress={() => Alert.alert('User Reviews clicked')}>
+                        <Text style={styles.buttonText}>User Reviews</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={() => state.esgId && router.push(`/Organisation/SessionGame/SessionGameList?id=${state.esgId}`)}
+                    >
+                        <Text style={styles.buttonText}>Game Sessions</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={() => router.push('/Organisation/ActivitityPlace/ActivityPlaceList')}
+                    >
+                        <Text style={styles.buttonText}>Activities</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </ScrollView>
     );
 }
+
+const styles = StyleSheet.create({
+    scrollViewContent: {
+        padding: 16,
+        alignItems: 'center',
+    },
+    container: {
+        flex: 1,
+        padding: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    centered: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    card: {
+        width: '100%',
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: '700',
+        marginBottom: 4,
+        textAlign: 'center',
+    },
+    subheader: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 12,
+        textAlign: 'center',
+    },
+    image: {
+        width: '100%',
+        height: 240,
+        borderRadius: 6,
+        marginBottom: 16,
+        backgroundColor: '#ddd',
+    },
+    content: {
+        marginBottom: 16,
+    },
+    label: {
+        fontSize: 16,
+        marginBottom: 8,
+    },
+    rowWrap: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        gap: 8, // gap n’est pas standard sur RN, tu peux gérer marge manuellement
+    },
+    actions: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+    },
+    button: {
+        backgroundColor: '#1976d2',
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 4,
+        minWidth: 90,
+        alignItems: 'center',
+        marginHorizontal: 4,
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: '600',
+    },
+    errorText: {
+        color: 'red',
+        marginBottom: 12,
+        fontSize: 16,
+        textAlign: 'center',
+    },
+    message: {
+        fontSize: 18,
+        textAlign: 'center',
+    },
+});

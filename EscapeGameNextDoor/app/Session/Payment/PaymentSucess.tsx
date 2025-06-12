@@ -1,21 +1,22 @@
-import { CardContent, CardHeader, Card, Paper,Typography } from "@mui/material";
+import React from "react";
+import { Card, Title, Paragraph } from "react-native-paper";
+import { View, StyleSheet } from "react-native";
 
-
-export default function paymentSuccces()
-{
-    return (<>
-        <Paper elevation={2}>
-            <Card>
-                <CardHeader 
-                    title="Payment Success"
-                />
-                <CardContent>
-                <Typography>
-                        Votre payment a été Valider.
-                    </Typography>    
-                </CardContent>
-            </Card>
-        
-        </Paper>
-    </>)
+export default function PaymentSuccess() {
+  return (
+    <View style={styles.container}>
+      <Card>
+        <Card.Title title="Payment Success" />
+        <Card.Content>
+          <Paragraph>Votre paiement a été validé.</Paragraph>
+        </Card.Content>
+      </Card>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    margin: 16,
+  },
+});
