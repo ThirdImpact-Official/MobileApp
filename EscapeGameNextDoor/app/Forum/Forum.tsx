@@ -65,7 +65,7 @@ interface ForumItemProps {
 
 const ForumItem: FC<ForumItemProps> = ({ data: forum }) => {
   return (
-    <View style={styles.forumItem}>
+    <View style={styles.forumItem} className="hover: shadom-sm transition-all">
       <View style={styles.avatarContainer}>
         <View style={styles.avatarCircle}>
           <Text style={styles.avatarLetter}>A</Text>

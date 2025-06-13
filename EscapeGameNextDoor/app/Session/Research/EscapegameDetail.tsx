@@ -1,108 +1,109 @@
-import { 
-  CardHeader, Card, CardContent, CardActions, Skeleton, Typography, CardMedia, Button 
-} from "@mui/material";
+import React, { FC, useEffect, useState } from "react";
+import { View, Image, StyleSheet, ScrollView } from "react-native";
+import { Card, Title, Paragraph, Button, ActivityIndicator } from "react-native-paper";
 import { GetEscapeGameDto } from "@/interfaces/EscapeGameInterface/EscapeGame/getEscapeGameDto";
-import { FC, useEffect, useState } from "react";
 import { UnitofAction } from "@/action/UnitofAction";
 import { ServiceResponse, PaginationResponse } from "@/interfaces/ServiceResponse";
 import { useToasted } from "@/context/ContextHook/ToastedContext";
+import { useNavigation } from "@react-navigation/native";
 
 interface EscapeGameDetailProps {
   Id?: number | null | undefined;
 }
 
+const buttonlst = [
+  { label: "Session", route: "SessionGameList" },
+  { label: "Activity place", route: "ActivitityPlaceList" },
+  { label: "Organisation", route: "" },
+  { label: "Avis", route: "RatingList" },
+];
+
 const EscapeGameDetail: FC<EscapeGameDetailProps> = ({ Id }) => {
   const action = new UnitofAction();
   const [escapeGame, setEscapeGame] = useState<GetEscapeGameDto | null>(null);
+  const [loading, setLoading] = useState(false);
   const notif = useToasted();
-
-  const buttonlst = [
-    { label: "Session", url: "../SessionGame/SessionGameList.tsx" },
-    { label: "Activity place", url: "../../ActivitityPlace/ActivitityPlaceList" },
-    { label: "Organisation", url: "" },
-    { label: "Avis", url: "../Rating/RatingList" },
-  ];
+  const navigation = useNavigation();
 
   const fetchEscape = async (id: number) => {
+    setLoading(true);
     try {
-      const response: ServiceResponse<GetEscapeGameDto> | PaginationResponse<GetEscapeGameDto> = 
+      const response: ServiceResponse<GetEscapeGameDto> | PaginationResponse<GetEscapeGameDto> =
         await action.escapeGameAction.getEscapeGameById(id);
 
       if (response.Success) {
         setEscapeGame(response.Data as GetEscapeGameDto);
         notif.showToast(response.Message, "success");
-        notif.isvisible = true;
       } else {
         notif.showToast(response.Message, "error");
-        notif.isvisible = true;
       }
     } catch (e) {
       console.error(e);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
-    // Charge uniquement si Id est défini et positif
     if (Id !== undefined && Id !== null && Id > 0) {
       fetchEscape(Id);
     }
   }, [Id]);
 
-  // Affichage du skeleton pendant le chargement ou si Id absent/non valide
-  if (!Id || Id <= 0 || !escapeGame) {
+  if (!Id || Id <= 0 || loading) {
     return (
-      <Card>
-        <CardHeader title={<Skeleton />} />
-        <CardContent>
-          <Skeleton />
-        </CardContent>
-        <CardActions>
+      <Card style={styles.card}>
+        <Card.Title title={<ActivityIndicator animating />} />
+        <Card.Content>
+          <ActivityIndicator animating size="large" />
+        </Card.Content>
+        <Card.Actions>
           {buttonlst.map((item) => (
-            <Button key={item.label} href={item.url}>
+            <Button key={item.label} onPress={() => item.route && navigation.navigate(item.route as never)}>
               {item.label}
             </Button>
           ))}
-        </CardActions>
+        </Card.Actions>
       </Card>
     );
   }
 
-  // Affichage des détails quand escapeGame est chargé
+  if (!escapeGame) return null;
+
   return (
-    <Card>
-      <CardHeader 
-        title={<Typography>{escapeGame.esgTitle}</Typography>}
-      />
-      {escapeGame.esgImgResources && (
-        <CardMedia
-          component="img"
-          height="194"
-          image={escapeGame.esgImgResources}
-          alt={escapeGame.esgTitle}
-        />
-      )}
-      <CardContent>
-        {[
-          { label: "Id", value: escapeGame.esgId?.toLocaleString() },
-          { label: "Title", value: escapeGame.esgTitle },
-          { label: "Description", value: escapeGame.esgContent },
-          { label: "PhoneNumber", value: escapeGame.esgPhoneNumber },
-          { label: "Difficulty", value: escapeGame.esg_DILE_Id },
-          { label: "Price", value: escapeGame.esg_Price_Id },
-          { label: "Pour Enfants", value: escapeGame.esg_IsForChildren ? "Oui" : "Non" },
-        ].map((item) => (
-          <Typography key={item.label}>{`${item.label}: ${item.value || ""}`}</Typography>
-        ))}
-      </CardContent>
-      <CardActions>
-        {buttonlst.map((item) => (
-          <Button key={item.label} href={item.url}>
-            {item.label}
-          </Button>
-        ))}
-      </CardActions>
-    </Card>
+    <ScrollView>
+      <Card style={styles.card}>
+        <Card.Title title={escapeGame.esgTitle} />
+        {escapeGame.esgImgResources ? (
+          <Image
+            source={{ uri: escapeGame.esgImgResources }}
+            style={styles.image}
+            resizeMode="cover"
+          />
+        ) : null}
+        <Card.Content>
+          <Paragraph>Id: {escapeGame.esgId?.toLocaleString()}</Paragraph>
+          <Paragraph>Title: {escapeGame.esgTitle}</Paragraph>
+          <Paragraph>Description: {escapeGame.esgContent}</Paragraph>
+          <Paragraph>PhoneNumber: {escapeGame.esgPhoneNumber}</Paragraph>
+          <Paragraph>Difficulty: {escapeGame.esg_DILE_Id}</Paragraph>
+          <Paragraph>Price: {escapeGame.esg_Price_Id}</Paragraph>
+          <Paragraph>Pour Enfants: {escapeGame.esg_IsForChildren ? "Oui" : "Non"}</Paragraph>
+        </Card.Content>
+        <Card.Actions>
+          {buttonlst.map((item) => (
+            <Button key={item.label} onPress={() => item.route && navigation.navigate(item.route as never)}>
+              {item.label}
+            </Button>
+          ))}
+        </Card.Actions>
+      </Card>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  card: { margin: 16 },
+  image: { width: "100%", height: 200, borderRadius: 8, marginBottom: 8 },
+});
 
 export default EscapeGameDetail;
