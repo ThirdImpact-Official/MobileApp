@@ -32,7 +32,7 @@ export default function ProfileComponent({ user }: ProfileProps) {
                 source={
                   profile.picture
                     ? { uri: profile.picture }
-                    : require("../../assets/default-avatar.png")
+                    : require("../../assets/images/react-logo.png")
                 }
                 style={styles.avatar}
               />

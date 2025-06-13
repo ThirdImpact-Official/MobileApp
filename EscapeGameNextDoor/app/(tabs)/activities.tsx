@@ -4,7 +4,7 @@ import { Text, View,StyleSheet,Image,ActivityIndicator } from "react-native";
 import { useState } from "react";
 import { Redirect } from "expo-router";
 import AppView from "@/components/ui/AppView";
-
+import React from "react";
 function Activities()
 {
     const [isLoading, setLoading] = useState(true);

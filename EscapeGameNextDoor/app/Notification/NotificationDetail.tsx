@@ -26,7 +26,7 @@ export default function NotificationDetail({ data }: Props) {
         <Text style={styles.date}>{FormUtils.FormatDate(notif.creationDate)}</Text>
       </View>
       <View style={styles.content}>
-        <Text>{notif.content}</Text>
+        <Text style={styles.content}>{notif.content}</Text>
       </View>
     </View>
   );

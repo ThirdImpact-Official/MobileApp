@@ -1,5 +1,5 @@
 import { Image, StyleSheet, Platform, ActivityIndicator } from 'react-native';
-
+import React from 'react';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';

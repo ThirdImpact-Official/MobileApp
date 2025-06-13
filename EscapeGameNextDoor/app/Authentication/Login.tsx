@@ -1,14 +1,10 @@
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { Text, Image, StyleSheet, } from "react-native";
-import { Box, TextField, Typography, Button, InputAdornment, IconButton, Stack as MUIStack, Input, InputLabel } from "@mui/material";
-import { LoginCredentials } from "@/interfaces/Credentials/loginDto";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
-import { useAuth, AuthContext } from '../../context/ContextHook/AuthContext';
-import { Redirect, Stack, useRouter } from "expo-router";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
+import { useAuth } from '../../context/ContextHook/AuthContext';
+import { useRouter } from "expo-router";
+import { LoginCredentials } from "@/interfaces/Credentials/loginDto";
 import AppView from "@/components/ui/AppView";
+import React from "react";
 
 export default function LoginScreen() {
   const Route = useRouter();
@@ -20,22 +16,6 @@ export default function LoginScreen() {
 
   const [showPassword, setShowPassword] = useState(false);
   const isAuthenticated = AuthContext.isAuthenticated;
-  const handleEmailChange = (email: string) => {
-    setCredentials((prev) => ({ ...prev, email }));
-  };
-
-  const handlePasswordChange = (password: string) => {
-    setCredentials((prev) => ({ ...prev, password }));
-  };
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
-
-  const handleMouseUpPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-  };
 
   const handleOnChange = (key: keyof LoginCredentials, value: string) => {
     setCredentials((prevData) => ({
@@ -46,13 +26,7 @@ export default function LoginScreen() {
 
   const handleSubmit = async () => {
     try {
-
-      const responseAuth = await AuthContext.login(credentials);
-      if (AuthContext.isAuthenticated) {
-        // a retirer ai u seind e l'application
-
-        automamated();
-      }
+      await AuthContext.login(credentials);
       if (AuthContext.isAuthenticated) {
         automamated();
       }
@@ -60,109 +34,109 @@ export default function LoginScreen() {
       console.error("Failed to login:", error);
     }
   };
+
   function automamated() {
-    console.log("automated " + AuthContext.isAuthenticated);
     Route.push("/");
   }
-  useEffect(()=> {
-    if(isAuthenticated)
-    {
-      automamated()
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      automamated();
     }
-  },[isAuthenticated])
+  }, [isAuthenticated]);
 
   return (
-<AppView>
-      <Box className="items-center justify-center text-center flex flex-col">
-        <ThemedText>
-          <Typography variant="h4">
-            <Text className="text-3xl">Login</Text>
-          </Typography>
-        </ThemedText>
-        <ThemedView>
-          <MUIStack spacing={2} 
-            className="border-2 border-slate-500 rounded-lg p-4 bg-slate-500"
-            sx={{ width: "100%" }}>
-            <Box >
-              <ThemedText>
-                <Typography variant="h5">Connecte to The Application </Typography>
-              </ThemedText>
-            </Box>
-            <Box className="flex flex-row justify-between  space-x-4">
-              <ThemedText>
-                <InputLabel>
-                  <Text className="text-lg text-light">
-                    Email
-                  </Text>
-                </InputLabel>
-              </ThemedText>
-              <TextField
-                className="text-light bg-white border-2"
-                name="email"
-                value={credentials.emailAdress}
-                onChange={(e) => handleOnChange("emailAdress", e.target.value)}
-                label="email" />
-            </Box>
-            <Box className="flex flex-row justify-between space-x-4">
-              <ThemedText>
-                <InputLabel className="text-lg text-light">
-                  <Text className="text-lg text-light">
-                    Password
-                  </Text>
-                </InputLabel>
-              </ThemedText>
-              <TextField
-                className="text-light bg-white"
-                name="Password"
-                type={showPassword ? "text" : "password"}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label={
-                          showPassword ? 'hide the password' : 'display the password'
-                        }
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        onMouseUp={handleMouseUpPassword}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>)
-                }}
-                value={credentials.password}
-                onChange={(e) => handleOnChange("password", e.target.value)}
-                label="password" />
-            </Box>
-            <Box >
-              <Button
-                variant="contained"
-                className="bg-black"
-                onClick={handleSubmit} >Connecter</Button>
-            </Box>
-
-          </MUIStack>
-        </ThemedView>
-      </Box>
- </AppView>
+    <AppView>
+      <View style={styles.container}>
+        <Text style={styles.title}>Login</Text>
+        <View style={styles.form}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={credentials.emailAdress}
+            onChangeText={(text) => handleOnChange("emailAdress", text)}
+            placeholder="Email"
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.input}
+              value={credentials.password}
+              onChangeText={(text) => handleOnChange("password", text)}
+              placeholder="Password"
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setShowPassword((show) => !show)}>
+              <Text style={styles.showPassword}>
+                {showPassword ? "Hide" : "Show"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Connecter</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </AppView>
   );
 }
+
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
   },
-  stepContainer: {
-    gap: 8,
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 24,
+  },
+  form: {
+    width: "100%",
+    maxWidth: 400,
+    backgroundColor: "#f1f5f9",
+    borderRadius: 12,
+    padding: 24,
+    elevation: 2,
+  },
+  label: {
+    fontSize: 16,
     marginBottom: 8,
+    color: "#222",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  input: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    fontSize: 16,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  showPassword: {
+    marginLeft: 8,
+    color: "#007AFF",
+    fontWeight: "bold",
+  },
+  button: {
+    backgroundColor: "#222",
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });

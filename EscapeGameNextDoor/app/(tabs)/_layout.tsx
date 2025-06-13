@@ -9,10 +9,10 @@ import { useAuth } from '@/context/ContextHook/AuthContext';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { Redirect } from 'expo-router';
 import {styles} from '../../constants/styles';
-import { NotificationsOutlined, Person, Person2 } from "@mui/icons-material";
-
+import React from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
+import { Bell } from 'react-native-feather';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -90,7 +90,7 @@ export default function TabLayout() {
               <IconSymbol size={28} name="bell" color={color} />
               <ThemedView>
                 <ThemedText>
-                  <NotificationsOutlined />
+                 <Bell></Bell>
                   </ThemedText>
               </ThemedView>
               </>
@@ -106,7 +106,7 @@ export default function TabLayout() {
               <IconSymbol size={28} name="person.fill" color={color} />
               <ThemedView>
                 <ThemedText>
-                  <Person2 />
+                <></>
                 </ThemedText>
               </ThemedView>
               </>

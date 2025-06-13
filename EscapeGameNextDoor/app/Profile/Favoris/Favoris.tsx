@@ -1,9 +1,11 @@
-import { Box, Stack } from "@mui/system";
-import { Skeleton } from "@mui/material";
+
 import { GetEscapeGameDto } from "@/interfaces/EscapeGameInterface/EscapeGame/getEscapeGameDto";
 import ItemDisplay from '@/components/factory/GenericComponent/ItemDisplay';
 import React from 'react';
 import { useRouter } from "expo-router";
+import { Box } from "react-native-feather";
+import Stack from "@/components/factory/GenericComponent/Stack";
+import { ActivityIndicator } from "react-native";
 
 type Props = {
     item?: GetEscapeGameDto[];
@@ -25,22 +27,22 @@ export default function FavorisComponent({ item }: Props) {
 
     if (!data || data.length === 0) {
         return (
-            <Stack>
+            <view>
                 <Box>
-                    <Skeleton />
+                    <ActivityIndicator/>
                 </Box>
-            </Stack>
+            </view>
         );
     }
 
     return (
-        <Stack>
-            <Box>
+        <view>
+            <view>
                 {data.map(item => (
                     <FavorisItem key={item.esgId?.toString() || Math.random().toString()} item={item} onRedirect={HandleRedirection} />
                 ))}
-            </Box>
-        </Stack>
+            </view>
+        </view>
     );
 }
 

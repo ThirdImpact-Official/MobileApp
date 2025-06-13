@@ -1,7 +1,7 @@
 import { Children } from "react";
 import ParallaxScrollView from "../ParallaxScrollView";
 import { useColorScheme, View, Image, StyleSheet, Text, ActivityIndicator } from "react-native";
-
+import React from "react";
 
 type props={
     children:React.ReactNode

@@ -1,9 +1,4 @@
-import { StyleSheet, Image, Platform } from 'react-native';
-import { Box, FormControl, List, ListItem, Pagination, Paper, Stack, Typography,Button } from '@mui/material';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import { ActivityIndicator, Text } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator, Button, ScrollView, TouchableOpacity } from 'react-native';
 import { useAuth } from '@/context/ContextHook/AuthContext';
 import HelloWave from '../../components/HelloWave';
 import AppView from '@/components/ui/AppView';
@@ -12,104 +7,67 @@ import { Picker } from '@react-native-picker/picker';
 import { UnitofAction } from '@/action/UnitofAction';
 import ItemDisplay from '@/components/factory/GenericComponent/ItemDisplay';
 import { GetEscapeGameDto } from '@/interfaces/EscapeGameInterface/EscapeGame/getEscapeGameDto';
-import { PaginationResponse } from '@/interfaces/ServiceResponse';
 import { GetOrganisationDto } from '@/interfaces/OrganisationInterface/Organisation/getOrganisationDto';
 import { useRouter } from 'expo-router';
-import { useLocalSearchParams } from 'expo-router';
 import { GetPriceDto } from '@/interfaces/EscapeGameInterface/Price/getPriceDto';
 import { GetDifficultyLevelDto } from '@/interfaces/EscapeGameInterface/DifficultyLevel/getDifficultyLevelDto';
 import { GetCategoryDto } from '@/interfaces/EscapeGameInterface/Category/getCategoryDto';
+import React from 'react';
+
 export default function TabTwoScreen() {
   const { isAuthenticated, isLoading } = useAuth();
-  const [isorganisation, setIsOrganisation] = useState<boolean>(false);
-
-  const HandleOrganisationSearch = () => {
-    setIsOrganisation(true);
-  }
-  /**
-   * Handles the research of escape games by setting the state to indicate 
-   * that the current selection is not an organisation. This function updates 
-   * the state to reflect that the user is focusing on escape games rather 
-   * than organisations.
-   */
-
-  const handleEscapeGameResearch = () => {
-    setIsOrganisation(false);
-  }
+  const [isOrganisation, setIsOrganisation] = useState(false);
 
   if (isLoading) {
     return (
       <AppView>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text> Loading...</Text>
+        <Text>Loading...</Text>
         <Text>Chargement...</Text>
       </AppView>
     );
   } else if (!isAuthenticated) {
-    // Add content for unauthenticated users
     return (
       <AppView>
-
-        <ThemedView style={styles.headerImage}>
-          <ThemedText style={styles.titleContainer}>Please Log In</ThemedText>
-          <ThemedText>You need to be authenticated to view this content</ThemedText>
+        <View style={styles.headerImage}>
+          <Text style={styles.titleContainer}>Please Log In</Text>
+          <Text>You need to be authenticated to view this content</Text>
           <HelloWave />
-        </ThemedView>
-      </AppView>);
-
+        </View>
+      </AppView>
+    );
   } else {
-    // Content for authenticated users
     return (
       <AppView>
-        <Box className="flex flex-row justify-center items-center space-x-4 gap-4 p-4 ">
-          <Box
-            className='border  rounded-sm'
-            onClick={() => handleEscapeGameResearch()}
-          >
-            <ThemedText type='title'
-              className='p-4' >
-              Escapegames
-            </ThemedText>
-          </Box>
-          <Box
-            className='border rounded-sm'
-            onClick={() => HandleOrganisationSearch()}
-          >
-            <ThemedText type='title' className='p-4'>
-              Organisation
-            </ThemedText>
-          </Box>
-        </Box>
-        <Box className="flex flex-row justify-center items-center p-4 space-x-4">
-          <ThemedView>
-            {
-              isorganisation ? <OrganisationSelection /> : <EscapeGameSelection />
-            }
-          </ThemedView>
-        </Box>
+        <View style={styles.switchContainer}>
+          <TouchableOpacity style={styles.switchButton} onPress={() => setIsOrganisation(false)}>
+            <Text style={styles.switchText}>Escapegames</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.switchButton} onPress={() => setIsOrganisation(true)}>
+            <Text style={styles.switchText}>Organisation</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ flex: 1 }}>
+          {isOrganisation ? <OrganisationSelection /> : <EscapeGameSelection />}
+        </View>
       </AppView>
     );
   }
 }
 
-export function OrganisationSelection() {
-  const httpaction = new UnitofAction();
-  const [organisation, setOrgansiation] = useState<GetOrganisationDto[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-
-  //select
-  const [isfiltered, setIsfiltered] = useState<boolean>(false);
-  const [page, setPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(0);
-  const router = useRouter();
+function OrganisationSelection() {
   const httpAction = new UnitofAction();
+  const [organisation, setOrganisation] = useState<GetOrganisationDto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const router = useRouter();
+
   const fetchOrganisation = async () => {
     try {
-      const response =
-        await httpAction.organisationAction.GetAllOrganisation(page, 5);
+      const response = await httpAction.organisationAction.GetAllOrganisation(page, 5);
       if (response.Success) {
-        setOrgansiation(response.Data as GetOrganisationDto[]);
+        setOrganisation(response.Data as GetOrganisationDto[]);
         setTotalPages(response.TotalPage);
       }
     } catch (e) {
@@ -117,91 +75,57 @@ export function OrganisationSelection() {
     } finally {
       setIsLoading(false);
     }
-  }
-  const resetfilter = () => {
-    setIsfiltered(false);
-  }
+  };
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-  }
   useEffect(() => {
     fetchOrganisation();
   }, [page]);
+
   return (
-    <>
-      <Stack>
-
-        <Paper elevation={2}
-          className='p-4 m-4'>
-          <Box className="flex flex-row justify-center items-center space-x-4 m-4">
-            <Picker>
-              <Picker.Item label="Organisation" value="organisation" />
-            </Picker>
-            <Picker>
-              <Picker.Item label="Organisation" value="organisation" />
-            </Picker>
-            <FormControl>
-              <Button onClick={resetfilter} >Reset</Button>
-            </FormControl>
-          </Box>
-          <Box>
-            <List>
-
-            </List>
-            {!isLoading && organisation.map((escapeGame) => (
-              <ListItem key={escapeGame.orgId}>
-                <ItemDisplay
-                  key={escapeGame.orgId}
-                  name={escapeGame.name}
-                  header={escapeGame.address}
-                  img={escapeGame.logo}
-                   onClick={()=>{router.push(
-                      {
-                        pathname: `/Organisation/OrganisationDetails`,
-                        params: { id: escapeGame.orgId.toString() }
-                      }
-                    )}}
-                />
-              </ListItem>
-            ))}
-            <Pagination
-              className='pt-4'
-              page={page}
-              count={totalPages}
-              onChange={handlePageChange}
-            />
-          </Box>
-        </Paper>
-      </Stack>
-    </>
-  )
+    <ScrollView>
+      <View style={styles.filterRow}>
+        {/* Ajoutez ici vos filtres si besoin */}
+        <Button title="Reset" onPress={fetchOrganisation} />
+      </View>
+      {isLoading ? (
+        <ActivityIndicator />
+      ) : (
+        organisation.map((org) => (
+          <TouchableOpacity key={org.orgId} onPress={() => router.push({ pathname: `/Organisation/OrganisationDetails`, params: { id: org.orgId.toString() } })}>
+            <ItemDisplay name={org.name} header={org.address} img={org.logo} />
+          </TouchableOpacity>
+        ))
+      )}
+      <View style={styles.paginationRow}>
+        <Button title="Précédent" disabled={page <= 1} onPress={() => setPage(page - 1)} />
+        <Text>
+          {page} / {totalPages}
+        </Text>
+        <Button title="Suivant" disabled={page >= totalPages} onPress={() => setPage(page + 1)} />
+      </View>
+    </ScrollView>
+  );
 }
-export function EscapeGameSelection() {
+
+function EscapeGameSelection() {
   const [escapeGames, setEscapeGames] = useState<GetEscapeGameDto[]>([]);
   const [price, setPrice] = useState<GetPriceDto[]>([]);
   const [difficulty, setDifficulty] = useState<GetDifficultyLevelDto[]>([]);
   const [category, setCategory] = useState<GetCategoryDto[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  //select
-  const [isfiltered, setIsfiltered] = useState<boolean>(false);
-
-  const [selectCategory, setSelectCategory] = useState<GetCategoryDto | null>(null);
-  const [selectPrice, setSelectPrice] = useState<GetPriceDto | null>(null);
-  const [selectDifficulty, setSelectDifficulty] = useState<GetDifficultyLevelDto | null>(null);
-  //
-  const [page, setPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFiltered, setIsFiltered] = useState(false);
+  const [selectCategory, setSelectCategory] = useState<number | null>(null);
+  const [selectPrice, setSelectPrice] = useState<number | null>(null);
+  const [selectDifficulty, setSelectDifficulty] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const httpAction = new UnitofAction();
   const router = useRouter();
-  /**
-   * 
-   */
+
   const fetchEscapeGames = async () => {
+    setIsLoading(true);
     try {
-
-      const response: PaginationResponse<GetEscapeGameDto> =
-        await httpAction.escapeGameAction.getAllEscapeGames(page, 5);
+      const response = await httpAction.escapeGameAction.getAllEscapeGames(page, 5);
       if (response.Success) {
         setEscapeGames(response.Data as GetEscapeGameDto[]);
         setTotalPages(response.TotalPage);
@@ -212,24 +136,17 @@ export function EscapeGameSelection() {
       setIsLoading(false);
     }
   };
-  /**
-   * 
-   * @param page 
-   * @param catId 
-   * @param priceId 
-   * @param diflId 
-   */
-  const fetchEscapeGamesFiltered = async (
-    page: number,
-    catId: number | null = null,
-    priceId: number | null = null,
-    diflId: number | null = null
-  ) => {
-    try {
-      setIsLoading(true);
-      const response =
-        await httpAction.escapeGameAction.GetAllEscapeGames(catId, priceId, diflId, page, 5);
 
+  const fetchEscapeGamesFiltered = async () => {
+    setIsLoading(true);
+    try {
+      const response = await httpAction.escapeGameAction.GetAllEscapeGames(
+        selectCategory,
+        selectPrice,
+        selectDifficulty,
+        page,
+        5
+      );
       if (response.Success) {
         setEscapeGames(response.Data as GetEscapeGameDto[]);
         setTotalPages(response.TotalPage);
@@ -240,160 +157,114 @@ export function EscapeGameSelection() {
       setIsLoading(false);
     }
   };
-  /**
-   * fetch category
-   */
-  const fetchAllCategory = async () => {
-    try {
-      const response = await httpAction.categoryAction.getAllCategories();
-      if (response.Success) {
 
-        setCategory(response.Data as GetCategoryDto[]);
-      }
-    }
-    catch (e) {
-      console.error(e);
-    }
-  }
-  /**
-   * fetch price indicator
-   */
-  const fetchPriceindicator = async () => {
-    try {
-      const response = await httpAction.escapeGameAction.GetPriceIndice();
-      if (response.Success) {
-        setPrice(response.Data as GetPriceDto[]);
-      }
-
-    }
-    catch (e) {
-      console.error(e);
-    }
-  }
-  /**
-   * fetch difficultylevel
-   */
-  const fetchDifficultylevel = async () => {
-    try {
-      const response = await httpAction.escapeGameAction.GetDifficultyLevelDto();
-      if (response.Success) {
-        setDifficulty(response.Data as GetDifficultyLevelDto[]);
-      }
-    }
-    catch (e) {
-      console.error(e);
-    }
-  }
-  /**
-   * reset filter
-   */
-  const resetFilter=()=>{
-    setIsfiltered(false);
-    setSelectCategory(null);
-    setSelectPrice(null);
-    setSelectDifficulty(null);
-  }
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-  }
   useEffect(() => {
-    fetchAllCategory();
-    fetchPriceindicator();
-    fetchDifficultylevel();
+    // fetch categories, prices, difficulties
+    (async () => {
+      try {
+        const catRes = await httpAction.categoryAction.getAllCategories();
+        if (catRes.Success) setCategory(catRes.Data as GetCategoryDto[]);
+        const priceRes = await httpAction.escapeGameAction.GetPriceIndice();
+        if (priceRes.Success) setPrice(priceRes.Data as GetPriceDto[]);
+        const diffRes = await httpAction.escapeGameAction.GetDifficultyLevelDto();
+        if (diffRes.Success) setDifficulty(diffRes.Data as GetDifficultyLevelDto[]);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
   }, []);
 
   useEffect(() => {
-    if(!isfiltered)
-    {
-      fetchEscapeGamesFiltered(page, selectCategory?.catId, selectPrice?.id, selectDifficulty?.dowId);
-    }
-    else{
+    if (isFiltered) {
+      fetchEscapeGamesFiltered();
+    } else {
       fetchEscapeGames();
     }
-  }, [page, selectCategory, selectPrice, selectDifficulty]);
+  }, [page, selectCategory, selectPrice, selectDifficulty, isFiltered]);
+
+  const resetFilter = () => {
+    setIsFiltered(false);
+    setSelectCategory(null);
+    setSelectPrice(null);
+    setSelectDifficulty(null);
+  };
+
   return (
-    <>
-      <Stack>
-
-        <Paper elevation={2} className="p-4 m-4">
-          <Box className="flex flex-row justify-center items-center space-x-4 m-4">
-            <Picker
-              onValueChange={(value) => {
-                setSelectCategory(value as GetCategoryDto);
-                setIsfiltered(true);
-              }}
-
-            >
-              {
-                category.map((category) => (
-
-                  <Picker.Item label={category.catName} value={category} />
-                ))
-              }
-            </Picker>
-            <Picker
-              onValueChange={(value) => {
-                setSelectPrice(value as GetPriceDto);
-                  setIsfiltered(true);
-              }}
-            >
-              {
-                price.map((priceindicator) => (
-                  <Picker.Item label={priceindicator.indicePrice.toString()} value={priceindicator.id} />
-                ))
-              }
-
-            </Picker>
-            <Picker
-              onValueChange={(value) => {
-                setSelectDifficulty(value as GetDifficultyLevelDto);
-                  setIsfiltered(true);
-              }}
-            >
-              {
-                difficulty.map((difficultylevel) => (
-                  <Picker.Item label={difficultylevel.dowName} value={difficultylevel.dowId} />
-                ))
-              }
-            </Picker>
-            <FormControl>
-              <Button onClick={resetFilter}>Reset</Button>
-            </FormControl>
-          </Box>
-          <Box >
-            <List className='space-y-4'>
-
-              {!isLoading && escapeGames.map((escapeGame) => (
-                <ListItem>
-
-                  <ItemDisplay
-
-                    key={escapeGame.esgId}
-                    name={escapeGame.esgNom}
-                    header={escapeGame.esgContent}
-                    img={escapeGame.esgImgResources}
-                    onClick={()=>{router.push(
-                      {
-                        pathname: `/Organisation/EscapeGame/EscapeGameDetails`,
-                        params: { id: escapeGame.esgId.toString() }
-                      }
-                    )}}
-                  />
-                </ListItem>
-              ))}
-            </List>
-            <Pagination
-              className='pt-4'
-              page={page}
-              count={totalPages}
-              onChange={handlePageChange}
+    <ScrollView>
+      <View style={styles.filterRow}>
+        <Picker
+          selectedValue={selectCategory}
+          style={styles.picker}
+          onValueChange={(value) => {
+            setSelectCategory(value);
+            setIsFiltered(true);
+          }}
+        >
+          <Picker.Item label="Catégorie" value={null} />
+          {category.map((cat) => (
+            <Picker.Item key={cat.catId} label={cat.catName} value={cat.catId} />
+          ))}
+        </Picker>
+        <Picker
+          selectedValue={selectPrice}
+          style={styles.picker}
+          onValueChange={(value) => {
+            setSelectPrice(value);
+            setIsFiltered(true);
+          }}
+        >
+          <Picker.Item label="Prix" value={null} />
+          {price.map((p) => (
+            <Picker.Item key={p.id} label={p.indicePrice.toString()} value={p.id} />
+          ))}
+        </Picker>
+        <Picker
+          selectedValue={selectDifficulty}
+          style={styles.picker}
+          onValueChange={(value) => {
+            setSelectDifficulty(value);
+            setIsFiltered(true);
+          }}
+        >
+          <Picker.Item label="Difficulté" value={null} />
+          {difficulty.map((d) => (
+            <Picker.Item key={d.dowId} label={d.dowName} value={d.dowId} />
+          ))}
+        </Picker>
+        <Button title="Reset" onPress={resetFilter} />
+      </View>
+      {isLoading ? (
+        <ActivityIndicator />
+      ) : (
+        escapeGames.map((escapeGame) => (
+          <TouchableOpacity
+            key={escapeGame.esgId}
+            onPress={() =>
+              router.push({
+                pathname: `/Organisation/EscapeGame/EscapeGameDetails`,
+                params: { id: escapeGame.esgId.toString() },
+              })
+            }
+          >
+            <ItemDisplay
+              name={escapeGame.esgNom}
+              header={escapeGame.esgContent}
+              img={escapeGame.esgImgResources}
             />
-          </Box>
-        </Paper>
-      </Stack>
-    </>
+          </TouchableOpacity>
+        ))
+      )}
+      <View style={styles.paginationRow}>
+        <Button title="Précédent" disabled={page <= 1} onPress={() => setPage(page - 1)} />
+        <Text>
+          {page} / {totalPages}
+        </Text>
+        <Button title="Suivant" disabled={page >= totalPages} onPress={() => setPage(page + 1)} />
+      </View>
+    </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   headerImage: {
     color: '#808080',
@@ -403,6 +274,42 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flexDirection: 'row',
+    gap: 8,
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 16,
+  },
+  switchButton: {
+    borderWidth: 1,
+    borderRadius: 4,
+    marginHorizontal: 8,
+    padding: 12,
+    backgroundColor: '#eee',
+  },
+  switchText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: 8,
+    justifyContent: 'space-between',
+  },
+  picker: {
+    flex: 1,
+    height: 40,
+    marginHorizontal: 4,
+  },
+  paginationRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 16,
     gap: 8,
   },
 });

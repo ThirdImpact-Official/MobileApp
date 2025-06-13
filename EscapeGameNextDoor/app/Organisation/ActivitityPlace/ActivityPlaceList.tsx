@@ -7,6 +7,7 @@ import AppView from '@/components/ui/AppView';
 import ItemDisplay from '@/components/factory/GenericComponent/ItemDisplay';
 import { useRouter } from 'expo-router';
 import { Card } from '@ui-kitten/components';
+import React from 'react';
 
 const ActivityPlaceList = () => {
     const [dataTable] = useState<GetActivityPlaceDto[]>(testActivityPlaces);

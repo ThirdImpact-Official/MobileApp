@@ -1,116 +1,157 @@
-import { Box, Button, Card, CardActions,CardContent, CardHeader, Skeleton, Stack, Typography } from "@mui/material";
-
-import { GetSessionReservedDto, reservationcolumns } from '../../../interfaces/EscapeGameInterface/Reservation/getSessionReservedDto';
-import { GetSessionGameDto } from '../../../interfaces/EscapeGameInterface/Session/getSessionGameDto';
-import { useState } from "react";
+import React, { useState } from "react";
+import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import FormUtils from '@/classes/FormUtils';
-import { ThemedView } from "@/components/ThemedView";
-import ItemDisplay from "@/components/factory/GenericComponent/ItemDisplay";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { Stroller } from "@mui/icons-material";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import {useColorScheme, View, Image, StyleSheet, Text, ActivityIndicator } from "react-native";
+import { GetSessionReservedDto } from '../../../interfaces/EscapeGameInterface/Reservation/getSessionReservedDto';
+import { GetSessionGameDto } from '../../../interfaces/EscapeGameInterface/Session/getSessionGameDto';
 
-type ReservationProps = {
-    reservation: GetSessionReservedDto[];
-};
-export default function Reservation( ) {
-
+export default function Reservation() {
     const { reservation } = useLocalSearchParams();
-
     const [state, setState] = useState<GetSessionReservedDto | undefined>(JSON.parse(reservation as string));
     const rooter = useRouter();
+    const [sessiongGame, setSessionGame] = useState<GetSessionGameDto | undefined>(
+        state?.sessionGame === null || state?.sessionGame === undefined ? undefined : state.sessionGame
+    );
 
-    const [sessiongGame, setSessionGame] = useState<GetSessionGameDto | undefined>(state?.sessionGame === null || state?.sessionGame === undefined ? undefined : state.sessionGame);
-    if(state === undefined || sessiongGame === undefined){
-        return(
-              <ParallaxScrollView
-              headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-                    headerImage={<Image source={require('@/assets/images/partial-react-logo.png')}
-                style={styles.reactLogo} />}
-            >
-
-            <Stack>
-                <Card>
-                    <CardHeader title={
-                        <Skeleton />
-                    } />
-                    <CardContent>
-                        <Skeleton />
-                    </CardContent>
-                    <CardActions>
-                        <Skeleton />
-                    </CardActions>
-                </Card>
-            </Stack>
-            </ParallaxScrollView>
-        )      
-    }
-    else
-    {
-        return(
+    if (state === undefined || sessiongGame === undefined) {
+        return (
             <ParallaxScrollView
-              headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-                    headerImage={<Image source={require('@/assets/images/partial-react-logo.png')}
-                style={styles.reactLogo} />}
+                headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+                headerImage={
+                    <Image source={require('@/assets/images/partial-react-logo.png')} style={styles.reactLogo} />
+                }
             >
-            <Stack className="flex flex-col items-center justify-center w-1/2 ">
-                <Card>
-                    <CardHeader 
-                        title={
-                        <>
-                          <Typography variant="h5">{}</Typography>
-                        </>
-                        }
-                        action={<>
-                          <Box>
-                            <Typography variant="h6">{FormUtils.FormatDate(sessiongGame.gameDate.toString())}</Typography>
-                          </Box>
-                        </>} />
-                    <CardContent>
-                        <Typography variant="body2" color="textSecondary">
-                            <strong>Date de reservation :</strong> {FormUtils.FormatDate(state.creationDate.toString())}</Typography>
-                        <Typography variant="body2" color="textSecondary">
-                            <strong>Game Name:</strong> {sessiongGame.price}</Typography>
-                        <Typography variant="body2" color="textSecondary">
-                        <strong>Place Available</strong>    {sessiongGame.placeAvailable}
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                         <strong>Place Maximum</strong>   {sessiongGame.placeMaximum}
-                        </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                     {state.content}
-                    </Typography>
-                    </CardContent>
-                    <CardActions>
-                        <Box className="justify-center items-center flex flex-row gap-4">
-                            <Button onClick={() =>rooter.push(`/EscapeGame/${sessiongGame.escapeGameId}`) }>Escape Game</Button>
-                            <Button onClick={() =>rooter.push(`/Profile/Reservation/Reservation`)}>Avis </Button>
-                            <Button onClick={() =>rooter.push(`/Profile/Reservation/Reservation`)}>Cancel </Button>
-                        </Box>    
-                    </CardActions>
-                </Card>
-            </Stack>
+                <View style={styles.centered}>
+                    <View style={styles.card}>
+                        <ActivityIndicator size="large" />
+                    </View>
+                </View>
             </ParallaxScrollView>
         );
-
+    } else {
+        return (
+            <ParallaxScrollView
+                headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+                headerImage={
+                    <Image source={require('@/assets/images/partial-react-logo.png')} style={styles.reactLogo} />
+                }
+            >
+                <ScrollView contentContainerStyle={styles.centered}>
+                    <View style={styles.card}>
+                        <View style={styles.cardHeader}>
+                            <Text style={styles.title}>{/* Add a title here if needed */}</Text>
+                            <Text style={styles.subtitle}>{FormUtils.FormatDate(sessiongGame.gameDate.toString())}</Text>
+                        </View>
+                        <View style={styles.cardContent}>
+                            <Text style={styles.label}>
+                                <Text style={styles.bold}>Date de réservation :</Text> {FormUtils.FormatDate(state.creationDate.toString())}
+                            </Text>
+                            <Text style={styles.label}>
+                                <Text style={styles.bold}>Game Name:</Text> {sessiongGame.price}
+                            </Text>
+                            <Text style={styles.label}>
+                                <Text style={styles.bold}>Place Available:</Text> {sessiongGame.placeAvailable}
+                            </Text>
+                            <Text style={styles.label}>
+                                <Text style={styles.bold}>Place Maximum:</Text> {sessiongGame.placeMaximum}
+                            </Text>
+                            <Text style={styles.label}>{state.content}</Text>
+                        </View>
+                        <View style={styles.cardActions}>
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={() => rooter.push({
+                                    pathname: '/Organisation/EscapeGame/EscapeGameDetails'
+                                    ,params: { id: sessiongGame.escapeGameId}
+                                })}
+                            >
+                                <Text style={styles.buttonText}>Escape Game</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={() => rooter.push(`/Profile/Reservation/Reservation`)}
+                            >
+                                <Text style={styles.buttonText}>Avis</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.button}
+                                onPress={() => rooter.push(`/Profile/Reservation/Reservation`)}
+                            >
+                                <Text style={styles.buttonText}>Cancel</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </ScrollView>
+            </ParallaxScrollView>
+        );
     }
 }
+
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
+    centered: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 16,
+    },
+    card: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        width: '100%',
+        maxWidth: 400,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 3,
+        marginVertical: 20,
+    },
+    cardHeader: {
+        marginBottom: 12,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    title: {
+        fontSize: 22,
+        fontWeight: 'bold',
+    },
+    subtitle: {
+        fontSize: 16,
+        color: '#888',
+    },
+    cardContent: {
+        marginBottom: 16,
+    },
+    label: {
+        fontSize: 16,
+        marginBottom: 6,
+        color: '#333',
+    },
+    bold: {
+        fontWeight: 'bold',
+    },
+    cardActions: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        marginTop: 10,
+    },
+    button: {
+        backgroundColor: '#1976d2',
+        paddingVertical: 8,
+        paddingHorizontal: 18,
+        borderRadius: 6,
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+    },
+    reactLogo: {
+        height: 178,
+        width: 290,
+        bottom: 0,
+        left: 0,
+        position: 'absolute',
+    },
 });

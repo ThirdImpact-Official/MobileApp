@@ -17,7 +17,7 @@ export default function AnnonceDetails() {
     try {
       const response = await action.annonceAction.getAnnonceById(Number(id));
       if (response.Success) {
-        setAnnonce(response.Data);
+        setAnnonce(response.Data as GetAnnonceDto);
       } else {
         console.warn("Erreur:", response.Message);
       }
@@ -57,7 +57,7 @@ export default function AnnonceDetails() {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Annonce</Text>
         <Text style={styles.label}>Titre :</Text>
-        <Text style={styles.content}>{annonce.title ?? "-"}</Text>
+        <Text style={styles.content}>{annonce.name ?? "-"}</Text>
 
         <Text style={styles.label}>Description :</Text>
         <Text style={styles.content}>{annonce.description ?? "-"}</Text>

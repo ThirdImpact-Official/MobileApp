@@ -1,3 +1,4 @@
+import React from 'react';
 import { GetNotificationDto } from "@/interfaces/NotificationInterface/Notification/getNotificationDto";
 import { FC, useState } from 'react';
 import { Card, Text, Button, Divider, Layout } from '@ui-kitten/components';
@@ -17,11 +18,10 @@ export const UserNotificationItem: FC<NotificationItemProps> = (props) => {
         console.log("notif log", item);
         props.onDetails(item);
     };
-
-    const handleVisibility = async () => {
-        setIsRead(!isRead);
-        await action.notificationAction.setNotificationVisibility(props.data.id);
-    };
+    // const handleVisibility = async () => {
+    //     setIsRead(!isRead);
+    //     await action.notificationAction.setNotificationVisibility(props.data.id);
+    // };
 
     return (
         <Card>
