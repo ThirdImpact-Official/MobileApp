@@ -48,7 +48,7 @@ const ItemDisplay: React.FC<ItemDisplayProps> = ({
           </ThemedView>
         )}
       />
-      <Divider style={{ marginHorizontal: 8, marginVertical: 4 }} />
+     
       </Card>
     </TouchableOpacity>
  

@@ -6,7 +6,9 @@ import { GetOrganisationDto } from "@/interfaces/OrganisationInterface/Organisat
 import { useToasted } from "@/context/ContextHook/ToastedContext";
 import AppView from "@/components/ui/AppView";
 import { Card } from 'react-native-paper';
-
+import { Collapsible } from "@/components/Collapsible";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
 export default function OrganisationDetails() {
   const { id } = useLocalSearchParams();
   const action = new UnitofAction();
@@ -89,6 +91,8 @@ else{
           <Text style={styles.info}>{organisation.email}</Text>
           <Text style={styles.info}>{organisation.phoneNumber}</Text>
           <Text style={styles.info}>{organisation.address}</Text>
+          <Text style={styles.info}>Créée le : {organisation.creationDate}</Text>
+          <Text style={styles.info}>ID : {organisation.orgId}</Text>
         </Card.Content>
         <Card.Actions style={styles.actions}>
           <TouchableOpacity style={styles.button} 
@@ -113,6 +117,13 @@ else{
             <Text style={styles.buttonText}>Annonce</Text>
           </TouchableOpacity>
         </Card.Actions>
+        <Card.Content>
+        
+            <Collapsible title="Adresse GPS " isThemed={false} headerStyle={{ marginTop: 10 }}>
+              <Text>Contenu collapsible</Text>
+            </Collapsible>
+          
+        </Card.Content>
       </Card>
     </AppView>
   );
