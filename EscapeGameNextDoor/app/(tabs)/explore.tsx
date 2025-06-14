@@ -92,7 +92,7 @@ function OrganisationSelection() {
       ) : (
         organisation.map((org) => (
           <TouchableOpacity key={org.orgId} onPress={() => router.push({ pathname: `/Organisation/OrganisationDetails`, params: { id: org.orgId.toString() } })}>
-            <ItemDisplay name={org.name} header={org.address} img={org.logo} />
+            <ItemDisplay name={org.name} header={org.address} img={org.logo} onClick={() => router.push({ pathname: `/Organisation/OrganisationDetails`, params: { id: org.orgId.toString() } })} />
           </TouchableOpacity>
         ))
       )}
@@ -247,9 +247,15 @@ function EscapeGameSelection() {
             }
           >
             <ItemDisplay
-              name={escapeGame.esgNom}
+              name={escapeGame.esgTitle}
               header={escapeGame.esgContent}
               img={escapeGame.esgImgResources}
+              onClick={() =>
+                router.push({
+                  pathname: `/Organisation/EscapeGame/EscapeGameDetails`,
+                  params: { id: escapeGame.esgId.toString() },
+                })
+              }
             />
           </TouchableOpacity>
         ))

@@ -5,7 +5,8 @@ import React from 'react';
 import { useRouter } from "expo-router";
 import { Box } from "react-native-feather";
 import Stack from "@/components/factory/GenericComponent/Stack";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from 'react-native';
+import { ThemedView } from "@/components/ThemedView";
 
 type Props = {
     item?: GetEscapeGameDto[];
@@ -21,7 +22,7 @@ export default function FavorisComponent({ item }: Props) {
         const data = JSON.stringify(item);
         router.push({
             pathname: `/Organisation/EscapeGame/EscapeGameDetails`,
-            params: { escapeGame: data }
+            params: { id: item.esgId,  }
         });
     };
 
@@ -52,8 +53,9 @@ type PropsItem = {
 };
 
 export function FavorisItem({ item, onRedirect }: PropsItem) {
+
     return (
-        <Box className="space-y-2">
+        <ThemedView className="space-y-2">
             <ItemDisplay
                 letter={item.esgId?.toString() || ""}
                 name={item.esgNom}
@@ -61,6 +63,6 @@ export function FavorisItem({ item, onRedirect }: PropsItem) {
                 img={item.esgImgResources}
                 onClick={() => onRedirect(item)}
             />
-        </Box>
+        </ThemedView>
     );
 }

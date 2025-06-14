@@ -5,6 +5,11 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Collapsible } from '@/components/Collapsible';
+import LatestEscapeGames from '../indexeComponent/LasteEscapeGame';
+import TopEscapeGames from '../indexeComponent/TopEscapeGame';
+import RecommandedEscapeGames from '../indexeComponent/RecomandedEscapegame';
+import LatestEscapeGamesNoted from '../indexeComponent/LastestEscapeNoted';
+import LatestAnnonces from '../indexeComponent/LastAnnoncePlateforme';
 
 
 export default function HomeScreen() {
@@ -35,11 +40,25 @@ export default function HomeScreen() {
           </ThemedText>{' '}
           to open developer tools.
         </ThemedText>
-      </ThemedView>
+        <ThemedView>
+
+        <LatestAnnonces />
+    
+        <LatestEscapeGames />
      
+        <LatestEscapeGames />
+   
+     
+        <RecommandedEscapeGames />
+     
+        <LatestEscapeGamesNoted />
+        </ThemedView>
+        </ThemedView>
+   
     </ParallaxScrollView>
   );
 }
+
 
 const styles = StyleSheet.create({
   titleContainer: {

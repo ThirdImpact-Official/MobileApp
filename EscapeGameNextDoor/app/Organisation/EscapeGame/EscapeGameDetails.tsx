@@ -69,13 +69,27 @@ export default function EscapeGameDetails() {
             </View>
         );
     }
-
+    const AddFvorite= async () => {
+        try {
+            const response = await action.favorisAction.addFavoris(state.esgId);
+            if (response.Success) {
+                Alert.alert('Success', 'Game added to favorites');
+            }
+        }
+        catch (error) {
+            Alert.alert('Error', 'Failed to add to favorites');
+            console.error('Add to favorites error:', error);
+        }
+    }
     const formattedDate = state.esg_CreationDate 
         ? FormUtils.FormatDate(state.esg_CreationDate.toString()) 
         : 'Date not available';
 
     return (
         <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            <View className='flex flex-row justify-between items-end w-full mb-4'>
+                <Button title="Ajouter aux Favoris" onPress={AddFvorite} />
+            </View>
             <View style={styles.card}>
                 <Text style={styles.title}>{state.esgNom || 'Untitled Game'}</Text>
                 <Text style={styles.subheader}>Created: {formattedDate}</Text>

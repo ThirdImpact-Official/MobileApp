@@ -1,8 +1,11 @@
 import React from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons"; // Ou @react-native-vector-icons/MaterialIcons
-// Ou adapte selon ton stack (expo ou pas)
-
+import { View, Image, StyleSheet, Touchable } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { ThemedText } from "@/components/ThemedText";
+import { List ,Card, Divider } from "react-native-paper";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { Divide } from "react-native-feather";
+import { ThemedView } from "@/components/ThemedView";
 interface ItemDisplayProps {
   letter?: string;
   name?: string;
@@ -11,78 +14,77 @@ interface ItemDisplayProps {
   onClick?: () => void;
 }
 
-const ItemDisplay: React.FC<ItemDisplayProps> = ({ letter, name, header, img, onClick }) => {
-  const handleClick = () => {
-    onClick?.() ?? console.log("Item clicked");
+const ItemDisplay: React.FC<ItemDisplayProps> = ({ 
+  letter = "?", 
+  name = "Non spécifié", 
+  header = "Titre", 
+  img, 
+  onClick 
+}) => {
+  const handlePress = () => {
+    onClick?.();
   };
-
+ const [expandedId, setExpandedId] = React.useState<number | null>(null);
   return (
-    <TouchableOpacity style={styles.container} onPress={handleClick}>
-      {/* Left Side */}
-      <View style={styles.leftContainer}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{letter}</Text>
-        </View>
-
-        <View style={styles.textContainer}>
-          <Text style={styles.header}>{header}</Text>
-          <Text style={styles.name}>{name}</Text>
-        </View>
-      </View>
-
-      {/* Right Side */}
-      <View style={styles.rightContainer}>
-        {img ? (
-          <Image source={{ uri: img }} style={styles.image} resizeMode="cover" />
-        ) : (
-          <View style={styles.placeholder}>
-            <MaterialIcons name="lock-clock" size={24} color="#e52e71" />
-          </View>
+    <TouchableOpacity onPress={handlePress} activeOpacity={0.7}> 
+        <Card>
+      <List.Item
+        title={name}
+        description={header}
+        left={() => (
+          <ThemedView style={styles.avatar}>
+            <MaterialIcons name="lock" size={24} color="#000" />
+          </ThemedView>
         )}
-      </View>
+        right={() => (
+          <ThemedView style={styles.rightContainer}>
+            {img ? (
+              <Image source={{ uri: img }} style={styles.image} />
+            ) : (
+              <ThemedView style={styles.placeholder}>
+                <MaterialIcons name="image" size={24} color="#7a7a8c" />
+              </ThemedView>
+            )}
+          </ThemedView>
+        )}
+      />
+      <Divider style={{ marginHorizontal: 8, marginVertical: 4 }} />
+      </Card>
     </TouchableOpacity>
+ 
   );
 };
-
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
     backgroundColor: "#17141d",
     borderRadius: 8,
-    padding: 8,
-    margin: 8,
-    alignItems: "flex-start",
-    justifyContent: "space-between",
+    marginVertical: 4,
+    marginHorizontal: 8,
+    paddingVertical: 12,
     borderWidth: 1,
     borderColor: "#333",
   },
-  leftContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-    gap: 12,
-  },
   avatar: {
+    paddingLeft: 12,
+    paddingTop: 20,
     width: 40,
     height: 40,
     borderRadius: 20,
     backgroundColor: "#f2f2f2",
     alignItems: "center",
     justifyContent: "center",
+    marginRight: 12,
   },
   avatarText: {
     color: "#000",
     fontWeight: "500",
-  },
-  textContainer: {
-    flexDirection: "column",
-    gap: 4,
-    flex: 1,
+    fontSize: 16,
   },
   header: {
     color: "#e52e71",
     fontWeight: "600",
     fontSize: 16,
+    marginBottom: 2,
   },
   name: {
     color: "#7a7a8c",
@@ -90,22 +92,22 @@ const styles = StyleSheet.create({
   },
   rightContainer: {
     width: 80,
-    borderLeftWidth: 1,
-    borderColor: "#ccc",
-    position: "relative",
+    height: 60,
+    marginLeft: 12,
   },
   image: {
+
     width: "100%",
     height: "100%",
-    borderTopRightRadius: 8,
-    borderBottomRightRadius: 8,
+    borderRadius: 4,
   },
   placeholder: {
-    flex: 1,
+    width: "100%",
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#f2f2f2",
-    height: "100%",
+    borderRadius: 4,
   },
 });
 

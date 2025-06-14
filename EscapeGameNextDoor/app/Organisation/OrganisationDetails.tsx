@@ -5,12 +5,15 @@ import { UnitofAction } from "@/action/UnitofAction";
 import { GetOrganisationDto } from "@/interfaces/OrganisationInterface/Organisation/getOrganisationDto";
 import { useToasted } from "@/context/ContextHook/ToastedContext";
 import AppView from "@/components/ui/AppView";
+import { Card } from 'react-native-paper';
 
 export default function OrganisationDetails() {
   const { id } = useLocalSearchParams();
   const action = new UnitofAction();
   const [organisation, setOrganisation] = useState<GetOrganisationDto | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isError, setIsError] = useState(false);
   const notif = useToasted();
   const router = useRouter();
 
@@ -18,15 +21,18 @@ export default function OrganisationDetails() {
     try {
       const response = await action.organisationAction.GetOrganisationById(Number(id));
       if (response.Success) {
+        // Assuming response.Data is of type GetOrganisationDto
+        if (!response.Data) {
+          throw new Error("Organisation not found");
+        }
         setOrganisation(response.Data as GetOrganisationDto);
-        notif.isvisible = true;
         notif.showToast(response.Message, "success");
       } else {
-        notif.isvisible = true;
         notif.showToast(response.Message, "error");
       }
     } catch (e) {
       console.error(e);
+      notif.showToast("Erreur lors de la récupération de l'organisation", "error");
     } finally {
       setIsLoading(false);
     }
@@ -38,35 +44,60 @@ export default function OrganisationDetails() {
 
   if (isLoading) {
     return (
-      <AppView style={styles.center}>
-        <ActivityIndicator size="large" />
+      <AppView>
+        <View style={styles.center}>
+          <ActivityIndicator size="large" />
+        </View>
       </AppView>
     );
   }
 
+      <><AppView>
+    <View style={styles.center}>
+      <Text>Aucune organisation trouvée.</Text>
+    </View>
+  </AppView><Text>Aucune organisation trouvée.</Text></>
   if (!organisation) {
     return (
-      <AppView style={styles.center}>
-        <Text>Aucune organisation trouvée.</Text>
+      <AppView>
+        <View style={styles.center}>
+          <Text>Aucune organisation trouvée.</Text>
+        </View>
       </AppView>
     );
   }
+  if (isError) {
+    return (
+      <AppView>
+        <View style={styles.center}>
+          <Text>Erreur lors de la récupération de l'organisation.</Text>
+        </View>
+      </AppView>
+    );
+  }
+else{
 
   return (
-    <AppView style={styles.container}>
-      <View style={styles.card}>
+    <AppView >
+      <Card style={styles.card}>
         {organisation.logo ? (
-          <Image source={{ uri: organisation.logo }} style={styles.image} />
+          <Card.Cover source={{ uri: organisation.logo }} style={styles.image} />
         ) : null}
-        <Text style={styles.title}>{organisation.name}</Text>
-        <View style={styles.infoContainer}>
+        <Card.Title title={organisation.name} titleStyle={styles.title} />
+        <Card.Content style={styles.infoContainer}>
           <Text style={styles.info}>{organisation.description}</Text>
           <Text style={styles.info}>{organisation.email}</Text>
           <Text style={styles.info}>{organisation.phoneNumber}</Text>
           <Text style={styles.info}>{organisation.address}</Text>
-        </View>
-        <View style={styles.actions}>
-          <TouchableOpacity style={styles.button} onPress={() => { /* TODO: action Escape Game */ }}>
+        </Card.Content>
+        <Card.Actions style={styles.actions}>
+          <TouchableOpacity style={styles.button} 
+          onPress={() => { /* TODO: action Escape Game */ 
+            router.push({
+              pathname: "/Organisation/EscapeGame/EscapeGameOrganisation",
+              params: { id: String(organisation.orgId) },
+            });
+          }}>
             <Text style={styles.buttonText}>Escape Game</Text>
           </TouchableOpacity>
           <View style={styles.divider} />
@@ -81,10 +112,11 @@ export default function OrganisationDetails() {
           >
             <Text style={styles.buttonText}>Annonce</Text>
           </TouchableOpacity>
-        </View>
-      </View>
+        </Card.Actions>
+      </Card>
     </AppView>
   );
+}
 }
 
 const styles = StyleSheet.create({

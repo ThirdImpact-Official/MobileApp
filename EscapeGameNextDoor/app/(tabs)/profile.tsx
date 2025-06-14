@@ -23,6 +23,7 @@ import { GetSessionReservedDto } from "@/interfaces/EscapeGameInterface/Reservat
 import { testEscapeGames } from "@/TestData/EscapeGametestData";
 import { testReservations } from "@/TestData/ReservationData";
 import AppView from "@/components/ui/AppView";
+import { ThemedView } from "@/components/ThemedView";
 
 export default function Profile() {
   const theme = useColorScheme() ?? "light";
@@ -95,11 +96,14 @@ export default function Profile() {
           />
         }
       >
+        <ThemedView>
+
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#0000ff" />
           <Text>Loading...</Text>
           <Text>Chargement...</Text>
         </View>
+        </ThemedView>
       </ParallaxScrollView>
     );
   }
@@ -107,13 +111,13 @@ export default function Profile() {
   return (
     <AppView>
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.profileWrapper}>
+        <ThemedView style={styles.profileWrapper}>
           <ProfileComponent user={user} />
-        </View>
+        </ThemedView>
 
-        <View style={styles.tabsWrapper}>
+        <ThemedView style={styles.tabsWrapper}>
           <GenericTabs tabs={Tabitem} defaultTab={0} ChangeTab={goToTab} ref={tabsRef} />
-        </View>
+        </ThemedView>
       </ScrollView>
     </AppView>
   );

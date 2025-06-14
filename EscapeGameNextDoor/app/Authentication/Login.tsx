@@ -1,10 +1,12 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useEffect, useState } from "react";
 import { useAuth } from '../../context/ContextHook/AuthContext';
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { LoginCredentials } from "@/interfaces/Credentials/loginDto";
 import AppView from "@/components/ui/AppView";
 import React from "react";
+import { ThemedView } from '../../components/ThemedView';
+import { ThemedText } from '../../components/ThemedText';
 
 export default function LoginScreen() {
   const Route = useRouter();
@@ -47,8 +49,10 @@ export default function LoginScreen() {
 
   return (
     <AppView>
-      <View style={styles.container}>
-        <Text style={styles.title}>Login</Text>
+      <ThemedView style={styles.container}>
+        <ThemedText>
+          <Text style={styles.title}>Login</Text>
+        </ThemedText>
         <View style={styles.form}>
           <Text style={styles.label}>Email</Text>
           <TextInput
@@ -75,11 +79,15 @@ export default function LoginScreen() {
               </Text>
             </TouchableOpacity>
           </View>
+
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}>Connecter</Text>
           </TouchableOpacity>
+          <View>
+            <Link href="/Authentication/Register">Vous n'avez pas encore de compte ? Inscrivez-vous</Link>
+          </View>
         </View>
-      </View>
+      </ThemedView>
     </AppView>
   );
 }

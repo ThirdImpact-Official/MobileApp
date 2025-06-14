@@ -3,6 +3,9 @@ import { GetDifficultyLevelDto } from "../DifficultyLevel/getDifficultyLevelDto"
 import { GetPriceDto } from "../Price/getPriceDto";
 
 export interface GetEscapeGameDto {
+    esgDuree: string;
+    esgDifficulte: string;
+    details: string;
     esgId: number;
     esgNom: string;
     esgCreator: string;

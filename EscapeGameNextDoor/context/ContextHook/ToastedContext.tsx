@@ -21,6 +21,12 @@ export const ToastedProvider: React.FC<ToastedProviderProps> = ({ children }) =>
   const [isvisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState("");
   const [severity, setSeverity] = useState<Severity>("info");
+  const [isMounted, setIsMounted] = useState(false);
+
+  // S'assurer que le composant est monté côté client
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const showToast = (msg: string, sev: Severity = "info") => {
     setMessage(msg);
@@ -50,14 +56,17 @@ export const ToastedProvider: React.FC<ToastedProviderProps> = ({ children }) =>
   return (
     <ToastedContext.Provider value={value}>
       {children}
-      <Snackbar
-        visible={isvisible}
-        onDismiss={closeToast}
-        duration={3000}
-        style={{ backgroundColor: getColorForSeverity(severity) }}
-      >
-        {message}
-      </Snackbar>
+      {/* Rendre le Snackbar seulement après le montage côté client */}
+      {isMounted && (
+        <Snackbar
+          visible={isvisible}
+          onDismiss={closeToast}
+          duration={3000}
+          style={{ backgroundColor: getColorForSeverity(severity) }}
+        >
+          {message}
+        </Snackbar>
+      )}
     </ToastedContext.Provider>
   );
 };
@@ -84,4 +93,5 @@ export const useToasted = (): ToastedContextType => {
   }
   return context;
 };
+
 export default ToastedProvider;
