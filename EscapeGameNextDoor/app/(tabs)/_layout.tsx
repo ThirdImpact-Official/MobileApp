@@ -12,7 +12,7 @@ import {styles} from '../../constants/styles';
 import React from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
-import { Bell } from 'react-native-feather';
+import { Activity, Bell, User } from 'react-native-feather';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -97,7 +97,7 @@ export default function TabLayout() {
             ),
           }}
           />
-             <Tabs.Screen
+          <Tabs.Screen
           name="profile"
           options={{
             title: 'Profile',
@@ -106,7 +106,23 @@ export default function TabLayout() {
               <IconSymbol size={28} name="person.fill" color={color} />
               <ThemedView>
                 <ThemedText>
-                <></>
+                <User />
+                </ThemedText>
+              </ThemedView>
+              </>
+            ),
+          }}
+          />
+            <Tabs.Screen
+          name="activities"
+          options={{
+            title: 'Forum',
+            tabBarIcon: ({ color }) => (
+              <>
+              <IconSymbol size={28} name="person.fill" color={color} />
+              <ThemedView>
+                <ThemedText>
+                <Activity />
                 </ThemedText>
               </ThemedView>
               </>

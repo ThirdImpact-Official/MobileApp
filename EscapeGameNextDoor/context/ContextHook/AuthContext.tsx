@@ -8,6 +8,9 @@ import { LoginCredentials } from "@/interfaces/login/loginCredentials";
 import { UnitofAction } from "@/action/UnitofAction";
 import { GetUserDto } from "@/interfaces/User/GetUserDto";
 import { SecureStoreApp } from "@/classes/SecureStore";
+import { RegisterDto } from "@/interfaces/Credentials/RegisterDto";
+import { useRouter } from 'expo-router';
+import { ServiceResponse } from "@/interfaces/ServiceResponse";
 
 // Constants
 const AUTH_TOKEN_KEY = "Token";
@@ -17,6 +20,7 @@ const AUTH_STATUS_KEY = "isAuthenticated";
 interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
+  register: (data: RegisterDto) => Promise<ServiceResponse<GetUserDto>>;
   user: GetUserDto;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -29,6 +33,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
+  const router  = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<GetUserDto>({
@@ -154,7 +159,24 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(false);
     }
   };
-
+  const register = async (data: RegisterDto): Promise<ServiceResponse<GetUserDto>> => {
+    setIsLoading(true);
+    try {
+      const response = await action.CredentialAction.Register(data);
+      if (response.Success) {
+        console.log("Registration successful:", response.Message);
+        // Optionally, you can auto-login after registration
+        //resumer la connexion
+        router.push("/Authentication/PostRegister");
+      }
+      return response as ServiceResponse<GetUserDto>;
+    } catch (error) {
+      console.error("Registration error:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // Auto-logout on 401
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
@@ -170,9 +192,28 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     return () => axios.interceptors.response.eject(interceptor);
   }, []);
 
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const authStatus = await action.CredentialAction.Checkauth();
+      if (authStatus.Success && authStatus.Data) {
+        const token = await getStorageItem(AUTH_TOKEN_KEY);
+        if (token) {
+          axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+          await getUserInformation(token);
+          setIsAuthenticated(true);
+        } else {
+          await removeAuth();
+        }
+      } else {
+        await removeAuth();
+      }
+    };
+    checkAuthStatus();
+  }, []);
   const value: AuthContextType = {
     login,
     logout,
+    register,
     user,
     isAuthenticated,
     isLoading,

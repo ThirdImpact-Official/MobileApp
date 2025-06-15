@@ -3,7 +3,8 @@ import { View, Text, Image, TouchableOpacity, ScrollView, StyleSheet } from "rea
 import { Card, Divider } from "react-native-paper";
 import { GetUserDto } from "@/interfaces/User/GetUserDto";
 import { ThemedText } from "@/components/ThemedText";
-
+import { ThemedView } from "@/components/ThemedView";
+import { black } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
 type ProfileProps = {
   user: GetUserDto;
 };
@@ -16,12 +17,11 @@ export default function ProfileComponent({ user }: ProfileProps) {
       <Card style={styles.card} elevation={3}>
         <Card.Title
           title={
-            <View>
-              <ThemedText>
-                <Text>{new Date().toLocaleString()}</Text>
+            <ThemedView>
+                <Text style={styles.caption}>{new Date().toLocaleString()}</Text>
                 <Text style={styles.title}>{profile.username}</Text>
-              </ThemedText>
-            </View>
+           
+            </ThemedView>
           }
         />
         <Card.Content>
@@ -41,14 +41,14 @@ export default function ProfileComponent({ user }: ProfileProps) {
             {/* Demi cercle SVG : React Native ne supporte pas SVG natif sans librairie, on peut l’ignorer ou utiliser react-native-svg */}
 
             <View style={styles.authorNameContainer}>
-              <ThemedText>
-                <Text style={styles.caption}>Nom </Text>
-                <Text>
+              <ThemedText style={styles.title}>
+                <ThemedText style={styles.caption}>Nom </ThemedText>
+                <ThemedText style={styles.title}>
                   {profile.firstName} {profile.lastName}
-                </Text>
+                </ThemedText>
                 <Divider style={styles.divider} />
-                <Text style={styles.caption}>Mail </Text>
-                <Text>{profile.email}</Text>
+                <ThemedText style={styles.caption}>Mail </ThemedText>
+                <ThemedText>{profile.email}</ThemedText>
               </ThemedText>
             </View>
           </View>
@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
+
   },
   authorContainer: {
     flexDirection: "row",

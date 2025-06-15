@@ -11,7 +11,6 @@ function Activities()
     const Auth=useAuth();
     const [isauthenticated, setIsAuthenticated] = useState(Auth.isAuthenticated);
     
-    
     if(isLoading)
         {
             return(

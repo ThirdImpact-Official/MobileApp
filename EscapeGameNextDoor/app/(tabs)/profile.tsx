@@ -144,6 +144,8 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   profileWrapper: {
+    flex: 1,
+    justifyContent: "center",
     width: "100%",
     marginBottom: 20,
     alignItems: "center",

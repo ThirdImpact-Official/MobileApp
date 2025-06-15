@@ -7,6 +7,7 @@ import AppView from "@/components/ui/AppView";
 import React from "react";
 import { ThemedView } from '../../components/ThemedView';
 import { ThemedText } from '../../components/ThemedText';
+import { EyeOff, Eye } from "react-native-feather";
 
 export default function LoginScreen() {
   const Route = useRouter();
@@ -75,7 +76,7 @@ export default function LoginScreen() {
             />
             <TouchableOpacity onPress={() => setShowPassword((show) => !show)}>
               <Text style={styles.showPassword}>
-                {showPassword ? "Hide" : "Show"}
+                {showPassword ? <EyeOff></EyeOff> : <Eye></Eye>}  
               </Text>
             </TouchableOpacity>
           </View>

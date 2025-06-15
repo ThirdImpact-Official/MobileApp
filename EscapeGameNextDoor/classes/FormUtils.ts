@@ -143,7 +143,21 @@ import { GetPriceDto } from "@/interfaces/EscapeGameInterface/Price/getPriceDto"
     const date = new Date(dateString);
     return isNaN(date.getTime()) ? 'Date inconnue' : new Intl.DateTimeFormat('fr-FR').format(date);
   }
-}
 
+
+  public static ValidForm<T extends Record<string, any>>(
+    data: T,
+    requiredFields: (keyof T)[]
+  ): { isValid: boolean; errors: { field: keyof T; message: string }[] } {
+    const errors: { field: keyof T; message: string }[] = [];
+    for (const field of requiredFields) {
+      if (!data[field]) {
+
+        errors.push({ field, message: `${field.toString()} is required` });
+      }
+    }
+    return { isValid: errors.length === 0, errors };
+  }
+}
 
 export default FormUtils;

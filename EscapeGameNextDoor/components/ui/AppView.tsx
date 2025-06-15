@@ -2,22 +2,24 @@ import { Children } from "react";
 import ParallaxScrollView from "../ParallaxScrollView";
 import { useColorScheme, View, Image, StyleSheet, Text, ActivityIndicator } from "react-native";
 import React from "react";
+import { styles } from '../../constants/styles';
 
 type props={
     children:React.ReactNode
+
 }
 export default function AppView(props: props) {
     return (
         <ParallaxScrollView
         headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
                 headerImage={<Image source={require('@/assets/images/partial-react-logo.png')}
-                  style={styles.reactLogo} />}>
+                  style={styleds.reactLogo} />}>
                     {props.children}
         </ParallaxScrollView>
     );
 };
 
-const styles = StyleSheet.create({
+const styleds = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',

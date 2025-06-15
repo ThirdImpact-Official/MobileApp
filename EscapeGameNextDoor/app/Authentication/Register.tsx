@@ -5,6 +5,10 @@ import { RegisterDto } from "@/interfaces/Credentials/RegisterDto";
 import FormUtils from "@/classes/FormUtils";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
+import { Card } from 'react-native-paper';
+import { Eye, EyeOff } from "react-native-feather";
+import { useAuth } from "@/context/ContextHook/AuthContext";
+import { router } from "expo-router";
 
 export default function Register() {
     const [register, setRegister] = useState<RegisterDto>({
@@ -15,12 +19,47 @@ export default function Register() {
         password: ""
     });
     const [showPassword, setShowPassword] = useState(false);
+    const [isError, setIsError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+    const theme = useColorScheme() ?? 'light';
 
     const handleRegisterChange = (name: keyof RegisterDto, value: string) => {
         setRegister(prev => ({
             ...prev,
             [name]: value,
         }));
+    
+    };
+
+    const validateForm = () => {
+        // Assuming FormUtils.ValidForm should be FormUtils.ValidateForm or similar, and returns { isValid, errors }
+        // Assuming FormUtils.ValidForm should be FormUtils.ValidateForm or similar, and accepts (data, rules)
+        const requiredFields: (keyof RegisterDto)[] = [
+            "userName",
+            "emailAdress",
+            "firstName",
+            "lastName",
+            "password"
+        ];
+        const response = FormUtils.ValidForm(register, requiredFields);
+
+        if (!response.isValid) {
+            setIsError(true);
+            setErrorMessage(response.errors.map(err => err.message).join(", "));
+            return false;
+        }
+        setIsError(false);
+        setErrorMessage("");
+        return true;
+    };
+    const handleRegister = async () => {
+        if (!validateForm()) {
+            return;
+        }
+        const response = await useAuth().register(register);
+        if (response.Success) {
+            router.push("/Authentication/PostRegister");
+        }
     };
 
     return (
@@ -33,11 +72,19 @@ export default function Register() {
                 />
             }
         >
-            <View style={styles.container}>
+          { isError && (
+            <ThemedView style={{ backgroundColor: theme === 'light' ? '#f8d7da' : '#721c24', padding: 16, borderRadius: 8, marginBottom: 16 }}>
+                <ThemedText style={{ color: theme === 'light' ? '#721c24' : '#f8d7da', fontSize: 16 }}>
+                    {errorMessage}
+                </ThemedText>   
+            </ThemedView>
+            )
+          }
+            <ThemedView style={styles.container}>
                 <ThemedText>
                     <Text style={styles.title}>S'enregistrer</Text>
                 </ThemedText>
-                <ThemedView>
+                <Card style={{ marginBottom: 16, padding: 16 }}>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>UserName</Text>
                         <TextInput
@@ -93,16 +140,16 @@ export default function Register() {
                             />
                             <TouchableOpacity onPress={() => setShowPassword(s => !s)}>
                                 <Text style={styles.showPassword}>
-                                    {showPassword ? "🙈" : "👁️"}
+                                    {showPassword ? <EyeOff></EyeOff> : <Eye></Eye>}
                                 </Text>
                             </TouchableOpacity>
                         </View>
                     </View>
-                </ThemedView>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={handleRegister}>
                     <Text style={styles.buttonText}>S'inscrire</Text>
                 </TouchableOpacity>
-            </View>
+                </Card>
+            </ThemedView>
         </ParallaxScrollView>
     );
 }
@@ -144,7 +191,7 @@ const styles = StyleSheet.create({
         marginLeft: 8,
     },
     button: {
-        backgroundColor: "#007bff",
+        backgroundColor: "#222",
         borderRadius: 8,
         paddingVertical: 12,
         paddingHorizontal: 32,

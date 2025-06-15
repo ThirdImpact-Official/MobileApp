@@ -8,7 +8,7 @@ import { UnitofAction } from '@/action/UnitofAction';
 import ItemDisplay from '@/components/factory/GenericComponent/ItemDisplay';
 import { GetEscapeGameDto } from '@/interfaces/EscapeGameInterface/EscapeGame/getEscapeGameDto';
 import { GetOrganisationDto } from '@/interfaces/OrganisationInterface/Organisation/getOrganisationDto';
-import { useRouter } from 'expo-router';
+import { router, useRouter } from 'expo-router';
 import { GetPriceDto } from '@/interfaces/EscapeGameInterface/Price/getPriceDto';
 import { GetDifficultyLevelDto } from '@/interfaces/EscapeGameInterface/DifficultyLevel/getDifficultyLevelDto';
 import { GetCategoryDto } from '@/interfaces/EscapeGameInterface/Category/getCategoryDto';
@@ -17,7 +17,7 @@ import React from 'react';
 export default function TabTwoScreen() {
   const { isAuthenticated, isLoading } = useAuth();
   const [isOrganisation, setIsOrganisation] = useState(false);
-
+  const router = useRouter();
   if (isLoading) {
     return (
       <AppView>
@@ -32,6 +32,9 @@ export default function TabTwoScreen() {
         <View style={styles.headerImage}>
           <Text style={styles.titleContainer}>Please Log In</Text>
           <Text>You need to be authenticated to view this content</Text>
+          <TouchableOpacity onPress={() => router.push('/Authentication/Login')}>
+            <Text style={{ color: 'blue' }}>Log In</Text>
+          </TouchableOpacity>
           <HelloWave />
         </View>
       </AppView>
