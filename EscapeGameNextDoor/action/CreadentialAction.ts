@@ -6,6 +6,8 @@ import { ErrorType } from "@/enums/RequestType";
 import { LoginCredentials } from "@/interfaces/login/loginCredentials";
 import { RegisterDto } from "@/interfaces/Credentials/RegisterDto";
 import { AuthResponse } from "@/interfaces/User/Authresponse";
+import { UpdateLoginDto } from "@/interfaces/Credentials/updateLogindto";
+import { UpdatePasswordDto } from '../interfaces/User/UpdatePassword';
 
 
 
@@ -74,16 +76,73 @@ export class CreadentialAction
          * @throws {Error} If the request to verify the email fails.
          */
     public async verifyEmail (token: string,email:string): Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>> {
-      
+            type verification={
+                email:string;
+                token:string;
+            }
+            const verif: verification = 
+            {
+                email: email,
+                token: token
+            }
             return await this._httpClient
-                .PostRequestType("account/emailverification?token="+token+"&email="+email)
+                .PostRequestType("account/emailverification")
+                .setData(verif)
                 .execute<GetUserDto>();            
          
      
     }
+    /**
+     * allow the application to check for the user 
+     * @returns 
+     */
     public async Checkauth():Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>> {
        return  await this._httpClient
                 .GetRequestType("user/checkauth")
                 .execute<GetUserDto>();
+    }
+    /**
+     * generate Email token
+     * @returns 
+     */
+    public async GenerateEmailToken(email:string): Promise<ServiceResponse<GetUserDto>> 
+    {
+        return await this._httpClient.GetRequestType(`account/emailverification?email${email}`).execute<GetUserDto>()
+    }
+    public async resetPasswordDemande(email: string): Promise<ServiceResponse<GetUserDto>> 
+    {
+        return await this._httpClient
+            .PutRequestType(`account/credential/demand?email=${email}`)
+            .execute();
+    }
+    /**
+     * envoie une demande de reset passwor
+     * @param update 
+     * @returns 
+     */
+    public async resetpassword(update:UpdateLoginDto) : Promise<ServiceResponse<GetUserDto>>
+    {
+        return await this._httpClient
+            .PutRequestType("account/credential/demand/response")
+            .setData(update)
+            .execute();
+    }
+    /**
+     * annule le reset de password
+     * 
+     */
+    public async CancelpassWord(email:string) :Promise<ServiceResponse<GetUserDto>>
+    {
+        return await this._httpClient.PutRequestType(`/escape-game/account/credential/cancel?email=${email}`).execute()
+    }
+    /**
+     * mets a jout le password
+     * @param Update 
+     * @returns 
+     */
+    public async UpdatePasswor(Update:UpdatePasswordDto): Promise<ServiceResponse<GetUserDto>>
+    {
+        return await this._httpClient.PutRequestType(`/escape-game/account/credential`).setData(Update)
+              .execute()
     }
 }
