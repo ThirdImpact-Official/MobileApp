@@ -8,48 +8,107 @@ import { SessionAction } from '../../../action/SessionAction';
 import { GetSessionReservedDto } from "@/interfaces/EscapeGameInterface/Reservation/getSessionReservedDto";
 import { ServiceResponse } from "@/interfaces/ServiceResponse";
 import FormUtils from "@/classes/FormUtils"
+import React from 'react';
+import { Card, Divider, Title } from 'react-native-paper';
 
-async function fetchSessionReservationById(id: string): Promise<GetSessionReservedDto> {
+/**
+ * 
+ * @param id 
+ * @returns 
+ */
+async function fetchSessionReservationById(id: string): Promise<ServiceResponse<GetSessionReservedDto>> {
     const sessionAction = new SessionAction();
     const response = await sessionAction.getSessionById(Number(id)) as ServiceResponse<GetSessionReservedDto>;
-    return response.Data as GetSessionReservedDto;
+    return response;
 }
-
+/**
+ * 
+ * @returns 
+ */
 export default function SessionReservation() {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const [session, setSession] = useState<null | GetSessionReservedDto>(null);
     const [loading, setLoading] = useState(false);
+    const [IsError,setIsError] = useState<boolean>(false);
+    const [error,setError] = useState<String>("");
+
+    /**
+     * 
+     */
+    const handleput= async()=> {
+        try
+        {
+
+        }
+        catch(error)
+        {
+
+        }
+    }
 
     useEffect(() => {
         if (typeof id === "string") {
             setLoading(true);
             fetchSessionReservationById(id).then((data) => {
-                setSession(data as GetSessionReservedDto);
-                setLoading(false);
+               if(data.Success)
+               {
+                   setSession(data.Data);
+                     setIsError(false);
+                   setError(data.Message)
+                   
+               }else{
+                 setSession(data.Data);
+                 setIsError(true);
+                   setError(data.Message)
+            }
+            setLoading(false);
             });
         }
     }, [id]);
-
-    return (
-        <AppView>
-            <ThemedView>
-                <ThemedText style={styles.title}>Détails de la réservation</ThemedText>
-                {loading ? (
-                    <ActivityIndicator size="large" />
-                ) : session ? (
-                    <View style={styles.card}>
-                        <Text style={styles.contentText}>{session.content}</Text>
-                        <Text style={styles.text}>Date : {FormUtils.FormatDate(session.gameDate)}</Text>
-                        <Text style={styles.text}>Participants : {session.placeReserved}</Text>
-                        <Text style={styles.text}>ID : {session.id}</Text>
-                    </View>
-                ) : (
-                    <Text style={styles.text}>Aucune session trouvée.</Text>
-                )}
-            </ThemedView>
-        </AppView>
-    );
+    if(IsError)
+    {
+        return(
+            <AppView>
+                 <Card>
+                    <Card.Title title=" Details de la session"  />
+                    <Divider className="mb-4"></Divider>
+                    <Card.Content className="flex flex-auto text-center justify-center items-center">
+                        <View>
+                            <Text>{error}</Text>
+                        </View>
+                    </Card.Content>
+                </Card>
+            </AppView>
+        )
+    }
+    else{
+        return (
+            <AppView>
+                <Card>
+                    <Card.Title title=" Details de la session"  />
+                    <Divider className="mb-4"></Divider>
+                    <Card.Content className="flex flex-auto text-center justify-center items-center">
+                        <View>
+                            <ThemedText style={styles.title}>Détails de la réservation</ThemedText>
+                            {loading ? (
+                                <ActivityIndicator size="large" />
+                            ) : session ? (
+                                <View style={styles.card}>
+                                    <Text style={styles.contentText}>{session.content}</Text>
+                                    <Text style={styles.text}>Date : {FormUtils.FormatDate(session.gameDate)}</Text>
+                                    <Text style={styles.text}>Participants : {session.placeReserved}</Text>
+                                    <Text style={styles.text}>ID : {session.id}</Text>
+                                </View>
+                            ) : (
+                                <Text style={styles.text}>Aucune session trouvée.</Text>
+                            )}
+                        </View>
+                    </Card.Content>
+                </Card>
+            </AppView>
+        );
+    }
 }
 
 const styles = StyleSheet.create({

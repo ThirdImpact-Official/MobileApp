@@ -140,7 +140,7 @@ export class CreadentialAction
      * @param Update 
      * @returns 
      */
-    public async UpdatePasswor(Update:UpdatePasswordDto): Promise<ServiceResponse<GetUserDto>>
+    public async UpdatePassword(Update:UpdatePasswordDto): Promise<ServiceResponse<GetUserDto>>
     {
         return await this._httpClient.PutRequestType(`/escape-game/account/credential`).setData(Update)
               .execute()
