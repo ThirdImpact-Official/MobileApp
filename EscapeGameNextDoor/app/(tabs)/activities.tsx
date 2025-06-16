@@ -1,56 +1,133 @@
-import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { AuthProvider, useAuth } from "@/context/ContextHook/AuthContext";
-import { Text, View,StyleSheet,Image,ActivityIndicator } from "react-native";
-import { useState } from "react";
-import { Redirect } from "expo-router";
-import AppView from "@/components/ui/AppView";
-import React from "react";
-function Activities()
+import React, { useEffect } from 'react';
+import AppView from '@/components/ui/AppView';
+import { useState } from 'react';
+import { ActivityIndicator, Card, List } from 'react-native-paper';
+import { View, Text } from 'react-native'
+import { GetForumDto } from '@/interfaces/PublicationInterface/Forum/getForumDto';
+import ItemDisplay from '@/components/factory/GenericComponent/ItemDisplay';
+import { UnitofAction } from '@/action/UnitofAction';
+import { ServiceResponse } from '@/interfaces/ServiceResponse';
+export default function ForumList()
 {
-    const [isLoading, setLoading] = useState(true);
-    const Auth=useAuth();
-    const [isauthenticated, setIsAuthenticated] = useState(Auth.isAuthenticated);
-    
-    if(isLoading)
+    const [error,setError] =useState<string>("");
+    const [isloading,setIsloading]=useState<boolean>(true);
+    const [forum,setForum]=useState<GetForumDto[] | null>([]);
+    const [page,setpage] =useState<number>(1);
+    const PAGE_SIZE=5;
+    const action = new UnitofAction();
+
+    /**
+     * recupération des escapeGame present sur l'application
+     */
+    const FetchAllforumSelection=async()=> {
+        try
         {
-            return(
-                <AuthProvider>
-                <ParallaxScrollView 
-                    headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-                    headerImage={<Image source={require('@/assets/images/partial-react-logo.png')} style={styles.reactLogo}/>}>
-                        <ActivityIndicator />
-                        <Text>Loading...</Text>
-                </ParallaxScrollView>
-
-                </AuthProvider>
-            )
+            const response= await action.forumAction.getAllForums(page,PAGE_SIZE)
+            if(response.Success)
+            {
+                setForum(response.Data as GetForumDto[]);
+                
+            }
+            else{
+            
+                setError(response.Message)
+            }
+            setIsloading(false);
         }
-    else{
-
-        if(isauthenticated)
+        catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError(String(err));
+            }
+        }
+    }
+    const FetchByOrganisation = async ()=> {
+          try
         {
-            return <Redirect href="../Authentication/AuthHub" />;
-        }
-        else{
+            const response= await action.forumAction.getAllForums(page,PAGE_SIZE)
+            if(response.Success)
+            {
+                setForum(response.Data as GetForumDto[]);
+                
+            }
+            else{
             
-            return(   
-           <AppView>
+                setError(response.Message)
+            }
+            setIsloading(false);
+        }
+        catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError(String(err));
+            }
+        }
+    }
+    useEffect(()=> {
+        
+        FetchAllforumSelection();
+    },[])
+    if(isloading)
+    {
+        return(
+            <AppView>
+                <Card>
+                    <Card.Title title="Loading" />
+                    <Card.Content>
+                        <View>
+                            <ActivityIndicator></ActivityIndicator>
+                        </View>
+                    </Card.Content>
+                </Card>
+            </AppView>
+        )
+    }
 
-                <View>
-                    <Text>Activities</Text>
-                </View>
-           </AppView>
-            
-            )
-        }
+    if(error)
+    {
+        return(
+            <AppView>
+                <Card>
+                    <Card.Title title="" />
+                  
+                    <Card.Content>
+                        {/* Add content here if needed */}
+                        <View>
+                            <Text>{error}</Text>
+                        </View>
+                    </Card.Content>
+                </Card>
+            </AppView>)
+    }
+
+    if(!isloading)
+    {
+        return (<AppView>
+            <Card>
+                <Card.Title  title="" />
+                <Card.Content>
+                    <View>
+                        
+                    </View>
+                </Card.Content>
+                <Card.Content>
+                    <View>
+                        <List.Section>
+                            {
+                                forum?.map((item, idx) => (
+                                    <List.Item
+                                        key={item.id ?? idx}
+                                        title={item.title}
+                                        left={(prop)=><Text>{item.creationDate}</Text> }
+                                    />
+                                ))
+                            }
+                        </List.Section>
+                    </View>
+                </Card.Content>
+            </Card>
+        </AppView>)
     }
 }
-const styles = StyleSheet.create({
-    reactLogo: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8
-    }
-})
-
-export default Activities;

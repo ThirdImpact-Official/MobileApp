@@ -14,33 +14,79 @@ export class ForumAction {
     }
 
     // Méthodes pour les Forums
+    /**
+     * get all Forum 
+     * @param page 
+     * @param pageSize 
+     * @returns 
+     */
     public async getAllForums(page: number, pageSize: number): Promise<ServiceResponse<GetForumDto> | PaginationResponse<GetForumDto>> {
         const param: string =`?page=${page}&pageSize=${pageSize}`;
         return await this.httpClient
             .GetRequestType(param)
             .executePagination<GetForumDto>();
     }
-
+    /**
+     * Get Forum by organisation
+     * @param page 
+     * @param pageSize 
+     * @returns 
+     */
+    public async getOrganisationById(page: number, pageSize: number) : Promise<PaginationResponse<GetForumDto>>
+    {
+          const param: string =`?page=${page}&pageSize=${pageSize}`;
+        return await this.httpClient
+            .GetRequestType("/organisation"+param)
+            .executePagination<GetForumDto>();
+    }
+      /**
+     * Get Forum by name 
+     * @param page 
+     * @param pageSize 
+     * @returns 
+     */
+    public async getOrganisationByName(page: number, pageSize: number) : Promise<PaginationResponse<GetForumDto>>
+    {
+          const param: string =`?page=${page}&pageSize=${pageSize}`;
+        return await this.httpClient
+            .GetRequestType("/byname"+param)
+            .executePagination<GetForumDto>();
+    }
+    /**
+     * GetForumById
+     * @param id 
+     * @returns 
+     */
     public async getForumById(id: number): Promise<ServiceResponse<GetForumDto> | PaginationResponse<GetForumDto>> {
         return await this.httpClient
             .GetRequestType(`/${id}`)
             .execute<GetForumDto>();
     }
-
+    /**
+     * Create a forum 
+     */
     public async createForum(forum: AddForumDto): Promise<ServiceResponse<GetForumDto> | PaginationResponse<GetForumDto>> {
         return await this.httpClient
             .PostRequestType('')
             .setData(forum)
             .execute<GetForumDto>();
     }
-
+    /**
+     * 
+     * @param forum 
+     * @returns 
+     */
     public async updateForum(forum: UpdateForumDto): Promise<ServiceResponse<GetForumDto> | PaginationResponse<GetForumDto>> {
         return await this.httpClient
             .PutRequestType('')
             .setData(forum)
             .execute<GetForumDto>();
     }
-
+    /**
+     * Delete 
+     * @param id 
+     * @returns 
+     */
     public async deleteForum(id: number): Promise<ServiceResponse<GetForumDto> | PaginationResponse<GetForumDto>> {
         return await this.httpClient
             .DeleteRequestType(`/${id}`)

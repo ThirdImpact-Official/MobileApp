@@ -3,12 +3,21 @@ import ParallaxScrollView from "../ParallaxScrollView";
 import { useColorScheme, View, Image, StyleSheet, Text, ActivityIndicator } from "react-native";
 import React from "react";
 import { styles } from '../../constants/styles';
+import { AuthContext, useAuth } from '../../context/ContextHook/AuthContext';
+import { Redirect } from "expo-router";
 
 type props={
     children:React.ReactNode
 
 }
 export default function AppView(props: props) {
+  const myauth=useAuth();
+  const isAuth= myauth.isAuthenticated;
+    if(isAuth)
+    {
+      <Redirect href='/Authentication/Login'/>
+    }
+
     return (
         <ParallaxScrollView
         headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
