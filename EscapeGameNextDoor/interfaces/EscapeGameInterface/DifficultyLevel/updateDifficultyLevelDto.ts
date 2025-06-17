@@ -1,4 +1,4 @@
 export interface UpdateDifficultyLevelDto  {
-    dowId: number;
-    dowName: string;
+    dileId: number;
+    dileName: string;
 }

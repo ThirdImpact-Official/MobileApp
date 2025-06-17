@@ -1,4 +1,4 @@
-export interface UpdatePostForumDto extends UpdateDto {
+export interface UpdatePostForumDto  {
     id: number;
     content: string;
     userId: number;

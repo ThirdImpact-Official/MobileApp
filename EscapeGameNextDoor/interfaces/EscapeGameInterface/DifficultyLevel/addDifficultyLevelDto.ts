@@ -1,3 +1,3 @@
 export interface AddDifficultyLevelDto  {
-    dowName: string;
+    dileName: string;
 }

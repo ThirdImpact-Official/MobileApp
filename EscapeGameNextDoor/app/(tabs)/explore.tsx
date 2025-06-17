@@ -231,7 +231,7 @@ function EscapeGameSelection() {
         >
           <Picker.Item label="Difficulté" value={null} />
           {difficulty.map((d) => (
-            <Picker.Item key={d.dowId} label={d.dowName} value={d.dowId} />
+            <Picker.Item key={d.dileId} label={d.dileName} value={d.dileId} />
           ))}
         </Picker>
         <Button title="Reset" onPress={resetFilter} />

@@ -32,11 +32,11 @@ export class ForumAction {
      * @param pageSize 
      * @returns 
      */
-    public async getOrganisationById(page: number, pageSize: number) : Promise<PaginationResponse<GetForumDto>>
+    public async getOrganisationById(id:number,page: number, pageSize: number) : Promise<PaginationResponse<GetForumDto>>
     {
-          const param: string =`?page=${page}&pageSize=${pageSize}`;
+          const param: string =`?page=${page}&pageSize=${pageSize}&organisationId=${id}`;
         return await this.httpClient
-            .GetRequestType("/organisation"+param)
+            .GetRequestType(param)
             .executePagination<GetForumDto>();
     }
       /**
