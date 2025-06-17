@@ -12,7 +12,7 @@ export interface GetOrganisationDto  {
   description: string;
   email: string;
   phoneNumber: string;
-  address: string;  // L'adresse est une chaîne de caractères
+  addresseId: number;
   website: string;
   isActive: boolean;
   logo: string;

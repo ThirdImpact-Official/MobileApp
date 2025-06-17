@@ -8,7 +8,7 @@ export interface GetActivityPlaceDto  {
     description: string;
     activityType: GetActivityPlaceTypeDto | null;
     activityId: number;
-    address: string;
+    addresseId: number;
     imgressources: string;
     creationDate: string;
     updateDate: string;
