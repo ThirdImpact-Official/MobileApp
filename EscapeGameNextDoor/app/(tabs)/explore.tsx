@@ -1,4 +1,5 @@
-import { StyleSheet, View, Text, ActivityIndicator, Button, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, ActivityIndicator, ScrollView, TouchableOpacity, TextStyle } from 'react-native';
+import { Button} from "react-native-paper"
 import { useAuth } from '@/context/ContextHook/AuthContext';
 import HelloWave from '../../components/HelloWave';
 import AppView from '@/components/ui/AppView';
@@ -13,7 +14,11 @@ import { GetPriceDto } from '@/interfaces/EscapeGameInterface/Price/getPriceDto'
 import { GetDifficultyLevelDto } from '@/interfaces/EscapeGameInterface/DifficultyLevel/getDifficultyLevelDto';
 import { GetCategoryDto } from '@/interfaces/EscapeGameInterface/Category/getCategoryDto';
 import React from 'react';
-
+import { Card, TextInput } from 'react-native-paper';
+import { PaginationResponse } from '@/interfaces/ServiceResponse';
+import { useCallback } from 'react';
+import { Margin } from '@mui/icons-material';
+import { ThemedText } from '@/components/ThemedText';
 export default function TabTwoScreen() {
   const { isAuthenticated, isLoading } = useAuth();
   const [isOrganisation, setIsOrganisation] = useState(false);
@@ -57,54 +62,112 @@ export default function TabTwoScreen() {
     );
   }
 }
-
 function OrganisationSelection() {
   const httpAction = new UnitofAction();
-  const [organisation, setOrganisation] = useState<GetOrganisationDto[]>([]);
+  const router = useRouter();
+  const [organisations, setOrganisations] = useState<GetOrganisationDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const fetchOrganisation = async () => {
+  const fetchOrganisations = async (currentPage: number, searchValue: string) => {
+    setIsLoading(true);
     try {
-      const response = await httpAction.organisationAction.GetAllOrganisation(page, 5);
+      const response = searchValue.trim()
+        ? await httpAction.organisationAction.GetOrganisationbyName(searchValue, currentPage, 5) as PaginationResponse<GetOrganisationDto>
+        : await httpAction.organisationAction.GetAllOrganisation(currentPage, 5) as PaginationResponse<GetOrganisationDto>;
+
       if (response.Success) {
-        setOrganisation(response.Data as GetOrganisationDto[]);
+        setOrganisations(response.Data as GetOrganisationDto[]);
         setTotalPages(response.TotalPage);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error('Error fetching organisations:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleSearch = async () => {
+    setPage(1);
+    await fetchOrganisations(1, searchTerm);
+  };
+
+  const handlePageChange = async (newPage: number) => {
+    setPage(newPage);
+    await fetchOrganisations(newPage, searchTerm);
+  };
+
   useEffect(() => {
-    fetchOrganisation();
-  }, [page]);
+    fetchOrganisations(page, searchTerm);
+  }, []);
 
   return (
     <ScrollView>
-      <View style={styles.filterRow}>
-        {/* Ajoutez ici vos filtres si besoin */}
-        <Button title="Reset" onPress={fetchOrganisation} />
-      </View>
+      <Card style={styles.cardContainer}>
+        <Card.Title title="filter" titleStyle={styles.cardText} />
+        <Card.Content>
+          <View style={styles.filterRow}>
+            <View style={{ flex: 1 }}>
+              <TextInput
+                label="Organisation"
+                value={searchTerm}
+                mode='outlined'
+                style={styles.textinput}
+                onChangeText={setSearchTerm}
+              />
+            </View>
+            <View style={{ marginLeft: 8 }}>
+              <Button onPress={handleSearch} ><Text>
+                Recherche
+                </Text>
+                </Button>
+            </View>
+          </View>
+        </Card.Content>
+      </Card>
+
       {isLoading ? (
         <ActivityIndicator />
       ) : (
-        organisation.map((org) => (
-          <TouchableOpacity    style={{ marginBottom: 16 }}key={org.orgId} onPress={() => router.push({ pathname: `/Organisation/OrganisationDetails`, params: { id: org.orgId.toString() } })}>
-            <ItemDisplay name={org.name} header={org.address} img={org.logo} onClick={() => router.push({ pathname: `/Organisation/OrganisationDetails`, params: { id: org.orgId.toString() } })} />
+        organisations.map((org) => (
+          <TouchableOpacity
+            key={org.orgId}
+            style={{ marginBottom: 16 }}
+            onPress={() => router.push({
+              pathname: `/Organisation/OrganisationDetails`,
+              params: { id: org.orgId.toString() }
+            })}
+          >
+            <ItemDisplay
+              name={org.name}
+              header={org.addresseId.toString()}
+              img={org.logo}
+              onClick={() => router.push({
+                pathname: `/Organisation/OrganisationDetails`,
+                params: { id: org.orgId.toString() }
+              })}
+            />
           </TouchableOpacity>
         ))
       )}
+
       <View style={styles.paginationRow}>
-        <Button title="Précédent" disabled={page <= 1} onPress={() => setPage(page - 1)} />
-        <Text>
-          {page} / {totalPages}
-        </Text>
-        <Button title="Suivant" disabled={page >= totalPages} onPress={() => setPage(page + 1)} />
+        <View style={{ flex: 1 }}>
+
+          <Button
+          
+            disabled={page <= 1}
+            onPress={() => handlePageChange(page - 1)}
+          >Précédent</Button>
+          <Text style={{textAlign:"center"}}>{page} / {totalPages}</Text>
+          <Button
+          
+            disabled={page >= totalPages}
+            onPress={() => handlePageChange(page + 1)}
+          >Suivant</Button>
+        </View>
       </View>
     </ScrollView>
   );
@@ -194,48 +257,56 @@ function EscapeGameSelection() {
 
   return (
     <ScrollView>
-      <View style={styles.filterRow}>
-        <Picker
-          selectedValue={selectCategory}
-          style={styles.picker}
-          onValueChange={(value) => {
-            setSelectCategory(value);
-            setIsFiltered(true);
-          }}
-        >
-          <Picker.Item label="Catégorie" value={null} />
-          {category.map((cat) => (
-            <Picker.Item key={cat.catId} label={cat.catName} value={cat.catId} />
-          ))}
-        </Picker>
-        <Picker
-          selectedValue={selectPrice}
-          style={styles.picker}
-          onValueChange={(value) => {
-            setSelectPrice(value);
-            setIsFiltered(true);
-          }}
-        >
-          <Picker.Item label="Prix" value={null} />
-          {price.map((p) => (
-            <Picker.Item key={p.id} label={p.indicePrice.toString()} value={p.id} />
-          ))}
-        </Picker>
-        <Picker
-          selectedValue={selectDifficulty}
-          style={styles.picker}
-          onValueChange={(value) => {
-            setSelectDifficulty(value);
-            setIsFiltered(true);
-          }}
-        >
-          <Picker.Item label="Difficulté" value={null} />
-          {difficulty.map((d) => (
-            <Picker.Item key={d.dileId} label={d.dileName} value={d.dileId} />
-          ))}
-        </Picker>
-        <Button title="Reset" onPress={resetFilter} />
-      </View>
+      <Card style={styles.cardContainer}>
+        <Card.Title title="Filtre" titleStyle={styles.cardText} />
+        <Card.Content>
+          <View style={styles.filterRow}>
+            <View style={{ flex: 1 }}>
+
+              <Picker
+                selectedValue={selectCategory}
+                style={styles.picker}
+                onValueChange={(value) => {
+                  setSelectCategory(value);
+                  setIsFiltered(true);
+                }}
+              >
+                <Picker.Item label="Catégorie" value={null} />
+                {category.map((cat) => (
+                  <Picker.Item key={cat.catId} label={cat.catName} value={cat.catId} />
+                ))}
+              </Picker>
+              <Picker
+                selectedValue={selectPrice}
+                style={styles.picker}
+                onValueChange={(value) => {
+                  setSelectPrice(value);
+                  setIsFiltered(true);
+                }}
+              >
+                <Picker.Item label="Prix" value={null} />
+                {price.map((p) => (
+                  <Picker.Item key={p.id} label={p.indicePrice.toString()} value={p.id} />
+                ))}
+              </Picker>
+              <Picker
+                selectedValue={selectDifficulty}
+                style={styles.picker}
+                onValueChange={(value) => {
+                  setSelectDifficulty(value);
+                  setIsFiltered(true);
+                }}
+              >
+                <Picker.Item label="Difficulté" value={null} />
+                {difficulty.map((d) => (
+                  <Picker.Item key={d.dileId} label={d.dileName} value={d.dileId} />
+                ))}
+              </Picker>
+              <Button  onPress={resetFilter} ><Text>Reset</Text></Button>
+            </View>
+          </View>
+        </Card.Content>
+      </Card>
       {isLoading ? (
         <ActivityIndicator />
       ) : (
@@ -265,11 +336,14 @@ function EscapeGameSelection() {
         ))
       )}
       <View style={styles.paginationRow}>
-        <Button title="Précédent" disabled={page <= 1} onPress={() => setPage(page - 1)} />
-        <Text>
-          {page} / {totalPages}
-        </Text>
-        <Button title="Suivant" disabled={page >= totalPages} onPress={() => setPage(page + 1)} />
+        <View style={{ flex: 1 }}>
+
+          <Button  disabled={page <= 1} onPress={() => setPage(page - 1)} ><Text>Précedent</Text></Button>
+          <ThemedText style={{textAlign:"center"}}>
+            {page} / {totalPages}
+          </ThemedText>
+          <Button  disabled={page >= totalPages} onPress={() => setPage(page + 1)} ><Text>Suivant</Text></Button>
+        </View>
       </View>
     </ScrollView>
   );
@@ -282,11 +356,23 @@ const styles = StyleSheet.create({
     left: -35,
     position: 'absolute',
   },
+  cardText: {
+    textAlign: "center",
+    alignItems: "center",
+    justifyContent: "center",
+
+  },
+  cardContainer: {
+    marginBottom: 10,
+  },
   titleContainer: {
     flexDirection: 'row',
     gap: 8,
     fontWeight: 'bold',
     fontSize: 18,
+  },
+  textinput: {
+    marginBottom: 16,
   },
   switchContainer: {
     flexDirection: 'row',

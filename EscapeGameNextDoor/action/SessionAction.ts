@@ -79,7 +79,7 @@ export class SessionAction {
      * @param pageSize 
      * @returns 
      */
-    public async getSessionReservedByUser(userId: string, page: number, pageSize: number): Promise<ServiceResponse<GetSessionReservedDto> | PaginationResponse<GetSessionReservedDto>> {
+    public async getSessionReservedByUser( page: number, pageSize: number): Promise<ServiceResponse<GetSessionReservedDto> | PaginationResponse<GetSessionReservedDto>> {
         const param: string = `?page=${page}&pageSize=${pageSize}`;
         return await this.httpClient
             .GetRequestType(`/reserved/user${param}`)

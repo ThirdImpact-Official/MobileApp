@@ -22,7 +22,7 @@ export default function postRegister() {
                     left={props => <CheckCircle color="#888" /> }
                     right={props => <IconSymbol {...props} name="chevron.right" color="#888" />} />
                 <Card.Content>
-                    <View>
+                    <View style={{flex:1}}>
                         <Text>Registration faite avec Succes</Text>
                         <Text>Un mail de confirmation a été envoyé à votre adresse e-mail.</Text>
                     </View>

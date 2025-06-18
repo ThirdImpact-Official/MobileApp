@@ -3,6 +3,9 @@ import { GetForumDto } from '@/interfaces/PublicationInterface/Forum/getForumDto
 import { UpdateForumDto } from '@/interfaces/PublicationInterface/Forum/updateForumDto';
 import { HttpClient } from './httpClient'; // Assurez-vous que le chemin est correct
 import { ServiceResponse, PaginationResponse } from '@/interfaces/ServiceResponse'; // Assurez-vous que le chemin est correct
+import { AddHasLikeDto } from '@/interfaces/PublicationInterface/Haslike/addHasLikeDto';
+import { GetlikeDto } from '@/interfaces/PublicationInterface/Haslike/getlikes';
+import { GetTypeLikeDto } from '@/interfaces/PublicationInterface/TypeLike/gettypeLikeDto';
 // Assurez-vous que les DTOs sont correctement définis
 
 export class ForumAction {
@@ -45,9 +48,9 @@ export class ForumAction {
      * @param pageSize 
      * @returns 
      */
-    public async getOrganisationByName(page: number, pageSize: number) : Promise<PaginationResponse<GetForumDto>>
+    public async getForumByName(name:string, page: number, pageSize: number) : Promise<PaginationResponse<GetForumDto>>
     {
-          const param: string =`?page=${page}&pageSize=${pageSize}`;
+          const param: string =`?page=${page}&pageSize=${pageSize}&=name${name}`;
         return await this.httpClient
             .GetRequestType("/byname"+param)
             .executePagination<GetForumDto>();
@@ -92,4 +95,31 @@ export class ForumAction {
             .DeleteRequestType(`/${id}`)
             .execute<GetForumDto>();
     }
+    public async AddlikeToForum(item:AddHasLikeDto): Promise<ServiceResponse<GetForumDto> | PaginationResponse<GetForumDto>> {
+        return await this.httpClient
+            .PostRequestType(`/haslike`)
+            .setData(item)
+            .execute<GetForumDto>();
+    }
+     public async GetTypeLIke(): Promise<ServiceResponse<GetTypeLikeDto> | PaginationResponse<GetTypeLikeDto> >{
+        return await this.httpClient
+            .GetRequestType(`/haslike`)
+            .execute<GetTypeLikeDto>();
+    }
+     public async RemovelikeToForum(item:AddHasLikeDto): Promise<ServiceResponse<GetForumDto> | PaginationResponse<GetForumDto>> {
+        return await this.httpClient
+            .DeleteRequestType(`/haslike`)
+            .setData(item)
+            .execute<GetForumDto>();
+    }
+     public async GetlikeToForum(id:number): Promise<ServiceResponse<GetlikeDto> | PaginationResponse<GetlikeDto>> {
+        return await this.httpClient
+            .GetRequestType(`/haslike/${id}`)
+            .execute<GetlikeDto>();
+    }
+    public async Verifylike(id: number): Promise<ServiceResponse<boolean> | PaginationResponse<boolean>> {
+            return await this.httpClient
+                .GetRequestType(`/haslike/verify/${id}`)
+                .execute<boolean>();
+        }
 }

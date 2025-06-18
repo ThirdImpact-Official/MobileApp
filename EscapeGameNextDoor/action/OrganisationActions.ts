@@ -37,7 +37,12 @@ export class OrganisationAction {
         return await this._httpClient.GetRequestType("/" + id)
             .execute<GetOrganisationDto>();
     }
-
+    public async GetOrganisationbyName(name:string,page:number,pageSize:number): Promise<ServiceResponse<GetOrganisationDto>|PaginationResponse<GetOrganisationDto>>
+    {
+            const param: string =`?page=${page}&pageSize=${pageSize}&name=${name}`;
+            return await this._httpClient.GetRequestType("/byname" +param )
+            .execute<GetOrganisationDto>();
+    }
     /**
      * Retrieves all organisations from the server.
      * @returns {Promise<ServiceResponse<GetOrganisationDto[]>>} A promise that resolves with a ServiceResponse object.

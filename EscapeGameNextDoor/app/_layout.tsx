@@ -49,6 +49,7 @@ import { ApplicationProvider } from '@ui-kitten/components';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider } from '@/context/ContextHook/AuthContext';
 import { ToastedProvider } from '@/context/ContextHook/ToastedContext';
+import { PaperProvider } from 'react-native-paper';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -71,17 +72,20 @@ export default function RootLayout() {
 
   return (
     <ApplicationProvider {...eva} theme={eva.light}>
-      <ToastedProvider>
-        <AuthProvider>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
-          </ThemeProvider>
-        </AuthProvider>
-      </ToastedProvider>
+      <PaperProvider>
+        <ToastedProvider>
+          <AuthProvider>
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+              <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+              <StatusBar style="auto" />
+            </ThemeProvider>
+          </AuthProvider>
+        </ToastedProvider>
+
+      </PaperProvider>
     </ApplicationProvider>
   );
 }

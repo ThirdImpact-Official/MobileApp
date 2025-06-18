@@ -1,34 +1,36 @@
-import { Children } from "react";
-import ParallaxScrollView from "../ParallaxScrollView";
-import { useColorScheme, View, Image, StyleSheet, Text, ActivityIndicator } from "react-native";
 import React from "react";
-import { styles } from '../../constants/styles';
-import { AuthContext, useAuth } from '../../context/ContextHook/AuthContext';
+import { Image, StyleSheet } from "react-native";
 import { Redirect } from "expo-router";
+import ParallaxScrollView from "../ParallaxScrollView";
+import { useAuth } from '../../context/ContextHook/AuthContext';
 
-type props={
-    children:React.ReactNode
-
+interface AppViewProps {
+  children: React.ReactNode;
 }
-export default function AppView(props: props) {
-  const myauth=useAuth();
-  const isAuth= myauth.isAuthenticated;
-    if(isAuth)
-    {
-      <Redirect href='/Authentication/Login'/>
-    }
 
-    return (
-        <ParallaxScrollView
-        headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-                headerImage={<Image source={require('@/assets/images/partial-react-logo.png')}
-                  style={styleds.reactLogo} />}>
-                    {props.children}
-        </ParallaxScrollView>
-    );
-};
+export default function AppView({ children }: AppViewProps) {
+  const { isAuthenticated } = useAuth();
 
-const styleds = StyleSheet.create({
+  if (!isAuthenticated) {
+    return <Redirect href='/Authentication/Login' />;
+  }
+
+  return (
+    <ParallaxScrollView
+      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerImage={
+        <Image 
+          source={require('@/assets/images/partial-react-logo.png')}
+          style={styles.reactLogo} 
+        />
+      }
+    >
+      {children}
+    </ParallaxScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',

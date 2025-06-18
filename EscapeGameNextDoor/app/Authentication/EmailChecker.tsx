@@ -59,12 +59,18 @@ export default function EmailChecker() {
     if (isLoading) {
         return (
             <AppView>
-                <View style={styles.centerContainer}>
-                    <ActivityIndicator size="large" />
-                    <ThemedText style={styles.loadingText}>
-                        {isVerified ? 'Email vérifié! Redirection...' : 'Vérification en cours...'}
-                    </ThemedText>
-                </View>
+                <Card>
+                    <Card.Content>
+                    <View style={styles.centerContainer}>
+                        <View style={{flex:1}}>
+                            <ActivityIndicator size="large" />
+                            <ThemedText style={styles.loadingText}>
+                                {isVerified ? 'Email vérifié! Redirection...' : 'Vérification en cours...'}
+                            </ThemedText>
+                        </View>
+                        </View>
+                    </Card.Content>
+                </Card>  
             </AppView>
         );
     }
@@ -100,14 +106,16 @@ export default function EmailChecker() {
                             left={() => <AlertCircle stroke="#F44336" width={24} height={24} />}
                         />
                         <Card.Content>
-                            <ThemedText style={styles.errorText}>{error}</ThemedText>
-                            <Button 
-                                mode="contained" 
-                                onPress={verifyEmail}
-                                style={styles.button}
-                            >
-                                Réessayer
-                            </Button>
+                            <View>
+                                <ThemedText style={styles.errorText}>{error}</ThemedText>
+                                <Button 
+                                    mode="contained" 
+                                    onPress={verifyEmail}
+                                    style={styles.button}
+                                >
+                                    Réessayer
+                                </Button>
+                                </View>
                         </Card.Content>
                     </Card>
                 </View>

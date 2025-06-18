@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, useColorScheme } from "react-native";
+import { View, Image, StyleSheet, useColorScheme } from "react-native";
+import { TextInput, Text, Button, Card, HelperText } from "react-native-paper";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { RegisterDto } from "@/interfaces/Credentials/RegisterDto";
 import FormUtils from "@/classes/FormUtils";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { Card } from 'react-native-paper';
+
 import { Eye, EyeOff } from "react-native-feather";
 import { useAuth } from "@/context/ContextHook/AuthContext";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 
 export default function Register() {
     const [register, setRegister] = useState<RegisterDto>({
@@ -22,7 +23,8 @@ export default function Register() {
     const [isError, setIsError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const theme = useColorScheme() ?? 'light';
-
+    const auth=useAuth()
+    
     const handleRegisterChange = (name: keyof RegisterDto, value: string) => {
         setRegister(prev => ({
             ...prev,
@@ -61,7 +63,12 @@ export default function Register() {
             router.push("/Authentication/PostRegister");
         }
     };
-
+    if(auth.isAuthenticated)
+    {
+        return(
+            <Redirect href="/" />
+        )
+    }
     return (
         <ParallaxScrollView
             headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
@@ -85,69 +92,76 @@ export default function Register() {
                     <Text style={styles.title}>S'enregistrer</Text>
                 </ThemedText>
                 <Card style={{ marginBottom: 16, padding: 16 }}>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>UserName</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={register?.userName}
-                            onChangeText={text => handleRegisterChange("userName", text)}
-                            placeholder="UserName"
-                            placeholderTextColor="#888"
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Email Address</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={register?.emailAdress}
-                            onChangeText={text => handleRegisterChange("emailAdress", text)}
-                            placeholder="Email Address"
-                            placeholderTextColor="#888"
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>First Name</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={register?.firstName}
-                            onChangeText={text => handleRegisterChange("firstName", text)}
-                            placeholder="First Name"
-                            placeholderTextColor="#888"
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Last Name</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={register?.lastName}
-                            onChangeText={text => handleRegisterChange("lastName", text)}
-                            placeholder="Last Name"
-                            placeholderTextColor="#888"
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Password</Text>
-                        <View style={styles.passwordRow}>
+                    <Card.Content>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>UserName</Text>
                             <TextInput
-                                style={[styles.input, { flex: 1 }]}
-                                value={register?.password}
-                                onChangeText={text => handleRegisterChange("password", text)}
-                                placeholder="Password"
+                                style={styles.input}
+                                value={register?.userName}
+                                onChangeText={text => handleRegisterChange("userName", text)}
+                                placeholder="UserName"
                                 placeholderTextColor="#888"
-                                secureTextEntry={!showPassword}
                             />
-                            <TouchableOpacity onPress={() => setShowPassword(s => !s)}>
-                                <Text style={styles.showPassword}>
-                                    {showPassword ? <EyeOff></EyeOff> : <Eye></Eye>}
-                                </Text>
-                            </TouchableOpacity>
                         </View>
-                    </View>
-                <TouchableOpacity style={styles.button} onPress={handleRegister}>
-                    <Text style={styles.buttonText}>S'inscrire</Text>
-                </TouchableOpacity>
+                        <View style={styles.inputGroup}>
+                            <ThemedText style={styles.label}>Email Address</ThemedText>
+                            <TextInput
+                                style={styles.input}
+                                value={register?.emailAdress}
+                                onChangeText={text => handleRegisterChange("emailAdress", text)}
+                                placeholder="Email Address"
+                                placeholderTextColor="#888"
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>First Name</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={register?.firstName}
+                                onChangeText={text => handleRegisterChange("firstName", text)}
+                                placeholder="First Name"
+                                placeholderTextColor="#888"
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Last Name</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={register?.lastName}
+                                onChangeText={text => handleRegisterChange("lastName", text)}
+                                placeholder="Last Name"
+                                placeholderTextColor="#888"
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Password</Text>
+                            <View style={styles.passwordRow}>
+                                <TextInput
+                                    style={[styles.input, { flex: 1 }]}
+                                    value={register?.password}
+                                    onChangeText={text => handleRegisterChange("password", text)}
+                                    placeholder="Password"
+                                    placeholderTextColor="#888"
+                                    secureTextEntry={!showPassword}
+                                />
+                                <Button onPress={() => setShowPassword(s => !s)}>
+                                    <ThemedText style={styles.showPassword}>
+                                        {showPassword ? <EyeOff></EyeOff> : <Eye></Eye>}
+                                    </ThemedText>
+                                </Button>
+                            </View>
+                        </View>
+                    </Card.Content>
+                    <Card.Actions>
+                        <View style={{flex:1}}>
+                            <Button style={styles.button} onPress={handleRegister}>
+                                <Text style={styles.buttonText}>S'inscrire</Text>
+                            </Button>
+                        </View>
+                    </Card.Actions>
                 </Card>
             </ThemedView>
         </ParallaxScrollView>
@@ -172,10 +186,11 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         marginBottom: 4,
-        color: "#333",
+       
+
     },
     input: {
-        backgroundColor: "#fff",
+ 
         borderRadius: 8,
         padding: 12,
         fontSize: 16,

@@ -1,236 +1,257 @@
 import React, { FC, useCallback, useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Image, ActivityIndicator, TouchableOpacity } from "react-native";
-import { useToasted } from "@/context/ContextHook/ToastedContext"; // Adapté React Native toast context
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
+import { useToasted } from "@/context/ContextHook/ToastedContext";
 import { UnitofAction } from "@/action/UnitofAction";
 import { GetForumDto } from "@/interfaces/PublicationInterface/Forum/getForumDto";
 import AppView from '../../components/ui/AppView';
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Button, Card, Divider, List } from "react-native-paper";
-import { Container, styled } from '@mui/material';
-import { GetPostForumDto } from '../../../../Webclient/webclient/src/pages/app/FAQ/ForumComponent/SelectedForum';
-import { PaginationResponse } from "@/interfaces/ServiceResponse";
+import { PaginationResponse, ServiceResponse } from "@/interfaces/ServiceResponse";
 import FormUtils from "@/classes/FormUtils";
-import { useRouter } from "expo-router";
 import { GetTypeLikeDto } from "@/interfaces/PublicationInterface/TypeLike/gettypeLikeDto";
+import { AddHasLikeDto } from "@/interfaces/PublicationInterface/Haslike/addHasLikeDto";
+import { RemoveHasLikeDto } from "@/interfaces/PublicationInterface/Haslike/removeHasLikeDto";
+import { GetPostForumDto } from "@/interfaces/PublicationInterface/Post/getPostForumDto";
+import { GetlikeDto } from "@/interfaces/PublicationInterface/Haslike/getlikes";
+const PAGE_SIZE = 5;
 
 const Forum = () => {
-  const { id } = useLocalSearchParams();
-  const PAgeSize = 5;
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [forum, setForum] = useState<GetForumDto | null>(null);
- const [typeLike,setTypeLike] = useState<GetTypeLikeDto[] | null>(null)
-  const [postMessage, setpostMessage] = useState<GetPostForumDto[] | null>(null);
-  const action = new UnitofAction();
-  const [page, setPage] = useState<number>(1);
-  const [totalPage, setTotalPage] = useState<number>(0);
-  const [Error, seterror] = useState<string>("")
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [typeLike, setTypeLike] = useState<GetTypeLikeDto[]>([]);
+  const [postMessage, setPostMessage] = useState<GetPostForumDto[]>([]);
+   const [numberofLike, setNumberofLike] = useState<GetlikeDto | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(0);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const notif = useToasted();
-  const router= useRouter();
-  const fetchForum = async () => {
+  const router = useRouter();
+  const action = new UnitofAction();
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const response = await action.forumAction.getForumById(Number(id))
-      const post_reponse = await action.postAction.getPostsByForumId(Number(id), page, 5) as PaginationResponse<GetPostForumDto>
+      const [forumResponse, postResponse, typeLikeResponse] = await Promise.all([
+        action.forumAction.getForumById(Number(id)),
+        action.postAction.getPostsByForumId(Number(id), page, PAGE_SIZE),
+        action.forumAction.GetTypeLIke()
+      ]);
+
+      if (forumResponse.Success) {
+        setForum(forumResponse.Data as GetForumDto);
+      } else {
+        setError(forumResponse.Message);
+      }
+
+      if ((postResponse as PaginationResponse<GetPostForumDto>).Success) {
+        const paginatedResponse = postResponse as PaginationResponse<GetPostForumDto>;
+        setPostMessage(paginatedResponse.Data as GetPostForumDto[]);
+        setTotalPage(paginatedResponse.TotalPage);
+      }
+ 
+      if ((typeLikeResponse as ServiceResponse<GetTypeLikeDto[]>).Success ) {
+        setTypeLike((typeLikeResponse ).Data as GetTypeLikeDto[] );
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id, page]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+ const handleLike = async (postId: number) => {
+    try {
+      // You need to define typeLikeId - this seems to be missing
+      const typeLikeId = 1; // Replace with actual logic to get typeLikeId
+      
+      const addLikeDto: AddHasLikeDto = {
+        forumId: postId, // Use postId instead of forum id
+        typeLikeId,
+      };
+      
+      const response = await action.forumAction.AddlikeToForum(addLikeDto);
       if (response.Success) {
-        setForum(response.Data as GetForumDto);
-        setpostMessage(post_reponse.Data as GetPostForumDto[]);
-        setTotalPage(post_reponse.TotalPage);
-        notif.showToast(response.Message, "success");
+        fetchData();
+        notif.showToast("Like ajouté", "success");
       } else {
         notif.showToast(response.Message, "error");
       }
-    } catch (error) {
-      console.error(error);
-      notif.showToast("Erreur réseau", "error");
+    } 
+    catch (err) {
+      notif.showToast("Erreur lors de l'ajout du like", "error");
     }
   };
-  const fetchtypelikeDto=async()=> {
-    try
-    {
-       const response ;
-    }
-    catch(Error)
-    {
-      if(Error instanceof Error)
-      {
+
+  const handleDisLike = async (postId: number) => {
+    try {
+      // You need to define typeLikeId - this seems to be missing
+      const typeLikeId = 1; // Replace with actual logic to get typeLikeId
       
+      const removeLikeDto: RemoveHasLikeDto = {
+        forumId: postId, // Use postId instead of forum id
+        typeLikeId
+      };
+      
+      const response = await action.forumAction.RemovelikeToForum(removeLikeDto);
+      if (response.Success) {
+        fetchData();
+        notif.showToast("Like retiré", "success");
+      } else {
+        notif.showToast(response.Message, "error");
       }
-
+    } 
+    catch (err) {
+      notif.showToast("Erreur lors de la suppression du like", "error");
     }
-  }
-  useEffect(() => {
-    fetchForum();
-  }, [page]);
-  const handlePageChange = useCallback((newPage: number) => {
-    if (newPage < 1 || newPage > totalPage || isLoading) return;
+  };
+   const fetchNumberOfLikes = async () => {
+      try {
+        const response = await action.postAction.GetlikeToForum(Number(id));
+        if (response.Success) {
+          setNumberofLike(response.Data as GetlikeDto);
+        } else {
+          console.log("Erreur lors de la récupération des likes:", response.Message);
+        }
+      } catch (err) {
+        console.log("Erreur lors de la récupération des likes:", err);
+      }
+    };
+  const getTotalLikes = () => {
+    if (!numberofLike?.getAllThelikes) return 0;
+    return numberofLike.getAllThelikes.reduce((total, like) => 
+      total + (like.numberLikes || 0), 0
+    );
+  };
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPage || isLoading) return;
     setPage(newPage);
-  }, [fetchForum])
-  if (Error) {
+  };
+
+  if (isLoading) {
+    return (
+      <AppView>
+        <ActivityIndicator size="large" />
+      </AppView>
+    );
+  }
+
+  if (error) {
     return (
       <AppView>
         <Card style={styles.container}>
-          <Card.Title title={forum?.title} />
+          <Card.Title title="Erreur" />
           <Card.Content>
-            <Text>{Error}</Text>
+            <Text style={styles.errorText}>{error}</Text>
           </Card.Content>
           <Card.Actions>
-            <Button>
-              <Text>Retry</Text>
-            </Button>
+            <Button onPress={fetchData}>Réessayer</Button>
           </Card.Actions>
         </Card>
       </AppView>
-    )
+    );
   }
 
   return (
     <AppView>
-      <Card style={styles.container}>
-        <Card.Title title={forum?.title} />
-        <Card.Content>
-          <View className="space-y-2">
-            {
-              postMessage?.map((item, idx) => (
-                <View>
-
-                  <Card onPress={()=> {
-                      router.push({
-                        pathname:"/Forum/PostForum",
-                        params: { id:item.PostId}
-                      })
-                  }}>
-                    <Card.Title title=''
-                      right={(props) => <Text>{FormUtils.FormatDate(item.creationDate)}</Text>} />
+      <ScrollView>
+        <Card style={styles.container}>
+          <Card.Title title={forum?.title} />
+          <Card.Content>
+            <View style={styles.postsContainer}>
+              {postMessage.map((item) => (
+                <View key={item.id} style={styles.postContainer}>
+                  <Card 
+                    onPress={() => router.push({
+                      pathname: "/Forum/PostForum",
+                      params: { id: item.id }
+                    })}
+                  >
+                    <Card.Title
+                      title={`Post #${item.id}`}
+                      right={() => <Text>{FormUtils.FormatDate(item.creationDate)}</Text>}
+                    />
                     <Card.Content>
                       <List.Item
-                        key={item.PostId ?? idx}
-                        title={item.content ?? "No Title"}
-                        description={item.content ?? ""}
+                        title={item.content || "Pas de contenu"}
+                        description={`Par ${item.userId}`}
                         left={props => <List.Icon {...props} icon="account" />}
                       />
-
                     </Card.Content>
                     <Card.Actions>
-                      <Button>Like</Button>
-                      <Button>Dislike</Button>
+                         <View style={styles.likeContainer}>
+                                 <Text style={styles.likeText}>Nombre de likes: {getTotalLikes()}</Text>
+                          </View>
+                      <Button onPress={() => handleLike(item.id)}>Like</Button>
+                      <Button onPress={() => handleDisLike(item.id)}>Dislike</Button>
                     </Card.Actions>
                   </Card>
                   <Divider />
                 </View>
-              ))
-            }
-          </View>
-        </Card.Content>
-        <Card.Actions>
-          <View>
-            <Button onPress={() => handlePageChange(page - 1)}>
-              Precedent
-            </Button>
-            <Text>page {page}/ {totalPage}</Text>
-            <Button
+              ))}
+            </View>
+          </Card.Content>
+          <Card.Actions style={styles.paginationContainer}>
+            <Button 
+              disabled={page === 1 || isLoading}
               onPress={() => handlePageChange(page - 1)}
-            >suivant</Button>
-          </View>
-        </Card.Actions>
-      </Card>
+            >
+              Précédent
+            </Button>
+            <Text style={styles.pageText}>Page {page}/{totalPage}</Text>
+            <Button
+              disabled={page === totalPage || isLoading}
+              onPress={() => handlePageChange(page + 1)}
+            >
+              Suivant
+            </Button>
+          </Card.Actions>
+        </Card>
+      </ScrollView>
     </AppView>
-  )
-};
-
-export default Forum;
-
-interface ForumListProps {
-  data: GetForumDto[];
-}
-
-const ForumList: FC<ForumListProps> = ({ data }) => {
-  return (
-    <View>
-      {data.map((item) => (
-        <ForumItem key={item.id} data={item} />
-      ))}
-    </View>
-  );
-};
-
-interface ForumItemProps {
-  data: GetForumDto;
-}
-
-const ForumItem: FC<ForumItemProps> = ({ data: forum }) => {
-  return (
-    <View style={styles.forumItem} className="hover: shadom-sm transition-all">
-      <View style={styles.avatarContainer}>
-        <View style={styles.avatarCircle}>
-          <Text style={styles.avatarLetter}>A</Text>
-        </View>
-      </View>
-      <View style={styles.forumContent}>
-        <Text style={styles.forumTitle}>{forum.title}</Text>
-        <Text style={styles.forumDescription}>{forum.content}</Text>
-      </View>
-      <Image source={{ uri: "https://example.com/media1.png" }} style={styles.forumImage} />
-    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    margin: 16,
     padding: 16,
-    backgroundColor: "#fff",
+    borderRadius: 8,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 12,
+  postsContainer: {
+    gap: 16,
   },
-  listContainer: {
-    flex: 1,
+  postContainer: {
+    marginBottom: 8,
   },
-  forumItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    backgroundColor: "#f9f9f9",
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+    marginTop: 16,
   },
-  avatarContainer: {
-    marginRight: 12,
-  },
-  avatarCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#aabbcc",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatarLetter: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  forumContent: {
-    flex: 1,
-  },
-  forumTitle: {
+  pageText: {
     fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
   },
-  forumDescription: {
+  likeContainer: {
+    marginBottom: 8,
+  },
+  likeText: {
     fontSize: 14,
-    color: "#444",
+    color: '#666',
   },
-  forumImage: {
-    width: 80,
-    height: 60,
-    marginLeft: 12,
-    borderRadius: 6,
-    backgroundColor: "#ece6f0", // placeholder background
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });
+
+export default Forum;

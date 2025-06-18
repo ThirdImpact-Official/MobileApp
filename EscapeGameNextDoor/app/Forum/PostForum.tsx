@@ -1,189 +1,282 @@
-import React, { FC, useCallback, useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, Image, ActivityIndicator, TouchableOpacity } from "react-native";
-import { useToasted } from "@/context/ContextHook/ToastedContext"; // Adapté React Native toast context
+import React, { useCallback, useEffect, useState } from "react";
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from "react-native";
+import { useToasted } from "@/context/ContextHook/ToastedContext";
 import { UnitofAction } from "@/action/UnitofAction";
-import { GetForumDto } from "@/interfaces/PublicationInterface/Forum/getForumDto";
 import AppView from '../../components/ui/AppView';
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Button, Card, Divider, List } from "react-native-paper";
-import { Container, styled } from '@mui/material';
-import { GetPostForumDto } from '../../../../Webclient/webclient/src/pages/app/FAQ/ForumComponent/SelectedForum';
+import { GetPostForumDto } from "@/interfaces/PublicationInterface/Post/getPostForumDto";
 import { PaginationResponse, ServiceResponse } from "@/interfaces/ServiceResponse";
 import FormUtils from "@/classes/FormUtils";
 import { GetTypeLikeDto } from "@/interfaces/PublicationInterface/TypeLike/gettypeLikeDto";
+import { RemoveHasLikeDto } from "@/interfaces/PublicationInterface/Haslike/removeHasLikeDto";
+import { AddHasLikeDto } from "@/interfaces/PublicationInterface/Haslike/addHasLikeDto";
+import { GetlikeDto, LikesDto } from "@/interfaces/PublicationInterface/Haslike/getlikes";
 
+const PAGE_SIZE = 5;
 
-export default function postForum()
-{
- const { id } = useLocalSearchParams();
-  const PAgeSize = 5;
+export default function PostForum() {
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [postParent, setPostParent] = useState<GetPostForumDto | null>(null);
-
-  const [postMessage, setpostMessage] = useState<GetPostForumDto[] | null>(null);
-  const [typeLike,setTypeLike] = useState<GetTypeLikeDto[] | null>(null)
-  const action = new UnitofAction();
-  const [page, setPage] = useState<number>(1);
-  const [totalPage, setTotalPage] = useState<number>(0);
-  const [Error, seterror] = useState<string>("")
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [postMessages, setPostMessages] = useState<GetPostForumDto[]>([]);
+  const [typeLikes, setTypeLikes] = useState<GetTypeLikeDto[]>([]);
+  const [numberofLike, setNumberofLike] = useState<GetlikeDto | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const notif = useToasted();
-  
-  const fetchPostParent = async () => {
+  const router = useRouter();
+  const action = new UnitofAction();
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const response = await action.postAction.getPostById(Number(id)) as ServiceResponse<GetPostForumDto>;
-      const post_reponse = await action.postAction.getPostsFromPostParentId(Number(id), page, 5) as PaginationResponse<GetPostForumDto>
-      if (response.Success) {
-        setPostParent(response.Data as GetPostForumDto);
-        setpostMessage(post_reponse.Data as GetPostForumDto[]);
-        setTotalPage(post_reponse.TotalPage);
-        notif.showToast(response.Message, "success");
+      const [parentResponse, postsResponse] = await Promise.all([
+        action.postAction.getPostById(Number(id)),
+        action.postAction.getPostsFromPostParentId(Number(id), page, PAGE_SIZE)
+      ]);
+
+      if (parentResponse.Success) {
+        setPostParent(parentResponse.Data as GetPostForumDto);
       } else {
-        notif.showToast(response.Message, "error");
+        setError(parentResponse.Message);
       }
-    } catch (error) {
-      console.error(error);
+
+      if ((postsResponse as PaginationResponse<GetPostForumDto>).Success) {
+        const paginatedResponse = postsResponse as PaginationResponse<GetPostForumDto>;
+        setPostMessages(paginatedResponse.Data as GetPostForumDto[]);
+        setTotalPages(paginatedResponse.TotalPage);
+      }
+
+      // Fetch number of likes
+      await fetchNumberOfLikes();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
       notif.showToast("Erreur réseau", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id, page]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages || isLoading) return;
+    setPage(newPage);
+  };
+
+  const fetchNumberOfLikes = async () => {
+    try {
+      const response = await action.postAction.GetlikeToForum(Number(id));
+      if (response.Success) {
+        setNumberofLike(response.Data as GetlikeDto);
+      } else {
+        console.log("Erreur lors de la récupération des likes:", response.Message);
+      }
+    } catch (err) {
+      console.log("Erreur lors de la récupération des likes:", err);
     }
   };
 
-  useEffect(() => {
- fetchPostParent();
-  }, [page]);
-  const handlePageChange = useCallback((newPage: number) => {
-    if (newPage < 1 || newPage > totalPage || isLoading) return;
+  const handleLike = async (postId: number) => {
+    try {
+      // You need to define typeLikeId - this seems to be missing
+      const typeLikeId = 1; // Replace with actual logic to get typeLikeId
+      
+      const addLikeDto: AddHasLikeDto = {
+        forumId: postId, // Use postId instead of forum id
+        typeLikeId,
+      };
+      
+      const response = await action.postAction.AddlikeToForum(addLikeDto);
+      if (response.Success) {
+        fetchData();
+        notif.showToast("Like ajouté", "success");
+      } else {
+        notif.showToast(response.Message, "error");
+      }
+    } catch (err) {
+      notif.showToast("Erreur lors de l'ajout du like", "error");
+    }
+  };
 
-    setPage(newPage);
-  }, [fetchPostParent])
-  if (Error) {
+  const getTotalLikes = () => {
+    if (!numberofLike?.getAllThelikes) return 0;
+    return numberofLike.getAllThelikes.reduce((total, like) => 
+      total + (like.numberLikes || 0), 0
+    );
+  };
+
+  const handleDisLike = async (postId: number) => {
+    try {
+      // You need to define typeLikeId - this seems to be missing
+      const typeLikeId = 1; // Replace with actual logic to get typeLikeId
+      
+      const removeLikeDto: RemoveHasLikeDto = {
+        forumId: postId, // Use postId instead of forum id
+        typeLikeId
+      };
+      
+      const response = await action.postAction.RemovelikeToForum(removeLikeDto);
+      if (response.Success) {
+        fetchData();
+        notif.showToast("Like retiré", "success");
+      } else {
+        notif.showToast(response.Message, "error");
+      }
+    } catch (err) {
+      notif.showToast("Erreur lors de la suppression du like", "error");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <AppView>
+        <ActivityIndicator size="large" />
+      </AppView>
+    );
+  }
+
+  if (error) {
     return (
       <AppView>
         <Card style={styles.container}>
-          <Card.Title title={"Erreur "} />
+          <Card.Title title="Erreur" />
           <Card.Content>
-            <Text>{Error}</Text>
+            <Text style={styles.errorText}>{error}</Text>
           </Card.Content>
           <Card.Actions>
-            <Button>
-              <Text>Retry</Text>
-            </Button>
+            <Button onPress={fetchData}>Réessayer</Button>
           </Card.Actions>
         </Card>
       </AppView>
-    )
+    );
   }
 
   return (
     <AppView>
-      <Card style={styles.container}>
-        <Card.Title title={"Response"} />
-        <Card.Content>
-          <View className="space-y-2">
-            {
-              postMessage?.map((item, idx) => (
-                <View>
+      <ScrollView>
+        <Card style={styles.container}>
+          <Card.Title title={`Réponses (${postMessages.length})`} />
+          
+          {/* Post parent */}
+          {postParent && (
+            <>
+              <Card style={styles.postCard}>
+                <Card.Title
+                  title={`Post #${postParent.id}`}
+                  subtitle={`Posté le ${FormUtils.FormatDate(postParent.creationDate)}`}
+                />
+                <Card.Content>
+                  <Text style={styles.postContent}>{postParent.content}</Text>
+                </Card.Content>
+                <Card.Actions>
+                  <View style={styles.likeContainer}>
+                    <Text style={styles.likeText}>Nombre de likes: {getTotalLikes()}</Text>
+                  </View>
+                  <View style={styles.buttonContainer}>
+                    <Button onPress={() => handleLike(postParent.id)}>Like</Button>
+                    <Button onPress={() => handleDisLike(postParent.id)}>Dislike</Button>
+                  </View>
+                </Card.Actions>
+              </Card>
+              <Divider style={styles.divider} />
+            </>
+          )}
 
-                  <Card>
-                    <Card.Title title=''
-                      right={(props) => <Text>{FormUtils.FormatDate(item.creationDate)}</Text>} />
-                    <Card.Content>
-                      <List.Item
-                        key={item.PostId ?? idx}
-                        title={item.content ?? "No Title"}
-                        description={item.content ?? ""}
-                        left={props => <List.Icon {...props} icon="account" />}
-                      />
+          {/* Réponses */}
+          <Card.Content>
+            {postMessages.map((item) => (
+              <View key={item.id} style={styles.postContainer}>
+                <Card style={styles.postCard}>
+                  <Card.Title
+                    title={`Réponse #${item.id}`}
+                    subtitle={`Posté le ${FormUtils.FormatDate(item.creationDate)}`}
+                  />
+                  <Card.Content>
+                    <Text style={styles.postContent}>{item.content}</Text>
+                  </Card.Content>
+                  <Card.Actions>
+                    <Button onPress={() => handleLike(item.id)}>Like</Button>
+                    <Button onPress={() => handleDisLike(item.id)}>Dislike</Button>
+                  </Card.Actions>
+                </Card>
+                <Divider style={styles.divider} />
+              </View>
+            ))}
+          </Card.Content>
 
-                    </Card.Content>
-                    <Card.Actions>
-                    <View className="text-center items-center justify-center">
-                      <Button>Like</Button>
-                      <Button>Dislike</Button>
-                      <Button>
-                        reponse
-                      </Button>
-
-                    </View>
-                    </Card.Actions>
-                  </Card>
-                  <Divider />
-                </View>
-              ))
-            }
-          </View>
-        </Card.Content>
-        <Card.Actions>
-          <View>
-            <Button onPress={() => handlePageChange(page - 1)}>
-              Precedent
-            </Button>
-            <Text>page {page}/ {totalPage}</Text>
-            <Button
+          {/* Pagination */}
+          <Card.Actions style={styles.paginationContainer}>
+            <Button 
+              disabled={page === 1 || isLoading}
               onPress={() => handlePageChange(page - 1)}
-            >suivant</Button>
-          </View>
-        </Card.Actions>
-      </Card>
+            >
+              Précédent
+            </Button>
+            <Text style={styles.pageText}>Page {page}/{totalPages}</Text>
+            <Button
+              disabled={page === totalPages || isLoading}
+              onPress={() => handlePageChange(page + 1)}
+            >
+              Suivant
+            </Button>
+          </Card.Actions>
+        </Card>
+      </ScrollView>
     </AppView>
-  )
-
+  );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    margin: 16,
     padding: 16,
-    backgroundColor: "#fff",
+    borderRadius: 8,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 12,
+  postContainer: {
+    marginBottom: 16,
   },
-  listContainer: {
-    flex: 1,
+  postCard: {
+    marginBottom: 8,
+    borderRadius: 8,
   },
-  forumItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    backgroundColor: "#f9f9f9",
-  },
-  avatarContainer: {
-    marginRight: 12,
-  },
-  avatarCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#aabbcc",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatarLetter: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  forumContent: {
-    flex: 1,
-  },
-  forumTitle: {
+  postContent: {
     fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
+    lineHeight: 24,
+    marginVertical: 8,
   },
-  forumDescription: {
+  divider: {
+    marginVertical: 8,
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+    marginTop: 16,
+  },
+  pageText: {
+    fontSize: 16,
+  },
+  likeContainer: {
+    marginBottom: 8,
+  },
+  likeText: {
     fontSize: 14,
-    color: "#444",
+    color: '#666',
   },
-  forumImage: {
-    width: 80,
-    height: 60,
-    marginLeft: 12,
-    borderRadius: 6,
-    backgroundColor: "#ece6f0", // placeholder background
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
+    textAlign: 'center',
   },
 });

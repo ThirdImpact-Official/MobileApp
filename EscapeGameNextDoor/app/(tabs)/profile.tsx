@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ReservationListe } from "@/app/Profile/Reservation/Reservation";
+
 import { useAuth } from "@/context/ContextHook/AuthContext";
 import ProfileComponent from "../Profile/ProfileComponent";
 import GenericTabs from "@/components/factory/GenericComponent/TabGénéric";
@@ -24,6 +24,7 @@ import { testEscapeGames } from "@/TestData/EscapeGametestData";
 import { testReservations } from "@/TestData/ReservationData";
 import AppView from "@/components/ui/AppView";
 import { ThemedView } from "@/components/ThemedView";
+import ReservationListe from '../Profile/Reservation/Reservation';
 
 export default function Profile() {
   const theme = useColorScheme() ?? "light";
@@ -51,7 +52,7 @@ export default function Profile() {
     },
     {
       label: "Reservation",
-      content: <ReservationListe reservationcolumns={reservation} />,
+      content: <ReservationListe />,
     },
   ];
 
@@ -111,9 +112,9 @@ export default function Profile() {
   return (
     <AppView>
       <ScrollView contentContainerStyle={styles.container}>
-        <ThemedView style={styles.profileWrapper}>
+        <View style={styles.profileWrapper}>
           <ProfileComponent user={user} />
-        </ThemedView>
+        </View>
 
         <ThemedView style={styles.tabsWrapper}>
           <GenericTabs tabs={Tabitem} defaultTab={0} ChangeTab={goToTab} ref={tabsRef} />

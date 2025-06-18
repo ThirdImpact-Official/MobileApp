@@ -58,7 +58,7 @@ export default function ResetToken() {
                 Alert.alert(
                     "Succès",
                     "Votre mot de passe a été réinitialisé avec succès",
-                    [{ text: "OK", onPress: () => router.replace("/login") }]
+                    [{ text: "OK", onPress: () => router.replace("/Authentication/Login") }]
                 );
             } else {
                 throw new Error(response.Message || "Échec de la réinitialisation");
@@ -127,37 +127,84 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         padding: 16,
-        backgroundColor: '#f5f5f5'
+        backgroundColor: '#f5f5f5',
     },
     card: {
-        borderRadius: 8,
-        padding: 16,
+        borderRadius: 12,
+        padding: 8,
         margin: 16,
-        elevation: 3,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        backgroundColor: '#ffffff',
+    },
+    cardTitle: {
+        fontSize: 20,
+        fontWeight: '600',
     },
     content: {
         marginTop: 16,
     },
     input: {
+        marginBottom: 8,
+        backgroundColor: 'transparent', // Supprimé le backgroundColor black
+    },
+    helperText: {
+        fontSize: 12,
+        color: '#d32f2f',
+        marginLeft: 12,
+        marginBottom: 12,
+    },
+    passwordStrengthContainer: {
+        backgroundColor: '#f8f9fa',
+        padding: 12,
+        borderRadius: 8,
         marginBottom: 16,
-        backgroundColor: "white",
+    },
+    passwordStrengthTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 8,
+        color: '#333',
+    },
+    passwordCriteria: {
+        fontSize: 12,
+        marginBottom: 4,
+    },
+    criteriaValid: {
+        color: '#4caf50',
+    },
+    criteriaInvalid: {
+        color: '#999',
     },
     button: {
-        marginTop: 16,
+        marginTop: 8,
+        borderRadius: 8,
+    },
+    buttonDisabled: {
+        opacity: 0.6,
     },
     buttonContent: {
         height: 48,
-        justifyContent: 'center'
+        justifyContent: 'center',
+    },
+    cancelButton: {
+        marginTop: 8,
     },
     errorContainer: {
-        backgroundColor: "#FFEBEE",
+        backgroundColor: "#ffebee",
         padding: 12,
-        borderRadius: 4,
+        borderRadius: 8,
         marginBottom: 16,
+        borderLeftWidth: 4,
+        borderLeftColor: '#d32f2f',
     },
     errorText: {
-        color: "#D32F2F",
+        color: "#d32f2f",
         textAlign: "center",
-        fontSize: 14
+        fontSize: 14,
+        fontWeight: '500',
     },
 });
