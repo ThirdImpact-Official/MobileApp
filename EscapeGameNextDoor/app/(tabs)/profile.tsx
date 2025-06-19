@@ -32,9 +32,9 @@ export default function Profile() {
   const [isauthenticated, setIsAuthenticated] = useState<Boolean>(authContext.isAuthenticated);
   const [loading, setLoading] = useState(authContext.isLoading);
   const [user, setUser] = useState<GetUserDto>(authContext.user);
-  const [favoris, setFavoris] = useState<GetEscapeGameDto[]>(testEscapeGames);
+  const [favoris, setFavoris] = useState<GetEscapeGameDto[] | undefined>([]);
   const [reservation, setReservation] = useState<GetSessionReservedDto[]>(testReservations);
-
+  
   const toasted = useToasted();
   const httpAction = new UnitofAction();
 
@@ -54,6 +54,10 @@ export default function Profile() {
       label: "Reservation",
       content: <ReservationListe />,
     },
+    {
+      label: "Achievement",
+      content: <ProfileComponent user={user} />,
+    }
   ];
 
   const fetchUserProfile = async () => {
@@ -74,8 +78,25 @@ export default function Profile() {
       setLoading(false);
     }
   };
-
+  const Fetchfavoris = async () => {
+    try {
+      setLoading(true);
+      const favoris = await httpAction.favorisAction.getFavoris();
+      if (favoris.Success) {
+        console.log("User profile fetched successfully:", favoris.Data);
+        setFavoris(favoris.Data as GetEscapeGameDto[]);
+        setIsAuthenticated(true);
+        toasted.showToast("User profile loaded successfully.", "success");
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      toasted.showToast("Failed to load user profile.", "error");
+    } finally {
+      setLoading(false);
+    }
+  }
   useEffect(() => {
+    Fetchfavoris();
     setIsAuthenticated(authContext.isAuthenticated);
     setLoading(authContext.isLoading);
   }, [authContext.isAuthenticated, authContext.isLoading]);

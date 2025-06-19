@@ -214,6 +214,7 @@ function EscapeGameSelection() {
         5
       );
       if (response.Success) {
+        console.log(response);
         setEscapeGames(response.Data as GetEscapeGameDto[]);
         setTotalPages(response.TotalPage);
       }
@@ -223,7 +224,21 @@ function EscapeGameSelection() {
       setIsLoading(false);
     }
   };
-
+  const handleFilter=(type:'category'| 'difficulty' |'price' ,value:number |null)=> {
+    setPage(1);
+   switch(type)
+   {
+    case 'category':
+      setSelectCategory(value);
+      break;
+      case 'price':
+        setSelectCategory(value);
+        break;
+        case 'difficulty':
+        setSelectDifficulty(value)
+        break;
+      }
+  }
   useEffect(() => {
     // fetch categories, prices, difficulties
     (async () => {
@@ -233,20 +248,22 @@ function EscapeGameSelection() {
         const priceRes = await httpAction.escapeGameAction.GetPriceIndice();
         if (priceRes.Success) setPrice(priceRes.Data as GetPriceDto[]);
         const diffRes = await httpAction.escapeGameAction.GetDifficultyLevelDto();
-        if (diffRes.Success) setDifficulty(diffRes.Data as GetDifficultyLevelDto[]);
+        if (diffRes.Success) console.log(diffRes); setDifficulty(diffRes.Data as GetDifficultyLevelDto[]);
       } catch (e) {
         console.error(e);
       }
+      
     })();
   }, []);
 
   useEffect(() => {
+    console.log(isFiltered)
     if (isFiltered) {
       fetchEscapeGamesFiltered();
     } else {
       fetchEscapeGames();
     }
-  }, [page, selectCategory, selectPrice, selectDifficulty, isFiltered]);
+  }, [page, setSelectCategory, setSelectPrice, setSelectDifficulty, isFiltered]);
 
   const resetFilter = () => {
     setIsFiltered(false);
@@ -267,20 +284,22 @@ function EscapeGameSelection() {
                 selectedValue={selectCategory}
                 style={styles.picker}
                 onValueChange={(value) => {
-                  setSelectCategory(value);
+                 handleFilter('category',value)
+                  console.log(value);
                   setIsFiltered(true);
                 }}
               >
                 <Picker.Item label="Catégorie" value={null} />
                 {category.map((cat) => (
-                  <Picker.Item key={cat.catId} label={cat.catName} value={cat.catId} />
+                  <Picker.Item key={cat.catId} label={cat.catName}  value={cat.catId} />
                 ))}
               </Picker>
               <Picker
                 selectedValue={selectPrice}
                 style={styles.picker}
                 onValueChange={(value) => {
-                  setSelectPrice(value);
+                 handleFilter('price',value)
+                   console.log(value);
                   setIsFiltered(true);
                 }}
               >
@@ -294,12 +313,14 @@ function EscapeGameSelection() {
                 style={styles.picker}
                 onValueChange={(value) => {
                   setSelectDifficulty(value);
+                  handleFilter("difficulty",value)
+                   console.log(value);
                   setIsFiltered(true);
                 }}
               >
                 <Picker.Item label="Difficulté" value={null} />
                 {difficulty.map((d) => (
-                  <Picker.Item key={d.dileId} label={d.dileName} value={d.dileId} />
+                  <Picker.Item key={d.dileId} label={d.dileLevel} value={d.dileId} />
                 ))}
               </Picker>
               <Button  onPress={resetFilter} ><Text>Reset</Text></Button>

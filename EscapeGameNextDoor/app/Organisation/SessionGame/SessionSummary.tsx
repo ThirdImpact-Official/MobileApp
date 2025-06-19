@@ -6,12 +6,13 @@ import { GetEscapeGameDto } from "@/interfaces/EscapeGameInterface/EscapeGame/ge
 import { AddSessionReservedDto } from "@/interfaces/EscapeGameInterface/Reservation/addSessionReservedDto";
 import { GetSessionGameDto } from "@/interfaces/EscapeGameInterface/Session/getSessionGameDto";
 import { ServiceResponse } from "@/interfaces/ServiceResponse";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect } from "react";
 import { View, ActivityIndicator, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import { ChevronLeft, ChevronRight } from "react-native-feather";
 import { Card, Divider, TextInput, Button } from "react-native-paper";
-
+import { GetPaymentDto } from "@/interfaces/EscapeGameInterface/Payment/getPaymentDto";
+import { GetSessionReservedDto } from "@/interfaces/EscapeGameInterface/Reservation/getSessionReservedDto";
 const unitOfAction = new UnitofAction();
 
 async function fetchSessionReservationById(params: string): Promise<ServiceResponse<GetSessionGameDto>> {
@@ -51,7 +52,8 @@ const SessionSummary: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [hasReserved, setHasReserved] = useState(false);
-
+    const [proceed, setProceed] = useState(false);
+    const [getConfirmedPayment,setConfirmedPayment]=useState<GetSessionReservedDto|null>(null);
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -110,7 +112,7 @@ const SessionSummary: React.FC = () => {
             // TODO: Implement actual reservation submission
             // const response = await unitOfAction.reservationAction.addReservation(reservation);
             // if (!response.Success) throw new Error(response.Message);
-
+         
             setHasReserved(true);
             Alert.alert("Succès", "Votre réservation a été enregistrée avec succès");
         } catch (err) {
@@ -121,22 +123,37 @@ const SessionSummary: React.FC = () => {
         }
     };
 
+    /**
+     * Handles the update of the reservation state
+     * 
+     * Called when the user wants to update their reservation
+     * 
+     * @returns {void}
+     */
     const handleUpdateReservation = () => {
         setHasReserved(false);
     };
 
-    const handleCOnfirmation = async () => {
+    const handleConfirmation = async () => {
+        setLoading(true);
         try
          {
-            const response = await unitOfAction.sessionAction.addSessionReserved(reservation) as ServiceResponse<AddSessionReservedDto>;
+            console.log(reservation);
+            const response = await unitOfAction.sessionAction.addSessionReserved(reservation) as ServiceResponse<GetSessionReservedDto>;
             if(response.Success)
             {
-                
+                setProceed(true);
+                setConfirmedPayment(response.Data as GetSessionReservedDto);
+                router.push({
+                    pathname:"/Organisation/Payment/MakePayment",
+                    params:{id:response.Data?.id}
+                })
             }
+        
             else{
                 setError(response.Message);
-                setLoading(false)
             }
+            setLoading(false)
          }
          catch(error)
          {
@@ -168,7 +185,9 @@ const SessionSummary: React.FC = () => {
                             onPress={() => setError("")}
                             style={styles.retryButton}
                         >
-                            Réessayer
+                          <ThemedText>
+                              Réessayer
+                            </ThemedText>
                         </Button>
                     </Card.Content>
                 </Card>
@@ -231,12 +250,14 @@ const SessionSummary: React.FC = () => {
                     <Card.Actions style={styles.actionsContainer}>
                         <Button
                             mode="contained"
-                            onPress={handleReservationSubmit}
+                            onPress={()=>{handleReservationSubmit()}}
                             style={styles.submitButton}
                             loading={loading}
                             disabled={loading}
                         >
+                          <ThemedText>
                             Confirmer la réservation
+                          </ThemedText>
                         </Button>
                     </Card.Actions>
                 </Card>
@@ -249,7 +270,7 @@ const SessionSummary: React.FC = () => {
             <Card style={styles.card}>
                 <Card.Title
                 
-                    title="Réservation confirmée"
+                    title="Réservation Valide"
                     titleStyle={styles.textTitle}
                     left={() => (
                         <TouchableOpacity onPress={handleUpdateReservation} style={styles.editButton}>
@@ -299,7 +320,7 @@ const SessionSummary: React.FC = () => {
                 <Card.Actions style={styles.actionsContainer}>
                     <Button
                         mode="contained"
-                        onPress={handleReservationSubmit}
+                        onPress={handleConfirmation}
                         style={styles.successButton}
                     >
                         Voir les détails
@@ -376,7 +397,7 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     input: {
-        backgroundColor: 'white',
+     
     },
     actionsContainer: {
         justifyContent: 'center',

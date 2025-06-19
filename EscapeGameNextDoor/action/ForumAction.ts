@@ -50,7 +50,7 @@ export class ForumAction {
      */
     public async getForumByName(name:string, page: number, pageSize: number) : Promise<PaginationResponse<GetForumDto>>
     {
-          const param: string =`?page=${page}&pageSize=${pageSize}&=name${name}`;
+          const param: string =`?page=${page}&pageSize=${pageSize}&name=${name}`;
         return await this.httpClient
             .GetRequestType("/byname"+param)
             .executePagination<GetForumDto>();

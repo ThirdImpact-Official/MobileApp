@@ -1,89 +1,126 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import FormUtils from '@/classes/FormUtils';
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { GetSessionReservedDto } from '../../../interfaces/EscapeGameInterface/Reservation/getSessionReservedDto';
 import { GetSessionGameDto } from '../../../interfaces/EscapeGameInterface/Session/getSessionGameDto';
-
+import { UnitofAction } from "@/action/UnitofAction";
+import { Button, Card} from 'react-native-paper';
+import AppView from "@/components/ui/AppView";
+import { CardContent } from '@mui/material';
 export default function Reservation() {
-    const { reservation } = useLocalSearchParams();
-    const [state, setState] = useState<GetSessionReservedDto | undefined>(JSON.parse(reservation as string));
+    const { id } = useLocalSearchParams();
+    const [state, setState] = useState<GetSessionReservedDto | undefined>(undefined);
     const rooter = useRouter();
     const [sessiongGame, setSessionGame] = useState<GetSessionGameDto | undefined>(
         state?.sessionGame === null || state?.sessionGame === undefined ? undefined : state.sessionGame
     );
+    const action= new UnitofAction();
+    const [error,setError] =useState<string>("");
+    const [isloading,setLoading]=useState<boolean>(false);
 
-    if (state === undefined || sessiongGame === undefined) {
+    const FetchReservationById=async ()=> {
+        try {
+            setLoading(true);
+            const resposne= await action.sessionAction.getSessionReserved(Number(id));
+            const Sessionrepsone= await action.sessionAction.getSessionById(state?.sessionGameId as number);
+            if(resposne.Success)
+            {
+                setState(resposne.Data as GetSessionReservedDto);
+            }
+            else{
+                setError(resposne.Message);
+            }
+            if(Sessionrepsone.Success)
+            {
+                setSessionGame(Sessionrepsone.Data as GetSessionGameDto);
+            }
+            else{
+                setError(Sessionrepsone.Message);
+            }
+        }
+        catch(err)
+        {
+            setError("une erreur a eu lieux lors de la procedure ")
+            console.log(err);
+        }
+        finally
+        {
+            setLoading(false);
+        }
+    }
+    useEffect(()=>{
+        FetchReservationById();
+    },[id]);
+    if (isloading) {
         return (
-            <ParallaxScrollView
-                headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-                headerImage={
-                    <Image source={require('@/assets/images/partial-react-logo.png')} style={styles.reactLogo} />
-                }
-            >
-                <View style={styles.centered}>
-                    <View style={styles.card}>
-                        <ActivityIndicator size="large" />
-                    </View>
-                </View>
-            </ParallaxScrollView>
+           <AppView>
+                <Card>
+                    <Card.Content>
+                        <View style={styles.centered}>
+                            <View style={styles.card}>
+                                <ActivityIndicator size="large" />
+                            </View>
+                        </View>
+                    </Card.Content>
+                </Card>
+           </AppView>
+           
         );
     } else {
         return (
-            <ParallaxScrollView
-                headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-                headerImage={
-                    <Image source={require('@/assets/images/partial-react-logo.png')} style={styles.reactLogo} />
-                }
-            >
+           <AppView>
+            
                 <ScrollView contentContainerStyle={styles.centered}>
-                    <View style={styles.card}>
+                    <Card style={styles.card}>
                         <View style={styles.cardHeader}>
                             <Text style={styles.title}>{/* Add a title here if needed */}</Text>
-                            <Text style={styles.subtitle}>{FormUtils.FormatDate(sessiongGame.gameDate.toString())}</Text>
+                            <Text style={styles.subtitle}>{FormUtils.FormatDate(sessiongGame?.gameDate.toString())}</Text>
                         </View>
-                        <View style={styles.cardContent}>
+                        <Card.Content style={styles.cardContent}>
                             <Text style={styles.label}>
-                                <Text style={styles.bold}>Date de réservation :</Text> {FormUtils.FormatDate(state.creationDate.toString())}
+                                <Text style={styles.bold}>Date de réservation :</Text> {FormUtils.FormatDate(state?.creationDate.toString())}
                             </Text>
                             <Text style={styles.label}>
-                                <Text style={styles.bold}>Game Name:</Text> {sessiongGame.price}
+                                <Text style={styles.bold}>Game Name:</Text> {sessiongGame?.price}
                             </Text>
                             <Text style={styles.label}>
-                                <Text style={styles.bold}>Place Available:</Text> {sessiongGame.placeAvailable}
+                                <Text style={styles.bold}>Place Available:</Text> {sessiongGame?.placeAvailable}
                             </Text>
                             <Text style={styles.label}>
-                                <Text style={styles.bold}>Place Maximum:</Text> {sessiongGame.placeMaximum}
+                                <Text style={styles.bold}>Place Maximum:</Text> {sessiongGame?.placeMaximum}
                             </Text>
-                            <Text style={styles.label}>{state.content}</Text>
-                        </View>
-                        <View style={styles.cardActions}>
-                            <TouchableOpacity
-                                style={styles.button}
-                                onPress={() => rooter.push({
-                                    pathname: '/Organisation/EscapeGame/EscapeGameDetails'
-                                    ,params: { id: sessiongGame.escapeGameId}
-                                })}
-                            >
-                                <Text style={styles.buttonText}>Escape Game</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.button}
-                                onPress={() => rooter.push(`/Profile/Reservation/Reservation`)}
-                            >
-                                <Text style={styles.buttonText}>Avis</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.button}
-                                onPress={() => rooter.push(`/Profile/Reservation/Reservation`)}
-                            >
-                                <Text style={styles.buttonText}>Cancel</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+                            <Text style={styles.label}>{state?.content}</Text>
+                        </Card.Content>
+                        <Card.Actions style={styles.cardActions}>
+                            <View style={{flex:1}}>
+                                <Button
+                                    style={styles.button}
+                                    onPress={() => rooter.push({
+                                        pathname: '/Organisation/EscapeGame/EscapeGameDetails'
+                                        ,params: { id: sessiongGame?.escapeGameId}
+                                    })}
+                                >
+                                    <Text style={styles.buttonText}>Escape Game</Text>
+                                </Button>
+                                <Button
+                                    style={styles.button}
+                                    onPress={() => rooter.push(`/Profile/Reservation/Reservation`)}
+                                >
+                                    <Text style={styles.buttonText}>Avis</Text>
+                                </Button>
+                                <Button
+                                    style={styles.button}
+                                    onPress={() => rooter.push(`/Profile/Reservation/Reservation`)}
+                                >
+                                    <Text style={styles.buttonText}>Cancel</Text>
+                                </Button>
+                            </View>
+                        </Card.Actions>
+                    </Card>
                 </ScrollView>
-            </ParallaxScrollView>
+            </AppView>
         );
     }
 }
@@ -138,6 +175,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     button: {
+        marginVertical: 8,
         backgroundColor: '#1976d2',
         paddingVertical: 8,
         paddingHorizontal: 18,

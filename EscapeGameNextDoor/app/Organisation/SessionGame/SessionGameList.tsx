@@ -1,5 +1,4 @@
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   View,
@@ -16,6 +15,9 @@ import { GetEscapeGameDto } from "@/interfaces/EscapeGameInterface/EscapeGame/ge
 import FormUtils from '@/classes/FormUtils';
 import { UnitofAction } from "@/action/UnitofAction";
 import { PaginationResponse } from "@/interfaces/ServiceResponse";
+import AppView from "@/components/ui/AppView";
+import { Button, Card } from 'react-native-paper';
+import { ThemedView } from "@/components/ThemedView";
 
 const { width } = Dimensions.get('window');
 
@@ -28,26 +30,33 @@ export default function SessionGameList() {
   const [page, setPage] = useState<number>(1);
   const [filter, setFilter] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState<number>(1);
 
   const httpaction = new UnitofAction();
 
   const fetchSessionGames = async () => {
     setIsLoading(true);
+    setError(null);
     try {
-      const response = await httpaction.sessionAction.getSessionEscapeGameById(Number(id), page, 5) as PaginationResponse<GetSessionGameDto>;
+      const response = await httpaction.sessionAction.getSessionEscapeGameById(
+        Number(id), 
+        page, 
+        5
+      ) as PaginationResponse<GetSessionGameDto>;
+      
       if (response.Success) {
+        console.log(response.Data);
         setSessionGames(response.Data as GetSessionGameDto[]);
         setTotalPages(response.TotalPage);
       } else {
+        setError(response.Message || "Failed to load sessions");
         setSessionGames([]);
-        setTotalPages(1);
-        console.log(response.Message);
       }
     } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : "An error occurred";
+      setError(errorMessage);
       setSessionGames([]);
-      setTotalPages(1);
-      console.log(e);
     } finally {
       setIsLoading(false);
     }
@@ -59,10 +68,11 @@ export default function SessionGameList() {
       if (response.Success) {
         setEscapeGame(response.Data as GetEscapeGameDto);
       } else {
-        console.log(response.Message);
+        setError(response.Message || "Failed to load escape game details");
       }
     } catch (e) {
-      console.log(e);
+      const errorMessage = e instanceof Error ? e.message : "An error occurred";
+      setError(errorMessage);
     }
   };
 
@@ -71,6 +81,16 @@ export default function SessionGameList() {
     fetchEscapeGame();
   }, [page]);
 
+  useEffect(() => {
+    // Reset to first page when filter changes
+    if (page !== 1) {
+      setPage(1);
+    } else {
+      // If already on page 1, refetch
+      fetchSessionGames();
+    }
+  }, [filter]);
+
   const filteredSessions = sessionGames.filter((sg) => {
     if (filter === '1') return !sg.isReserved;
     if (filter === '2') return sg.isReserved;
@@ -78,121 +98,159 @@ export default function SessionGameList() {
   });
 
   const renderSessionItem = ({ item, index }: { item: GetSessionGameDto; index: number }) => (
-    <View style={styles.sessionItem}>
-      <TouchableOpacity
-        style={styles.sessionButton}
-        onPress={() => router.push({
-          pathname: `/Organisation/SessionGame/SessionGameDetails`,
-          params: { id: item.segId.toString() }
-        })}
-        activeOpacity={0.7}
-      >
-        {/* Session ID Badge */}
-        <View style={[
-          styles.sessionBadge,
-          { backgroundColor: item.isReserved ? '#9e9e9e' : '#4caf50' }
-        ]}>
-          <Text style={styles.sessionBadgeText}>{item.segId}</Text>
-        </View>
+    <Card style={styles.sessionItem} key={item.segId}>
+      <Card.Content>
+        <ThemedView>
+          <TouchableOpacity
+            style={styles.sessionButton}
+            onPress={() => router.push({
+              pathname: `/Organisation/SessionGame/SessionGameDetails`,
+              params: { id: item.segId.toString() }
+            })}
+            activeOpacity={0.7}
+          >
+            <View style={[
+              styles.sessionBadge,
+              { backgroundColor: item.isReserved ? '#9e9e9e' : '#4caf50' }
+            ]}>
+              <Text style={styles.sessionBadgeText}>{item.segId}</Text>
+            </View>
 
-        {/* Session Content */}
-        <View style={styles.sessionContent}>
-          <Text style={styles.sessionStatus}>
-            {item.isReserved ? 'Reserved' : 'Available'}
-          </Text>
-          <Text style={styles.sessionDate}>
-            {FormUtils.FormatDate(item.gameDate.toString())}
-          </Text>
-        </View>
+            <View style={styles.sessionContent}>
+              <Text style={styles.sessionStatus}>
+                {item.isReserved ? 'Reserved' : 'Available'}
+              </Text>
+              <Text style={styles.sessionDate}>
+                {FormUtils.FormatDate(item.gameDate.toString())}
+              </Text>
+              <Text style={styles.sessionTime}>
+                {FormUtils.FormatDate(item.gameDate.toString())}
+              </Text>
+            </View>
 
-        {/* Arrow */}
-        <View style={styles.arrowContainer}>
-          <Text style={styles.arrow}>›</Text>
-        </View>
-      </TouchableOpacity>
+            <View style={styles.arrowContainer}>
+              <Text style={styles.arrow}>›</Text>
+            </View>
+          </TouchableOpacity>
+        </ThemedView>
+      </Card.Content>
 
-      {/* Separator */}
       {index !== filteredSessions.length - 1 && <View style={styles.separator} />}
-    </View>
+    </Card>
   );
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Chargement...</Text>
-      </View>
+      <AppView>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Loading sessions...</Text>
+        </View>
+      </AppView>
+    );
+  }
+
+  if (error) {
+    return (
+      <AppView>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <Button 
+            mode="contained" 
+            onPress={() => {
+              setPage(1);
+              fetchSessionGames();
+              fetchEscapeGame();
+            }}
+            style={styles.retryButton}
+          >
+            Retry
+          </Button>
+        </View>
+      </AppView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* Header with Filter */}
-      <View style={styles.header}>
-        <Text style={styles.filterLabel}>Filtre</Text>
-        <View style={styles.filterRow}>
-          <View style={styles.escapeGameName}>
-            <Text style={styles.escapeGameText}>{escapeGame?.esgNom}</Text>
-          </View>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={filter}
-              onValueChange={(itemValue) => setFilter(itemValue)}
-              style={styles.picker}
-              itemStyle={styles.pickerItem}
-            >
-              <Picker.Item label="All" value="" />
-              <Picker.Item label="Available" value="1" />
-              <Picker.Item label="Reserved" value="2" />
-            </Picker>
-          </View>
-        </View>
-      </View>
-
-      {/* Sessions List */}
-      <View style={styles.listContainer}>
-        <View style={styles.card}>
-          {filteredSessions.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>Aucune session trouvée</Text>
+    <AppView>
+     
+        <Card style={styles.header}>
+          <Card.Actions><Button onPress={()=> {
+            setPage(1) ;
+            fetchSessionGames();
+          }}> Recharger </Button></Card.Actions>
+          <Card.Content style={styles.filterRow}>
+            <View style={styles.escapeGameName}>
+              <Text style={styles.escapeGameText}>
+                {escapeGame?.esgNom || 'Escape Game Sessions'}
+              </Text>
             </View>
-          ) : (
-            <FlatList
-              data={filteredSessions}
-              renderItem={renderSessionItem}
-              keyExtractor={(item) => item.segId.toString()}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.listContent}
-            />
-          )}
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={filter}
+                onValueChange={(itemValue) => setFilter(itemValue)}
+                style={styles.picker}
+                dropdownIconColor="#007AFF"
+              >
+                <Picker.Item label="All Sessions" value="" />
+                <Picker.Item label="Available Only" value="1" />
+                <Picker.Item label="Reserved Only" value="2" />
+              </Picker>
+            </View>
+          </Card.Content>
+        </Card>
+
+        <View style={styles.listContainer}>
+          <Card style={styles.listCard}>
+            {filteredSessions.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>
+                  {sessionGames.length === 0 
+                    ? 'No sessions available' 
+                    : 'No matching sessions found'}
+                </Text>
+              </View>
+            ) : (
+              <FlatList
+                data={filteredSessions}
+                renderItem={renderSessionItem}
+                keyExtractor={(item) => item.segId.toString()}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.listContent}
+              />
+            )}
+          </Card>
         </View>
 
-        {/* Pagination */}
-        <View style={styles.paginationContainer}>
-          <TouchableOpacity
-            style={[styles.paginationButton, page === 1 && styles.paginationButtonDisabled]}
-            onPress={() => setPage(page - 1)}
-            disabled={page === 1}
-          >
-            <Text style={[styles.paginationText, page === 1 && styles.paginationTextDisabled]}>
+        <Card.Actions style={styles.paginationContainer}>
+          <View style={styles.paginationControls}>
+            <Button
+              mode="outlined"
+              onPress={() => setPage(page - 1)}
+              disabled={page === 1}
+              style={styles.paginationButton}
+              labelStyle={styles.paginationButtonText}
+            >
               Previous
+            </Button>
+            
+            <Text style={styles.pageInfo}>
+              Page {page} of {totalPages}
             </Text>
-          </TouchableOpacity>
-
-          <Text style={styles.pageInfo}>Page {page}</Text>
-
-          <TouchableOpacity
-            style={[styles.paginationButton, page === totalPages && styles.paginationButtonDisabled]}
-            onPress={() => setPage(page + 1)}
-            disabled={page === totalPages}
-          >
-            <Text style={[styles.paginationText, page === totalPages && styles.paginationTextDisabled]}>
+            
+            <Button
+              mode="outlined"
+              onPress={() => setPage(page + 1)}
+              disabled={page === totalPages}
+              style={styles.paginationButton}
+              labelStyle={styles.paginationButtonText}
+            >
               Next
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
+            </Button>
+          </View>
+        </Card.Actions>
+   
+    </AppView>
   );
 }
 
@@ -200,82 +258,81 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    paddingBottom: 16,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
   },
   loadingText: {
-    marginTop: 10,
+    marginTop: 16,
     fontSize: 16,
     color: '#666',
   },
-  header: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
-  filterLabel: {
+  errorText: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    color: '#d32f2f',
+    marginBottom: 20,
     textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 16,
+    backgroundColor: '#007AFF',
+  },
+  header: {
+    margin: 16,
+    marginBottom: 8,
+    elevation: 2,
   },
   filterRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 8,
   },
   escapeGameName: {
     flex: 1,
     marginRight: 16,
   },
   escapeGameText: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: '600',
     color: '#333',
-    textAlign: 'center',
   },
   pickerContainer: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 8,
+    flex: 1,
     borderWidth: 1,
-    borderColor: '#dee2e6',
-    minWidth: 120,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   picker: {
     height: 50,
-  },
-  pickerItem: {
-    fontSize: 16,
+    width: '100%',
   },
   listContainer: {
     flex: 1,
-    padding: 16,
-    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 8,
   },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    width: Math.min(350, width - 32),
-    maxHeight: '70%',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  listCard: {
+    flex: 1,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   listContent: {
     paddingVertical: 8,
   },
   sessionItem: {
-    paddingHorizontal: 16,
+    marginHorizontal: 8,
+    marginVertical: 4,
+    elevation: 1,
   },
   sessionButton: {
     flexDirection: 'row',
@@ -283,16 +340,16 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   sessionBadge: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
   },
   sessionBadgeText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   sessionContent: {
@@ -302,27 +359,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 4,
   },
   sessionDate: {
     fontSize: 14,
     color: '#666',
+    marginTop: 2,
+  },
+  sessionTime: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
   },
   arrowContainer: {
     padding: 8,
   },
   arrow: {
-    fontSize: 20,
-    color: '#ccc',
+    fontSize: 24,
+    color: '#007AFF',
   },
   separator: {
     height: 1,
     backgroundColor: '#e0e0e0',
-    marginVertical: 4,
+    marginHorizontal: 16,
   },
   emptyState: {
     padding: 40,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyStateText: {
     fontSize: 16,
@@ -330,35 +393,25 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   paginationContainer: {
+    marginHorizontal: 16,
+    marginTop: 8,
+  },
+  paginationControls: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 16,
-    paddingHorizontal: 16,
-    width: Math.min(350, width - 32),
+    justifyContent: 'space-between',
+    width: '100%',
   },
   paginationButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#007AFF',
-    borderRadius: 6,
-    minWidth: 80,
-    alignItems: 'center',
+    borderColor: '#007AFF',
+    minWidth: 100,
   },
-  paginationButtonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  paginationText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  paginationTextDisabled: {
-    color: '#999',
+  paginationButtonText: {
+    color: '#007AFF',
   },
   pageInfo: {
     fontSize: 16,
     color: '#333',
-    fontWeight: '500',
+    marginHorizontal: 16,
   },
 });

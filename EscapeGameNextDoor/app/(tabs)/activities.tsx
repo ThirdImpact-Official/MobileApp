@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AppView from '@/components/ui/AppView';
 import { ActivityIndicator, Button, Card, Divider, List, TextInput } from 'react-native-paper';
 import { View, Text, StyleSheet } from 'react-native';
@@ -17,7 +17,7 @@ export default function ForumList() {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [forums, setForums] = useState<GetForumDto[]>([]);
     const [organisations, setOrganisations] = useState<GetOrganisationDto[]>([]);
-    const [selectedOrganisation, setSelectedOrganisation] = useState<GetOrganisationDto | null>(null);
+    const [selectedOrganisation, setSelectedOrganisation] = useState<GetOrganisationDto | undefined>(undefined);
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
@@ -26,10 +26,8 @@ export default function ForumList() {
     const action = new UnitofAction();
     const router = useRouter();
 
-    /**
-     * Fetch all forums with pagination
-     */
-    const fetchAllForums = useCallback(async (page: number = 1) => {
+    // Fetch all forums with pagination
+    const fetchAllForums = async (page: number = 1) => {
         setIsLoading(true);
         setError("");
         
@@ -50,18 +48,15 @@ export default function ForumList() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    };
 
-    /**
-     * Fetch forums by organisation
-     */
-    const fetchForumsByOrganisation = useCallback(async (orgId: number, page: number = 1) => {
+    // Fetch forums by organisation
+    const fetchForumsByOrganisation = async (orgId: number, page: number = 1) => {
         setIsLoading(true);
         setError("");
         
         try {
             const response = await action.forumAction.getOrganisationById(orgId, page, PAGE_SIZE) as PaginationResponse<GetForumDto>;
-            
             if (response.Success) {
                 setForums(response.Data as GetForumDto[]);
                 setTotalPages(response.TotalPage || 1);
@@ -76,15 +71,12 @@ export default function ForumList() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    };
 
-    /**
-     * Fetch all organisations
-     */
-    const fetchAllOrganisations = useCallback(async () => {
+    // Fetch all organisations
+    const fetchAllOrganisations = async () => {
         try {
             const response = await action.organisationAction.GetAllOrganisation(1, 20) as PaginationResponse<GetOrganisationDto>;
-            
             if (response.Success) {
                 setOrganisations(response.Data as GetOrganisationDto[]);
             } else {
@@ -94,21 +86,22 @@ export default function ForumList() {
             const errorMessage = err instanceof Error ? err.message : String(err);
             setError(errorMessage);
         }
-    }, []);
+    };
 
-    /**
-     * Fetch forums by name/search term
-     */
-    const fetchForumsByName = useCallback(async (searchValue: string, page: number = 1) => {
+    // Fetch forums by name/search term
+    const fetchForumsByName = async (searchValue: string, page: number = 1) => {
         setIsLoading(true);
         setError("");
         
         try {
             const response = await action.forumAction.getForumByName(searchValue, page, PAGE_SIZE) as PaginationResponse<GetForumDto>;
-            
             if (response.Success) {
-                setForums(response.Data as GetForumDto[]);
-                setTotalPages(response.TotalPage || 1);
+                if(response.Data?.length === 0) {
+                    setForums([]);
+                } else {
+                    setForums(response.Data as GetForumDto[]);
+                    setTotalPages(response.TotalPage || 1);
+                }
             } else {
                 setError(response.Message);
                 setForums([]);
@@ -120,73 +113,47 @@ export default function ForumList() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    };
 
-    /**
-     * Handle organisation selection
-     */
-    const handleOrganisationChange = useCallback((value: GetOrganisationDto | null) => {
+    // Handle organisation selection
+    const handleOrganisationChange = (value: GetOrganisationDto | undefined) => {
         setSelectedOrganisation(value);
         setCurrentPage(1);
         setSearchTerm(""); // Clear search when changing organisation
-        
-        if (value?.orgId) {
-            fetchForumsByOrganisation(value.orgId, 1);
-        } else {
-            fetchAllForums(1);
-        }
-    }, [fetchAllForums, fetchForumsByOrganisation]);
+    };
 
-    /**
-     * Handle search input changes
-     */
-    const handleSearchChange = useCallback((value: string) => {
-        setSearchTerm(value);
+    // Handle search input changes
+    const handleSearchChange = async () => {
         setCurrentPage(1);
-        
-        // Debounce search - you might want to add debouncing logic here
-        if (value.trim().length === 0) {
-            // If search is empty, fetch based on current organisation selection
-            if (selectedOrganisation?.orgId) {
-                fetchForumsByOrganisation(selectedOrganisation.orgId, 1);
-            } else {
-                fetchAllForums(1);
-            }
-        } else {
-            fetchForumsByName(value.trim(), 1);
-        }
-    }, [selectedOrganisation, fetchAllForums, fetchForumsByOrganisation, fetchForumsByName]);
+    };
 
-    /**
-     * Handle pagination
-     */
-    const handlePageChange = useCallback((newPage: number) => {
+    // Handle pagination
+    const handlePageChange = (newPage: number) => {
         if (newPage < 1 || newPage > totalPages) return;
-        
         setCurrentPage(newPage);
-        
-        if (searchTerm.trim().length > 0) {
-            fetchForumsByName(searchTerm.trim(), newPage);
-        } else if (selectedOrganisation?.orgId) {
-            fetchForumsByOrganisation(selectedOrganisation.orgId, newPage);
-        } else {
-            fetchAllForums(newPage);
-        }
-    }, [totalPages, searchTerm, selectedOrganisation, fetchAllForums, fetchForumsByOrganisation, fetchForumsByName]);
+    };
 
-    /**
-     * Navigate to forum detail
-     */
-    const handleForumPress = useCallback((forumId: number) => {
+    // Navigate to forum detail
+    const handleForumPress = (forumId: number) => {
         router.push({
             pathname: '/Forum/Forum',
             params: { id: forumId },
         });
-    }, [router]);
+    };
+   
+    // Fetch data based on current filters
+    useEffect(() => {
+        if (searchTerm.trim().length > 0) {
+            fetchForumsByName(searchTerm.trim(), currentPage);
+        } else if (selectedOrganisation?.orgId) {
+            fetchForumsByOrganisation(selectedOrganisation.orgId, currentPage);
+        } else {
+            fetchAllForums(currentPage);
+        }
+    }, [currentPage, selectedOrganisation]);
 
     // Initial data fetch
     useEffect(() => {
-        fetchAllForums();
         fetchAllOrganisations();
     }, []);
 
@@ -237,11 +204,14 @@ export default function ForumList() {
                         <TextInput
                             label="Rechercher un forum"
                             value={searchTerm}
-                            onChangeText={handleSearchChange}
+                            onChangeText={setSearchTerm}
                             mode="outlined"
                             style={styles.searchInput}
+                            onSubmitEditing={handleSearchChange}
                         />
-                        
+                        <Button onPress={handleSearchChange} mode="contained">
+                            Rechercher
+                        </Button>
                         <ThemedText style={styles.filterLabel}>Filtrer par organisation</ThemedText>
                         <View style={styles.pickerContainer}>
                             <Picker
@@ -249,7 +219,7 @@ export default function ForumList() {
                                 onValueChange={handleOrganisationChange}
                                 style={styles.picker}
                             >
-                                <Picker.Item label="Toutes les organisations" value={null} />
+                                <Picker.Item label="Toutes les organisations" value={undefined} />
                                 {organisations.map((org) => (
                                     <Picker.Item 
                                         key={org.orgId} 
@@ -293,7 +263,7 @@ export default function ForumList() {
                 </Card.Content>
 
                 {/* Pagination */}
-                {totalPages > 1 && (
+                {totalPages >= 1 && (
                     <Card.Actions>
                         <View style={styles.paginationContainer}>
                             <View style={{flex:1}}>
@@ -303,7 +273,9 @@ export default function ForumList() {
                                     disabled={currentPage <= 1}
                                     style={styles.paginationButton}
                                 >
-                                    Précédent
+                                 <Text>
+                                      Précédent
+                                    </Text> 
                                 </Button>
                                 
                                 <ThemedText style={styles.pageInfo}>
@@ -316,7 +288,9 @@ export default function ForumList() {
                                     disabled={currentPage >= totalPages}
                                     style={styles.paginationButton}
                                 >
-                                    Suivant
+                                  <Text>
+                                      Suivant
+                                    </Text>
                                 </Button>
 
                             </View>
@@ -401,6 +375,7 @@ const styles = StyleSheet.create({
         minWidth: 100,
     },
     pageInfo: {
+        textAlign:"center",
         fontSize: 14,
         fontWeight: '500',
     },

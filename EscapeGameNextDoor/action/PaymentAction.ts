@@ -14,31 +14,31 @@ export class PaymentAction{
 
     public async CreatePayment(reservationId: number): Promise<ServiceResponse<GetPaymentDto>> {
         const res = await this.httpclient
-        .PostRequestType("/createPayment"+reservationId)
+        .PostRequestType("/createPayment/"+reservationId)
         .execute<GetPaymentDto>();
         return res;
     }
     public async RetryPayment(reservationId: number): Promise<ServiceResponse<GetPaymentDto>> {
         const res = await this.httpclient
-        .PostRequestType("/retrypayment"+reservationId)
+        .PutRequestType("/retrypayment/"+reservationId)
         .execute<GetPaymentDto>();
         return res;
     }
     public async CancelPayment(reservationId: number): Promise<ServiceResponse<GetPaymentDto>> {
         const res = await this.httpclient
-        .PostRequestType("/cancelpayment"+reservationId)
+        .PutRequestType("/cancelpayment/"+reservationId)
         .execute<GetPaymentDto>();
         return res;
     }
     public async FailedPayment(reservationId: number): Promise<ServiceResponse<GetPaymentDto>> {
         const res = await this.httpclient
-        .PostRequestType("/failedpayment"+reservationId)
+        .PutRequestType("/failedpayment/"+reservationId)
         .execute<GetPaymentDto>();
         return res;
     }
     public async SuccessPayment(reservationId: number): Promise<ServiceResponse<GetPaymentDto>> {
         const res = await this.httpclient
-        .PostRequestType("/successpayment"+reservationId)
+        .PutRequestType("/successpayment/"+reservationId)
         .execute<GetPaymentDto>();
         return res;
     }

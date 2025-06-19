@@ -29,28 +29,24 @@ export class EscapeGameAction {
             .GetRequestType("escapegame"+`${params}`)
             .executePagination<GetEscapeGameDto>();
     }
-    public async GetAllEscapeGames(catId:number | null,priceId:number| null,diflId:number| null, page: number, pageSize: number): Promise<PaginationResponse<GetEscapeGameDto>> {
-         const urlparams:string="";
-        if(catId==null)
-        {
-            const catparams=`?categoryId=${catId}`;
-            urlparams.concat(catparams);
+    public async GetAllEscapeGames(catId: number | null, priceId: number | null, diflId: number | null, page: number, pageSize: number): Promise<PaginationResponse<GetEscapeGameDto>> {
+        const params = new URLSearchParams();
+        
+        
+        if (catId !== null) {
+            params.append('categoryId', catId.toString());
         }
-        if(priceId==null)
-        {
-            const priceParams=`?priceId=${priceId}`;
-            urlparams.concat(priceParams);
+        if (priceId !== null) {
+            params.append('priceId', priceId.toString());
         }
-        if(diflId==null)
-        {
-            const diflParams =`?difficultyLevelId=${diflId}`;
-            urlparams.concat(diflParams);	
+        if (diflId !== null) {
+            params.append('difficultyLevelId', diflId.toString());
         }
-      
-        const params=`?page=${page}&pageSize=${pageSize}`;
+        params.append('page', page.toString());
+        params.append('pageSize', pageSize.toString());
         
         return await this.httpClient
-            .GetRequestType("escapegame"+urlparams+`${params}`)
+            .GetRequestType(`escapegame/filtered?${params.toString()}`)
             .executePagination<GetEscapeGameDto>();
     }
     public async getAllEscapeGamesFromOrganisation(orgId:number,page:number, pageSize: number ): Promise< PaginationResponse<GetEscapeGameDto>> {

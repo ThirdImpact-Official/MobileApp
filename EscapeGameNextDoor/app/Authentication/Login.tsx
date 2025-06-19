@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image, view } from 'react-native';
 import { Link, useRouter } from "expo-router";
 import { Card, TextInput, Button, Text, ActivityIndicator } from 'react-native-paper';
 import ParallaxScrollView from "../../components/ParallaxScrollView";
@@ -207,45 +207,51 @@ export default function LoginScreen() {
                 <Text style={styles.errorMessageText}>{error}</Text>
               </View>
             )}
-
+            <View style={styles.separator}>
+              <TextInput
+                label="Adresse email"
+                mode="outlined"
+                value={credentials.emailAdress}
+                onChangeText={(text) => handleInputChange("emailAdress", text)}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={styles.input}
+                error={!!validationErrors.email}
+                disabled={isLoading}
+              />
+              {validationErrors.email && (
+                <Text style={styles.validationError}>{validationErrors.email}</Text>
+              )}
+              
+            </View>
             {/* Email input */}
-            <TextInput
-              label="Adresse email"
-              mode="outlined"
-              value={credentials.emailAdress}
-              onChangeText={(text) => handleInputChange("emailAdress", text)}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              style={styles.input}
-              error={!!validationErrors.email}
-              disabled={isLoading}
-            />
-            {validationErrors.email && (
-              <Text style={styles.validationError}>{validationErrors.email}</Text>
-            )}
+            <View style={styles.separator}>
+              <TextInput
+                label="Mot de passe"
+                mode="outlined"
+                value={credentials.password}
+                onChangeText={(text) => handleInputChange("password", text)}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                style={styles.input}
+                error={!!validationErrors.password}
+                disabled={isLoading}
+                right={
+                  <TextInput.Icon
+                    icon={showPassword ? 'eye-off' : 'eye'}
+                    onPress={togglePasswordVisibility}
+                    disabled={isLoading}
+                  />
+                }
+              />
 
+            </View>
             {/* Password input */}
-            <TextInput
-              label="Mot de passe"
-              mode="outlined"
-              value={credentials.password}
-              onChangeText={(text) => handleInputChange("password", text)}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              style={styles.input}
-              error={!!validationErrors.password}
-              disabled={isLoading}
-              right={
-                <TextInput.Icon
-                  icon={showPassword ? 'eye-off' : 'eye'}
-                  onPress={togglePasswordVisibility}
-                  disabled={isLoading}
-                />
-              }
-            />
             {validationErrors.password && (
               <Text style={styles.validationError}>{validationErrors.password}</Text>
             )}
+          </Card.Content>
+            <Card.Actions>
 
             {/* Login button */}
             <Button
@@ -257,26 +263,32 @@ export default function LoginScreen() {
             >
               {isLoading ? "Connexion..." : "Se connecter"}
             </Button>
-
-            {/* Register link */}
-            <View style={styles.linkContainer}>
-              <Link href="/Authentication/Register" asChild>
-                <Button mode="text" disabled={isLoading}>
-                  Vous n'avez pas encore de compte ? Inscrivez-vous
+          
+           
+            </Card.Actions>
+            <Card.Content>
+                <View style={{flex:1}}>
+              {/* Register link */}
+              <View style={styles.linkContainer}>
+                <Link href="/Authentication/Register" asChild>
+                  <Button mode="text" disabled={isLoading}>
+                    Vous n'avez pas encore de compte ? Inscrivez-vous
+                  </Button>
+                </Link>
+              </View> 
+            </View>
+              <View style={{flex:1}}>
+              {/* Forgot password link (if needed) */}
+              <View style={styles.linkContainer}>
+                <Button mode="text" disabled={isLoading} onPress={() => {
+                  // Add forgot password functionality here
+                  console.log("Forgot password pressed");
+                }}>
+                  Mot de passe oublié ?
                 </Button>
-              </Link>
-            </View>
-
-            {/* Forgot password link (if needed) */}
-            <View style={styles.linkContainer}>
-              <Button mode="text" disabled={isLoading} onPress={() => {
-                // Add forgot password functionality here
-                console.log("Forgot password pressed");
-              }}>
-                Mot de passe oublié ?
-              </Button>
-            </View>
-          </Card.Content>
+              </View> 
+              </View>
+            </Card.Content>
         </Card>
       </ThemedView>
        </ParallaxScrollView>
@@ -294,6 +306,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
+    padding:16,
     marginBottom: 8,
   },
   cardTitle: {
@@ -313,10 +326,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
+  separator:{
+    marginBottom: 16,
+  },
   input: {
+    padding:16,
     marginBottom: 8,
   },
   button: {
+    alignContent: 'center',
+    width: '100%',
     marginTop: 24,
     paddingVertical: 8,
   },

@@ -73,6 +73,16 @@ export class SessionAction {
             .execute<GetSessionGameDto>();
     }
     /**
+     * 
+     * @param id 
+     * @returns 
+     */
+    public async getSessionReserved(id: number): Promise<ServiceResponse<GetSessionReservedDto> | PaginationResponse<GetSessionReservedDto>> {
+        return await this.httpClient
+            .GetRequestType('/reserved/'+id)
+            .executePagination<GetSessionReservedDto>();
+    }
+    /**
      * récupère les erservation d'un utilisateur par pagination
      * @param userId 
      * @param page 

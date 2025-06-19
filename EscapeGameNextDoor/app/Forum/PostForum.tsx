@@ -12,7 +12,7 @@ import { GetTypeLikeDto } from "@/interfaces/PublicationInterface/TypeLike/getty
 import { RemoveHasLikeDto } from "@/interfaces/PublicationInterface/Haslike/removeHasLikeDto";
 import { AddHasLikeDto } from "@/interfaces/PublicationInterface/Haslike/addHasLikeDto";
 import { GetlikeDto, LikesDto } from "@/interfaces/PublicationInterface/Haslike/getlikes";
-
+import { ThemedText } from "@/components/ThemedText";
 const PAGE_SIZE = 5;
 
 export default function PostForum() {
@@ -171,15 +171,18 @@ export default function PostForum() {
                   subtitle={`Posté le ${FormUtils.FormatDate(postParent.creationDate)}`}
                 />
                 <Card.Content>
-                  <Text style={styles.postContent}>{postParent.content}</Text>
+                  <ThemedText style={styles.postContent}>{postParent.content}</ThemedText>
                 </Card.Content>
                 <Card.Actions>
+                  <View style={{flex:1}}>
                   <View style={styles.likeContainer}>
                     <Text style={styles.likeText}>Nombre de likes: {getTotalLikes()}</Text>
                   </View>
                   <View style={styles.buttonContainer}>
                     <Button onPress={() => handleLike(postParent.id)}>Like</Button>
                     <Button onPress={() => handleDisLike(postParent.id)}>Dislike</Button>
+                  </View>
+
                   </View>
                 </Card.Actions>
               </Card>
@@ -211,19 +214,22 @@ export default function PostForum() {
 
           {/* Pagination */}
           <Card.Actions style={styles.paginationContainer}>
-            <Button 
-              disabled={page === 1 || isLoading}
-              onPress={() => handlePageChange(page - 1)}
-            >
-              Précédent
-            </Button>
-            <Text style={styles.pageText}>Page {page}/{totalPages}</Text>
-            <Button
-              disabled={page === totalPages || isLoading}
-              onPress={() => handlePageChange(page + 1)}
-            >
-              Suivant
-            </Button>
+            <View style={{flex:1}}>
+              <Button 
+                disabled={page === 1 || isLoading}
+                onPress={() => handlePageChange(page - 1)}
+              >
+                Précédent
+              </Button>
+              <ThemedText style={styles.pageText}>Page {page}/{totalPages}</ThemedText>
+              <Button
+                disabled={page === totalPages || isLoading}
+                onPress={() => handlePageChange(page + 1)}
+              >
+                Suivant
+              </Button>
+
+            </View>
           </Card.Actions>
         </Card>
       </ScrollView>
@@ -262,6 +268,7 @@ const styles = StyleSheet.create({
   },
   pageText: {
     fontSize: 16,
+    textAlign: "center"
   },
   likeContainer: {
     marginBottom: 8,

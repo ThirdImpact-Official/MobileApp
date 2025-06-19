@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, StyleSheet, useWindowDimensions } from "react-native";
+import { View, Text, ActivityIndicator, StyleSheet, useWindowDimensions } from 'react-native';
 import { Button } from "react-native-paper";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import AppView from "@/components/ui/AppView";
@@ -8,8 +8,13 @@ import { UnitofAction } from "@/action/UnitofAction";
 import { GetSessionGameDto } from "@/interfaces/EscapeGameInterface/Session/getSessionGameDto";
 import FormUtils from '@/classes/FormUtils';
 import { Card } from "react-native-paper";
-
-export default function ListSessionDetails() {
+import { ThemedText } from "@/components/ThemedText";
+/**
+ * Page pour afficher les d tails d'une session
+ * @param id - L'identifiant de la session
+ * @returns La page des d tails de la session
+ */
+export default function SessionDetails() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [session, setSession] = useState<GetSessionGameDto | null>(null);
   const isLoading = useAuth().isLoading;
@@ -22,6 +27,7 @@ export default function ListSessionDetails() {
     try {
       const response = await httpaction.sessionAction.getSessionById(Number(id));
       if (response.Success) {
+        console.log(response.Data);
         setSession(response.Data as GetSessionGameDto);
       } else {
         setError(response.Message || "Une erreur est survenue lors du chargement de la session.");
@@ -40,7 +46,11 @@ export default function ListSessionDetails() {
   if (isLoading) {
     return (
       <AppView>
-        <ActivityIndicator size="large" />
+        <Card>
+          <Card.Content>
+            <ActivityIndicator size="large" />
+          </Card.Content>
+        </Card>
       </AppView>
     );
   }
@@ -62,15 +72,17 @@ export default function ListSessionDetails() {
     <AppView>
       <Card style={styles.card}>
         <View style={styles.container}>
-          <Text style={styles.header}>Session</Text>
+          <ThemedText style={styles.header}>Session</ThemedText>
           <Card.Content style={styles.content}>
-            <Text><Text style={styles.label}>Date : </Text>{session?.gameDate ? FormUtils.FormatDate(session.gameDate.toString()) : "-"}</Text>
-            <Text><Text style={styles.label}>Place Maximum : </Text>{session?.placeMaximum ?? "-"}</Text>
-            <Text><Text style={styles.label}>Place Disponible : </Text>{session?.placeAvailable ?? "-"}</Text>
-            <Text><Text style={styles.label}>Prix : </Text>
-              {session?.price !== undefined && session?.price !== null ? `${session.price} €` : "-"}
-            </Text>
-            <Text><Text style={styles.label}>Libre : </Text>{session?.isReserved ? "Oui" : "Non"}</Text>
+            <View>
+              <ThemedText><Text style={styles.label}>Date : </Text>{session?.gameDate ? FormUtils.FormatDate(session.gameDate.toString()) : "-"}</ThemedText>
+              <ThemedText><Text style={styles.label}>Place Maximum : </Text>{session?.placeMaximum ?? "-"}</ThemedText>
+              <ThemedText><Text style={styles.label}>Place Disponible : </Text>{session?.placeAvailable ?? "-"}</ThemedText>
+              <ThemedText><Text style={styles.label}>Prix : </Text>
+                {session?.price !== undefined && session?.price !== null ? `${session.price} €` : "-"}
+              </ThemedText>
+              <ThemedText><Text style={styles.label}>Libre : </Text>{session?.isReserved ? "Oui" : "Non"}</ThemedText>
+            </View>
           </Card.Content>
         </View>
 
@@ -83,16 +95,19 @@ export default function ListSessionDetails() {
               params: { id: id },
             })}
           >
-            Réserver
+            <ThemedText>
+              Réserver
+
+            </ThemedText>
           </Button>
           <Button
             mode="outlined"
             style={styles.outlinedButton}
             onPress={() => router.back()}
           >
-            <Text style={styles.buttontext}>
+            <ThemedText style={styles.buttontext}>
               Autres Sessions
-              </Text>
+              </ThemedText>
           </Button>
         </Card.Actions>
       </Card>
@@ -132,7 +147,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   buttontext:{
-      color:'#050505',
+   
   },
   button: {
     color:'#050505',
