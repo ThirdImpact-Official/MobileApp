@@ -16,6 +16,7 @@ import { RatingAction } from './RatingAction';
 import { FavorisAction } from './FavorisAction';
 import { ModerationAction } from './ModerationAction';
 import { PaymentAction } from './PaymentAction';
+import { CompletegameAction } from './CompleteGameAction';
 export class UnitofAction
 {
     private readonly AdminDemandAction = new AdminDemandAction();
@@ -36,6 +37,7 @@ export class UnitofAction
     private readonly FavorisAction = new FavorisAction();
     private readonly ModerationAction = new ModerationAction();
     private  readonly PaymentAction = new PaymentAction();
+    private readonly CompletegameAction = new CompletegameAction();
     //#region Actions
     public get adminDemandAction() { return this.AdminDemandAction; }
     public get annonceAction() { return this.AnnonceAction; }
@@ -55,5 +57,6 @@ export class UnitofAction
     public get favorisAction() { return this.FavorisAction; }
     public get moderationAction() { return this.ModerationAction; }
     public get paymentAction() { return this.PaymentAction; }
+    public get completegameAction() { return this.CompletegameAction; }
     //#endregion
 }

@@ -12,6 +12,7 @@ import { GetEventDto } from "@/interfaces/EscapeGameInterface/Event/getEventDto"
 import { UpdateEventDto } from "@/interfaces/EscapeGameInterface/Event/updateEventDto";
 import { GetDifficultyLevelDto } from '../interfaces/EscapeGameInterface/DifficultyLevel/getDifficultyLevelDto';
 import { GetPriceDto } from '../interfaces/EscapeGameInterface/Price/getPriceDto';
+import { Update } from 'vite/types/hmrPayload.js';
 
 export class EscapeGameAction {
     private readonly httpClient: HttpClient;
@@ -73,6 +74,12 @@ export class EscapeGameAction {
         return await this.httpClient
             .PutRequestType('escapegame')
             .setData(escapeGame)
+            .execute<GetEscapeGameDto>();
+    }
+    public async UpdateRecommendationEscapeGame(int:number,recommendation:boolean): Promise<ServiceResponse<GetEscapeGameDto> | PaginationResponse<GetEscapeGameDto>> {
+        return await this.httpClient
+            .PutRequestType('escapegame/recommendation/'+int)
+            .setData(recommendation)
             .execute<GetEscapeGameDto>();
     }
 

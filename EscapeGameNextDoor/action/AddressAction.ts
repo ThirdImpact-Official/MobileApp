@@ -5,7 +5,7 @@ import { AddAddressDto } from "@/interfaces/OrganisationInterface/Adress/addAdre
 import { ServiceResponse } from "../interfaces/ServiceResponse";
 export class AddressAction {
   private httpClient: HttpClient;
-  private apibaseurl: string = "http://localhost:7159/escape-game/accueil";
+  private apibaseurl: string = "http://localhost:7159/escape-game/address";
   constructor() {
     this.httpClient = new HttpClient();
     this.httpClient.setBaseUrl(this.apibaseurl);
@@ -26,7 +26,29 @@ export class AddressAction {
       .execute<GetAddressDto>();
     return res;
   }
-
+  /**
+   * 
+   * @param id
+   */
+  public async  AddresByEscapeGameId(
+    id: number
+  ): Promise<ServiceResponse<GetAddressDto>> {
+   return await this.httpClient.GetRequestType(`/escapegame/${id}`).execute<GetAddressDto>();
+}
+/**
+ * 
+ */
+public async AddressByActivityId(id: number): Promise<ServiceResponse<GetAddressDto>> {
+  return await this.httpClient.GetRequestType(`/activity/${id}`).execute<GetAddressDto>();
+}
+/**
+ * 
+ * @param id 
+ * @returns 
+ */
+public async AddressByOrganisationId(id: number): Promise<ServiceResponse<GetAddressDto>> {
+  return await this.httpClient.GetRequestType(`/organisation/${id}`).execute<GetAddressDto>();
+}
   /**
    * Adds a new address.
    * @param {AddAddressDto} dto - The new address data.
@@ -36,7 +58,7 @@ export class AddressAction {
    *          be false.
    * @throws {Error} If the request to add the address fails.
    */
-  public async add(
+  public async addAdress(
     dto: AddAddressDto
   ): Promise<ServiceResponse<GetAddressDto>> {
     const res = await this.httpClient
@@ -56,7 +78,7 @@ export class AddressAction {
    * @throws {Error} If the request to delete the address fails.
    */
 
-  public async delete(id: number): Promise<ServiceResponse<GetAddressDto>> {
+  public async deleteAddress(id: number): Promise<ServiceResponse<GetAddressDto>> {
     const res = await this.httpClient
       .DeleteRequestType(`/${id}`)
       .execute<GetAddressDto>();

@@ -3,6 +3,7 @@ import { GetCategoryDto } from '@/interfaces/EscapeGameInterface/Category/getCat
 import { UpdateCategory } from '@/interfaces/EscapeGameInterface/Category/updateCategory';
 import { HttpClient } from './httpClient'; // Assurez-vous que le chemin est correct
 import { PaginationResponse, ServiceResponse } from '@/interfaces/ServiceResponse'; // Assurez-vous que le chemin est correct
+import { AddEscapeGameDto } from '../../../Webclient/webclient/src/interfaces/EscapeGameInterface/EscapeGame/addEscapeGameDto';
 
  // Assurez-vous que les DTOs sont correctement définis
 
@@ -20,33 +21,65 @@ export class CategoryAction {
             .GetRequestType('')
             .execute<GetCategoryDto[]>();
     }
-
+    
     public async getCategoryById(catId: number): Promise<ServiceResponse<GetCategoryDto> | PaginationResponse<GetCategoryDto>> {
         return await this.httpClient
             .GetRequestType(`/${catId}`)
             .execute<GetCategoryDto>();
     }
-
+    /**
+     * 
+     * @param category 
+     * @returns 
+     */
     public async createCategory(category: AddCategoryDto): Promise<ServiceResponse<GetCategoryDto> | PaginationResponse<GetCategoryDto>> {
         return await this.httpClient
             .PostRequestType('')
             .setData(category)
             .execute<GetCategoryDto>();
     }
-
+    /**
+     * 
+     * @param category 
+     * @returns 
+     */
     public async updateCategory(category: UpdateCategory): Promise<ServiceResponse<GetCategoryDto> | PaginationResponse<GetCategoryDto>> {
         return await this.httpClient
             .PutRequestType('')
             .setData(category)
             .execute<GetCategoryDto>();
     }
-
+    /**
+     * 
+     * @param id 
+     * @returns 
+     */
     public async deleteCategory(id: number): Promise<ServiceResponse<GetCategoryDto> | PaginationResponse<GetCategoryDto>> {
         return await this.httpClient
             .DeleteRequestType(`/${id}`)
             .execute<GetCategoryDto>();
     }
-
+    /**
+     * 
+     * @param id 
+     * @returns 
+     */
+    public async  AddEscapeGameDto(id: number): Promise<ServiceResponse<GetCategoryDto> | PaginationResponse<GetCategoryDto>> {
+        return await this.httpClient
+            .PostRequestType(`/escapegame/${id}`)
+            .execute<GetCategoryDto>();
+    }
+    /**
+     * 
+     * @param id 
+     * @returns 
+     */
+    public async RemoveEscapeGameDto(id: number): Promise<ServiceResponse<GetCategoryDto> | PaginationResponse<GetCategoryDto>> {
+        return await this.httpClient
+            .DeleteRequestType(`/escapegame/${id}`)
+            .execute<GetCategoryDto>();
+    }
+    //#region subcategory
     // Méthodes pour les sous-catégories
     public async getAllSubCategoriesByCategoryParent(parentId: number): Promise<ServiceResponse<GetCategoryDto[]> | PaginationResponse<GetCategoryDto[]>> {
         return await this.httpClient
@@ -79,4 +112,5 @@ export class CategoryAction {
             .DeleteRequestType(`/subcategory/${id}`)
             .execute<GetCategoryDto>();
     }
+    // #endregion
 }

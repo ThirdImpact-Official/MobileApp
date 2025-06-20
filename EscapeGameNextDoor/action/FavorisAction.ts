@@ -25,7 +25,17 @@ export class FavorisAction {
             .GetRequestType(url)
             .executePagination<GetEscapeGameDto>();
     }
-
+    /**
+     * 
+     * @param escapeGameId 
+     * @returns 
+     */
+    public async Isfavoris(escapeGameId: number): Promise<ServiceResponse<boolean>> {
+      
+        return await this.httpClient
+            .GetRequestType("/check/escapegame/"+escapeGameId)
+            .execute<boolean>();
+    }
     /**
      * Ajoute un escape game aux favoris de l'utilisateur
      * @param escapeGameId - ID de l'escape game à ajouter

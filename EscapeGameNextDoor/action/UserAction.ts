@@ -2,6 +2,7 @@ import { PaginationResponse, ServiceResponse } from "@/interfaces/ServiceRespons
 import { HttpClient } from "./httpClient";
 import { ErrorType } from "@/enums/RequestType";
 import { GetUserDto } from "@/interfaces/User/GetUserDto";
+import { UpdatePictureDto, UpdateUserDto } from "@/interfaces/User/UpdateUserDto";
 
 export class UserAction
 {
@@ -74,6 +75,66 @@ export class UserAction
         try 
         {
             const response = await this._httpClient.GetRequestType("").execute<GetUserDto>();
+            if(response.Success)
+            {
+                return response;
+            }
+            throw new Error(response.Message);
+        }
+        catch(error)
+        {
+            return {
+                Data: null,
+                Success: false,
+                Message: error instanceof Error ? error.message : 'An error occurred',
+                ErrorType: ErrorType.Bad,
+            }
+        }
+    }
+    public async UpdateUser(update:UpdateUserDto): Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>> {
+        try 
+        {
+            const response = await this._httpClient.PutRequestType("").setData(update).execute<GetUserDto>();
+            if(response.Success)
+            {
+                return response;
+            }
+            throw new Error(response.Message);
+        }
+        catch(error)
+        {
+            return {
+                Data: null,
+                Success: false,
+                Message: error instanceof Error ? error.message : 'An error occurred',
+                ErrorType: ErrorType.Bad,
+            }
+        }
+    }
+    public async UpdatePicture(update:UpdatePictureDto): Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>> {
+        try 
+        {
+            const response = await this._httpClient.PutRequestType("/picture").setData(update).execute<GetUserDto>();
+            if(response.Success)
+            {
+                return response;
+            }
+            throw new Error(response.Message);
+        }
+        catch(error)
+        {
+            return {
+                Data: null,
+                Success: false,
+                Message: error instanceof Error ? error.message : 'An error occurred',
+                ErrorType: ErrorType.Bad,
+            }
+        }
+    }
+    public async DeleteUser(id: number): Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>> {
+        try 
+        {
+            const response = await this._httpClient.DeleteRequestType("/" + id).execute<GetUserDto>();
             if(response.Success)
             {
                 return response;

@@ -4,6 +4,7 @@ import { AddSessionGameDto } from '@/interfaces/EscapeGameInterface/Session/addS
 import { UpdateSessionReservedDto } from '@/interfaces/EscapeGameInterface/Reservation/updateSessionReservedDto';
 import { GetSessionGameDto } from '@/interfaces/EscapeGameInterface/Session/getSessionGameDto';
 import { UpdateSessionGameDto } from '@/interfaces/EscapeGameInterface/Session/updateSessionGameDto';
+import { GetSessionTemplateDto,UpdateSessionTemplateDto,AddSessionTemplateDto } from '@/interfaces/EscapeGameInterface/SessionTemplate/Sessiontempalte';
 import { HttpClient } from './httpClient'; // Assurez-vous que le chemin est correct
 import { ServiceResponse, PaginationResponse } from '@/interfaces/ServiceResponse'; // Assurez-vous que le chemin est correct
 
@@ -72,6 +73,7 @@ export class SessionAction {
             .DeleteRequestType(`/${id}`)
             .execute<GetSessionGameDto>();
     }
+    //#region reservation
     /**
      * 
      * @param id 
@@ -82,6 +84,12 @@ export class SessionAction {
             .GetRequestType('/reserved/'+id)
             .executePagination<GetSessionReservedDto>();
     }
+    public async Iscancellable(id: number): Promise<ServiceResponse<boolean> | PaginationResponse<boolean>> {
+        return await this.httpClient
+            .GetRequestType(`/reserved/cancellable/${id}`)
+            .execute<boolean>();
+    }
+
     /**
      * récupère les erservation d'un utilisateur par pagination
      * @param userId 
@@ -152,6 +160,27 @@ export class SessionAction {
             .execute<GetSessionReservedDto>();
     }
     /**
+     * 
+     * @param sessionId 
+     * @returns 
+     */
+    public async cancelAdmin(sessionId: number): Promise<ServiceResponse<GetSessionReservedDto> | PaginationResponse<GetSessionReservedDto>> {
+        return await this.httpClient
+            .PutRequestType(`/reserved/cancel/admin/${sessionId}`)
+            .execute<GetSessionReservedDto>();
+    }
+    //#endregion
+    /**
+     * 
+     * @param sessionId 
+     * @returns 
+     */
+    public async Completereservation(sessionId: number): Promise<ServiceResponse<GetSessionReservedDto> | PaginationResponse<GetSessionReservedDto>> {
+        return await this.httpClient
+            .PutRequestType(`/reserved/completed/${sessionId}`)
+            .execute<GetSessionReservedDto>();
+    }
+    /**
      * reset une session
      * @param sessionId 
      * @returns 
@@ -161,4 +190,83 @@ export class SessionAction {
             .DeleteRequestType(`/reserved/reset/${sessionId}`)
             .execute<GetSessionReservedDto>();
     }
+    // #region
+  
+
+    /**
+     * Get all session templates
+     * @returns Promise with list of session templates
+     */
+    public async getSessionTemplates(): Promise<ServiceResponse<GetSessionTemplateDto[]> | PaginationResponse<GetSessionTemplateDto[]>> {
+        return await this.httpClient
+            .GetRequestType('/template')
+            .execute<GetSessionTemplateDto[]>();
+    }
+
+    /**
+     * Get a specific session template by ID
+     * @param id - Template ID
+     * @returns Promise with session template data
+     */
+    public async getSessionTemplateById(id: number): Promise<ServiceResponse<GetSessionTemplateDto> | PaginationResponse<GetSessionTemplateDto>> {
+        return await this.httpClient
+            .GetRequestType(`/template/${id}`)
+            .execute<GetSessionTemplateDto>();
+    }   
+    /**
+     * 
+     * @param id 
+     * @returns 
+     */
+    public async getSessionTemplateByEscapeGameId(id: number): Promise<ServiceResponse<GetSessionTemplateDto> | PaginationResponse<GetSessionTemplateDto>> {
+        return await this.httpClient
+            .GetRequestType(`/template/escapegame/${id}`)
+            .execute<GetSessionTemplateDto>();
+    }
+    /**
+     * Create a new session template
+     * @param template - Template data to create
+     * @returns Promise with created template data
+     */
+    public async addSessionTemplate(template: AddSessionTemplateDto): Promise<ServiceResponse<GetSessionTemplateDto> | PaginationResponse<GetSessionTemplateDto>> {
+        return await this.httpClient
+            .PostRequestType('/template')
+            .setData(template)
+            .execute<GetSessionTemplateDto>();
+    }
+
+    /**
+     * Update an existing session template
+     * @param template - Template data to update
+     * @returns Promise with updated template data
+     */
+    public async updateSessionTemplate(template: UpdateSessionTemplateDto): Promise<ServiceResponse<GetSessionTemplateDto> | PaginationResponse<GetSessionTemplateDto>> {
+        return await this.httpClient
+            .PutRequestType('/template')
+            .setData(template)
+            .execute<GetSessionTemplateDto>();
+    }
+
+    /**
+     * Delete/deactivate a session template
+     * @param id - Template ID to delete
+     * @returns Promise with deletion result
+     */
+    public async deleteSessionTemplate(id: number): Promise<ServiceResponse<GetSessionTemplateDto> | PaginationResponse<GetSessionTemplateDto>> {
+        return await this.httpClient
+            .DeleteRequestType(`/template/${id}`)
+            .execute<GetSessionTemplateDto>();
+    }
+
+    /**
+     * Reactivate a session template
+     * @param id - Template ID to reactivate
+     * @returns Promise with reactivated template data
+     */
+    public async reactivateSessionTemplate(id: number): Promise<ServiceResponse<GetSessionTemplateDto> | PaginationResponse<GetSessionTemplateDto>> {
+        return await this.httpClient
+            .PutRequestType(`/template/reactivate/${id}`)
+            .execute<GetSessionTemplateDto>();
+    }
+    // #endregion
 }

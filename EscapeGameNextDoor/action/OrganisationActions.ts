@@ -8,6 +8,7 @@ import { UpdateUserOrganisationDto } from '@/interfaces/OrganisationInterface/Us
 import { UpdateAdressDto } from '../interfaces/OrganisationInterface/Adress/updateAdressDto';
 
 import { GetUserDto } from '@/interfaces/User/GetUserDto';
+import { Update } from 'vite/types/hmrPayload.js';
 
 
 
@@ -139,27 +140,26 @@ export class OrganisationAction {
 
     public async RemoveUserOrganisationDto(userOrganisation: UpdateUserOrganisationDto): Promise<ServiceResponse<GetOrganisationDto>|PaginationResponse<GetOrganisationDto>> {
       
-        return await this._httpClient.DeleteRequestType("/user")
+        return await this._httpClient.DeleteRequestType("/user"+userOrganisation.OrganisationId)
                             .setData<UpdateUserOrganisationDto>(userOrganisation)
                             .execute<GetOrganisationDto>();
-
     }
-
     /**
-     * Updates the address of the organisation.
-     * @param {UpdateAdressDto} updateData - The updated address data.
-     * @returns {Promise<ServiceResponse<GetOrganisationDto>>} A promise that resolves with the updated organisation data.
-     * @throws {Error} If the request to update the address fails.
+     * 
+     * @param userOrganisation 
+     * @returns 
      */
-    public async updateAddress(updateData: UpdateAdressDto): Promise<ServiceResponse<GetOrganisationDto> | PaginationResponse<GetOrganisationDto>> {
-     
-            return  await this._httpClient
-                .setData<UpdateAdressDto>(updateData)
-                .PutRequestType("/address")
-                .execute<GetOrganisationDto>();
-                
-   
+    public async UpdateUserOrganisationDto(userOrganisation: UpdateUserOrganisationDto): Promise<ServiceResponse<GetOrganisationDto>|PaginationResponse<GetOrganisationDto>> {
+      
+        return await this._httpClient.PutRequestType("/user")
+                            .setData<UpdateUserOrganisationDto>(userOrganisation)
+                            .execute<GetOrganisationDto>();
     }
+    /**
+     * 
+     * @param id 
+     * @returns 
+     */
     public async GetUserOrganisation(id: number): Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>> {
    
         return await this._httpClient
