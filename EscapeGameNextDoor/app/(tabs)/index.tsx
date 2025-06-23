@@ -7,48 +7,48 @@ import TopEscapeGames from '../indexeComponent/TopEscapeGame';
 import RecommandedEscapeGames from '../indexeComponent/RecomandedEscapegame';
 import LatestEscapeGamesNoted from '../indexeComponent/LastestEscapeNoted';
 import LatestAnnonces from '../indexeComponent/LastAnnoncePlateforme';
-
+import AppView from '@/components/ui/AppView';
+import { ThemedText } from '@/components/ThemedText';
+import LinearGradientWrapSynthwave, { SynthwaveText } from '../../components/ui/synthwaveGradienbt';
 export default function HomeScreen() {
   const theme = useTheme();
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: theme.colors.primary, dark: theme.colors.backdrop }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <Surface style={styles.container}>
-        <Surface style={styles.titleContainer} elevation={0}>
-          <Text variant="headlineLarge">Welcome!</Text>
-        </Surface>
+  <AppView>
 
+        <Surface style={styles.titleContainer} elevation={0}>
+          <LinearGradientWrapSynthwave>
+          <SynthwaveText>
+            <Text variant="headlineLarge">Welcome!</Text>
+          </SynthwaveText>
+          </LinearGradientWrapSynthwave>
+        </Surface>
+   
         <Surface style={styles.stepContainer} elevation={0}>
-          <Text variant="titleMedium">Step 1: Try it</Text>
-          <Text variant="bodyMedium">
-            Edit <Text style={styles.boldText}>app/(tabs)/index.tsx</Text> to see changes.
-            Press{' '}
-            <Text style={styles.boldText}>
-              {Platform.select({
-                ios: 'cmd + d',
-                android: 'cmd + m',
-                web: 'F12'
-              })}
-            </Text>{' '}
-            to open developer tools.
-          </Text>
+           <ThemedText type="subtitle">
+                   <Text >
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+                   </Text>
+               </ThemedText>
+        </Surface>
 
           <Surface style={styles.contentContainer} elevation={0}>
+           
             <LatestAnnonces />
+            </Surface>
+        <Surface style={styles.stepContainer} elevation={0}>
             <LatestEscapeGames />
+        </Surface>
+        <Surface style={styles.stepContainer} elevation={0}>
+         
             <RecommandedEscapeGames />
+            </Surface>
+           
+        <Surface style={styles.stepContainer} elevation={0}>
             <LatestEscapeGamesNoted />
           </Surface>
-        </Surface>
-      </Surface>
-    </ParallaxScrollView>
+  </AppView>
+  
   );
 }
 

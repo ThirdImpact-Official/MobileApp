@@ -4,7 +4,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from "expo-router";
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { ThemedView } from "@/components/ThemedView";
-import { Button, Card, Text } from 'react-native-paper';
+import { Button, Card, Text,List } from 'react-native-paper';
 import { UnitofAction } from "@/action/UnitofAction";
 import { create } from 'domain';
 
@@ -55,7 +55,7 @@ export default function FavorisComponent({ item }: FavorisComponentProps) {
             setError("");
             
             const response = await action.favorisAction.getFavoris(pageNumber);
-            
+            console.log(response);
             if (response.Success) {
                 const newData = response.Data as GetEscapeGameDto[];
                 setData(newData);
@@ -107,9 +107,8 @@ export default function FavorisComponent({ item }: FavorisComponentProps) {
                     </Text>
                 </Card.Content>
                 <Card.Actions style={{ justifyContent: 'space-between', paddingHorizontal: 16 }}>
-                    <View>
+                    <View style={{flexDirection:'column', alignItems:'center' ,justifyContent:'center'}}>
                         <View style={{flex:1}}>
-
                             <Button disabled>Précédent</Button>
                             <Text style={{ color: '#666' }}>Page {page}</Text>
                             <Button disabled>Suivant</Button>
@@ -133,6 +132,7 @@ export default function FavorisComponent({ item }: FavorisComponentProps) {
                     </Button>
                 </Card.Content>
                 <Card.Actions style={{ justifyContent: 'space-between', paddingHorizontal: 16 }}>
+                    <View style={{flexDirection:'column', alignItems:'center' ,justifyContent:'center',flex:1}}>
                     <Button 
                         disabled={page <= 1}
                         onPress={handlePrevPage}
@@ -146,6 +146,8 @@ export default function FavorisComponent({ item }: FavorisComponentProps) {
                     >
                         Suivant
                     </Button>
+
+                    </View>
                 </Card.Actions>
             </Card>
         );
@@ -164,6 +166,7 @@ export default function FavorisComponent({ item }: FavorisComponentProps) {
                     </Text>
                 </Card.Content>
                 <Card.Actions style={{ justifyContent: 'space-between', paddingHorizontal: 16 }}>
+                     <View style={{flexDirection:'column', alignItems:'center' ,justifyContent:'center',flex:1}}>
                     <Button 
                         disabled={page <= 1}
                         onPress={handlePrevPage}
@@ -178,6 +181,7 @@ export default function FavorisComponent({ item }: FavorisComponentProps) {
                     >
                         Suivant
                     </Button>
+                    </View>
                 </Card.Actions>
             </Card>
         );
@@ -185,8 +189,8 @@ export default function FavorisComponent({ item }: FavorisComponentProps) {
 
     // Success state with data
     return (
-        <Card>
-            <Card.Content>
+        <React.Fragment>
+        <List.Section>
                 <View>
                     {data.map((favorisItem, index) => (
                         <View 
@@ -197,8 +201,9 @@ export default function FavorisComponent({ item }: FavorisComponentProps) {
                         </View>
                     ))}
                 </View>
-            </Card.Content>
-            <Card.Actions style={{ justifyContent: 'space-between', paddingHorizontal: 16 }}>
+        </List.Section>
+           
+            <View style={{ justifyContent: 'space-between', paddingHorizontal: 16 }}>
                 <View style={style.paginationRow}>
                     <View style={style.responsivebutton}>
                     <Button 
@@ -222,8 +227,8 @@ export default function FavorisComponent({ item }: FavorisComponentProps) {
 
                     </View>
                     </View>
-            </Card.Actions>
-        </Card>
+            </View>
+            </React.Fragment>
     );
 }
 

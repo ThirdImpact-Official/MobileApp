@@ -3,21 +3,13 @@ import { GetOrganisationDto } from '../interfaces/OrganisationInterface/Organisa
 import { PaginationResponse, ServiceResponse } from '@/interfaces/ServiceResponse';
 import { AddUserOrganisationDto } from '../interfaces/OrganisationInterface/UserOrganisation/addUserOrganisationDto';
 import { ErrorType } from '@/enums/RequestType';
-import  {AddOrganisationDto}  from '@/interfaces/OrganisationInterface/Organisation/addOrganisationDto';
-import { UpdateUserOrganisationDto } from '@/interfaces/OrganisationInterface/UserOrganisation/updateUserOrganisationDto';
-import { UpdateAdressDto } from '../interfaces/OrganisationInterface/Adress/updateAdressDto';
-
+import { AddOrganisationDto } from '@/interfaces/OrganisationInterface/Organisation/addOrganisationDto';
+import { UpdateUserOrganisationDto } from '../interfaces/OrganisationInterface/UserOrganisation/updateUserOrganisationDto';
 import { GetUserDto } from '@/interfaces/User/GetUserDto';
-import { Update } from 'vite/types/hmrPayload.js';
-
-
 
 export class OrganisationAction {
-    private readonly HttpClient = HttpClient.getInstance();
-  
     private _httpClient: HttpClient;
     private apibaseurl: string;
-
 
     constructor(apibaseurl: string = "http://localhost:7159/escape-game/organisation") {
         this.apibaseurl = apibaseurl;
@@ -38,24 +30,33 @@ export class OrganisationAction {
         return await this._httpClient.GetRequestType("/" + id)
             .execute<GetOrganisationDto>();
     }
-    public async GetOrganisationbyName(name:string,page:number,pageSize:number): Promise<ServiceResponse<GetOrganisationDto>|PaginationResponse<GetOrganisationDto>>
-    {
-            const param: string =`?page=${page}&pageSize=${pageSize}&name=${name}`;
-            return await this._httpClient.GetRequestType("/byname" +param )
+
+    /**
+     * Retrieves organisations by name with pagination.
+     * @param {string} name - The name to search for.
+     * @param {number} page - The page number.
+     * @param {number} pageSize - The number of items per page.
+     * @returns {Promise<ServiceResponse<GetOrganisationDto>|PaginationResponse<GetOrganisationDto>>} A promise that resolves with the search results.
+     * @throws {Error} If the request to search organisations fails.
+     */
+    public async GetOrganisationbyName(name: string, page: number, pageSize: number): Promise<ServiceResponse<GetOrganisationDto>|PaginationResponse<GetOrganisationDto>> {
+        const param: string = `?page=${page}&pageSize=${pageSize}&name=${name}`;
+        return await this._httpClient.GetRequestType("/byname" + param)
             .execute<GetOrganisationDto>();
     }
+
     /**
      * Retrieves all organisations from the server.
-     * @returns {Promise<ServiceResponse<GetOrganisationDto[]>>} A promise that resolves with a ServiceResponse object.
+     * @returns {Promise<PaginationResponse<GetOrganisationDto>>} A promise that resolves with a ServiceResponse object.
      *          If the request is successful, the data property of the ServiceResponse object will contain an array of
      *          GetOrganisationDto objects. If the request fails, the data property will be null and the success property will
      *          be false.
      * @throws {Error} If the request to retrieve all organisations fails.
      */
-    public async GetAllOrganisation(page:number ,pageSize: number): Promise<PaginationResponse<GetOrganisationDto>> {
-            const param: string =`?page=${page}&pageSize=${pageSize}`;
-            return await this._httpClient.GetRequestType(param)
-                .executePagination<GetOrganisationDto>();
+    public async GetAllOrganisation(page: number, pageSize: number): Promise<PaginationResponse<GetOrganisationDto>> {
+        const param: string = `?page=${page}&pageSize=${pageSize}`;
+        return await this._httpClient.GetRequestType(param)
+            .executePagination<GetOrganisationDto>();
     }
 
     /**
@@ -98,9 +99,10 @@ export class OrganisationAction {
      * @throws {Error} If the request to delete the organisation fails.
      */
     public async DeleteOrganisation(id: number): Promise<ServiceResponse<GetOrganisationDto>|PaginationResponse<GetOrganisationDto>> {
-        return  await this._httpClient.DeleteRequestType("/" + id)
+        return await this._httpClient.DeleteRequestType("/" + id)
                                 .execute<GetOrganisationDto>(); 
     }
+
     /**
      * Adds a new organisation.
      * @param {AddOrganisationDto} organisation - The details of the organisation to be added.
@@ -111,24 +113,22 @@ export class OrganisationAction {
      * @throws {Error} If the request to add the organisation fails.
      */
     public async AddanOrganisation(organisation: AddOrganisationDto): Promise<ServiceResponse<GetOrganisationDto>|PaginationResponse<GetOrganisationDto>> {
-        
-            return await this._httpClient.PostRequestType("")
-                                    .setData(organisation)
-                                    .execute<GetOrganisationDto>();
+        return await this._httpClient.PostRequestType("")
+                                .setData(organisation)
+                                .execute<GetOrganisationDto>();
     }
+
     /**
      * Adds a user to an organisation.
      * @param {AddUserOrganisationDto} userOrganisation - The data containing user and organisation details.
      * @returns {Promise<ServiceResponse<GetOrganisationDto>>} A promise that resolves with the status of the addition operation.
      * @throws {Error} If the request to add the user to the organisation fails.
      */
-
     public async addUserOrganisation(userOrganisation: AddUserOrganisationDto): Promise<ServiceResponse<GetOrganisationDto> | PaginationResponse<GetOrganisationDto>> {
-        
-           return await this._httpClient
-                    .setData(userOrganisation)
-                    .PostRequestType("/user")
-                    .execute<GetOrganisationDto>();
+        return await this._httpClient
+                .setData(userOrganisation)
+                .PostRequestType("/user")
+                .execute<GetOrganisationDto>();
     }
 
     /**
@@ -137,39 +137,42 @@ export class OrganisationAction {
      * @returns {Promise<ServiceResponse<GetOrganisationDto>>} A promise that resolves with the status of the removal operation.
      * @throws {Error} If the request to remove the user from the organisation fails.
      */
-
     public async RemoveUserOrganisationDto(userOrganisation: UpdateUserOrganisationDto): Promise<ServiceResponse<GetOrganisationDto>|PaginationResponse<GetOrganisationDto>> {
-      
-        return await this._httpClient.DeleteRequestType("/user"+userOrganisation.OrganisationId)
+        return await this._httpClient.DeleteRequestType("/user")
                             .setData<UpdateUserOrganisationDto>(userOrganisation)
                             .execute<GetOrganisationDto>();
     }
+
     /**
-     * 
-     * @param userOrganisation 
-     * @returns 
+     * Updates a user's details within an organisation.
+     * @param {UpdateUserOrganisationDto} userOrganisation - The updated user organisation data.
+     * @returns {Promise<ServiceResponse<GetOrganisationDto>>} A promise that resolves with the status of the update operation.
+     * @throws {Error} If the request to update the user organisation fails.
      */
     public async UpdateUserOrganisationDto(userOrganisation: UpdateUserOrganisationDto): Promise<ServiceResponse<GetOrganisationDto>|PaginationResponse<GetOrganisationDto>> {
-      
         return await this._httpClient.PutRequestType("/user")
                             .setData<UpdateUserOrganisationDto>(userOrganisation)
                             .execute<GetOrganisationDto>();
     }
+
     /**
-     * 
-     * @param id 
-     * @returns 
+     * Retrieves a specific user within an organisation.
+     * @param {number} id - The ID of the user to retrieve.
+     * @returns {Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>>} A promise that resolves with the user data.
+     * @throws {Error} If the request to retrieve the user fails.
      */
     public async GetUserOrganisation(id: number): Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>> {
-   
         return await this._httpClient
             .GetRequestType("/user/" + id).execute<GetUserDto>();   
-
     }
+
+    /**
+     * Retrieves all users within organisations with pagination.
+     * @returns {Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>>} A promise that resolves with paginated user data.
+     * @throws {Error} If the request to retrieve users fails.
+     */
     public async GetUserOrganisationlst(): Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>> {
-      
         return await this._httpClient.GetRequestType("/user")
             .executePagination<GetUserDto>();   
-
     }
 }

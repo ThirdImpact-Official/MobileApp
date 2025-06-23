@@ -1,9 +1,7 @@
-export interface AddSignalementDto {
+export interface AddSignalementForumDto {
     forumId: number | null;
     postForumId: number | null;
     userId: number;
     signalementTypeId: number;
-    description: string | null;
-    isPertinent: boolean;
-    isClosed: boolean;
+    content: string | null;
 }

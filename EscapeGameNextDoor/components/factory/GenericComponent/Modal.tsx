@@ -1,94 +1,105 @@
-import { Button, Modal, Typography, Box, Fade, Backdrop } from "@mui/material";
+import { Button, Modal, Text } from "react-native-paper";
+import { View, ViewStyle } from 'react-native';
 import React, { FC, useState } from "react";
 
-  
-
 interface ModalProps {
-    ButtonColor?: "primary" | "secondary" | "success" | "error" | "info" | "warning";
-    ButtonTitle?: string;
-    children: React.ReactNode;
-    Title: string;
-    Description: string;
-    Method?:() => void;
+  ButtonColor?: "primary" | "secondary" | "success" | "error" | "info" | "warning";
+  ButtonTitle?: string;
+  children: React.ReactNode;
+  Title: string;
+  Description: string;
+  Method?: () => void;
 }
 
-
-
-  const ModalComponent: FC<ModalProps> = ({ children, Method, ButtonTitle = "Open Modal", Title, Description,ButtonColor }) => {
-    const [open, setOpen] = useState(false);
-    const handleOpen = () =>{
-      setOpen(true);
-      if(Method !== undefined)
-      {
-        Method();
-      }
-    } 
-    const handleClose = () => setOpen(false);
+const ModalComponent: FC<ModalProps> = ({ 
+  children, 
+  Method, 
+  ButtonTitle = "Open Modal", 
+  Title, 
+  Description, 
+  ButtonColor = "primary" 
+}) => {
+  const [visible, setVisible] = useState(false);
   
-    return (
-      <>
-        <Button variant="contained"
-                color={ButtonColor} 
-                onClick={handleOpen}>
-          {ButtonTitle}
-        </Button>
-  
-        <Modal
-          open={open}
-          onClose={handleClose}
-          closeAfterTransition
-          slots={{ backdrop: Backdrop }}
-          slotProps={{
-            backdrop: {
-              timeout: 500,
-            },
-          }}
-        >
-          <Fade in={open}>
-            <Box
-              sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                bgcolor: "background.paper",
-                borderRadius: 3,
-                boxShadow: 8,
-                p: 4,
-                width: { xs: "90%", sm: 400 },
-                maxHeight: "90vh",
-                overflowY: "auto",
-              }}
-            >
-              <Typography variant="h6" component="h2" textAlign="center">
-                {Title}
-              </Typography>
-  
-              {Description && (
-                <Typography sx={{ mt: 2, textAlign: "center" }}>
-                  {Description}
-                </Typography>
-              )}
-  
-              {children && (
-                <Box sx={{ mt: 3 }}>
-                  {children}
-                </Box>
-              )}
-  
-              <Box sx={{ mt: 4, display: "flex", justifyContent: "center" }}>
-                <Button variant="contained" 
-                        color={"primary" }
-                        onClick={handleClose}>
-                  Fermer
-                </Button>
-              </Box>
-            </Box>
-          </Fade>
-        </Modal>
-      </>
-    );
+  const handleOpen = () => {
+    setVisible(true);
+    if (Method !== undefined) {
+      Method();
+    }
   };
-  
-  export default ModalComponent;
-  
+
+  const handleClose = () => setVisible(false);
+
+  // Modal container style
+  const containerStyle: ViewStyle = {
+    backgroundColor: 'white',
+    padding: 20,
+    margin: 20,
+    borderRadius: 8,
+  };
+
+  return (
+    <>
+      <Button
+        mode="contained"
+        onPress={handleOpen}
+        buttonColor={getButtonColor(ButtonColor)}
+      >
+        {ButtonTitle}
+      </Button>
+
+      <Modal
+        visible={visible}
+        onDismiss={handleClose}
+        contentContainerStyle={containerStyle}
+      >
+        <View>
+          <Text variant="headlineSmall" style={{ marginBottom: 16 }}>
+            {Title}
+          </Text>
+          
+          {Description && (
+            <Text variant="bodyMedium" style={{ marginBottom: 16 }}>
+              {Description}
+            </Text>
+          )}
+          
+          {children && (
+            <View style={{ marginBottom: 16 }}>
+              {children}
+            </View>
+          )}
+          
+          <Button
+            mode="outlined"
+            onPress={handleClose}
+          >
+            Fermer
+          </Button>
+        </View>
+      </Modal>
+    </>
+  );
+};
+
+// Helper function to map color props to actual colors
+const getButtonColor = (color: string): string => {
+  switch (color) {
+    case "primary":
+      return "#6200ee";
+    case "secondary":
+      return "#03dac6";
+    case "success":
+      return "#4caf50";
+    case "error":
+      return "#f44336";
+    case "info":
+      return "#2196f3";
+    case "warning":
+      return "#ff9800";
+    default:
+      return "#6200ee";
+  }
+};
+
+export default ModalComponent;

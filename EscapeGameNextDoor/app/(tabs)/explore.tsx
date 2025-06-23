@@ -22,6 +22,7 @@ import { ThemedText } from '@/components/ThemedText';
 export default function TabTwoScreen() {
   const { isAuthenticated, isLoading } = useAuth();
   const [isOrganisation, setIsOrganisation] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   if (isLoading) {
     return (
@@ -61,6 +62,7 @@ export default function TabTwoScreen() {
       </AppView>
     );
   }
+  if(error) return <Text>Error: {error}</Text>; 
 }
 function OrganisationSelection() {
   const httpAction = new UnitofAction();
@@ -70,6 +72,7 @@ function OrganisationSelection() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [error,setError] = useState<string | null>(null);
 
   const fetchOrganisations = async (currentPage: number, searchValue: string) => {
     setIsLoading(true);
@@ -83,6 +86,7 @@ function OrganisationSelection() {
         setTotalPages(response.TotalPage);
       }
     } catch (error) {
+      setError('Error fetching organisations');
       console.error('Error fetching organisations:', error);
     } finally {
       setIsLoading(false);
@@ -102,7 +106,19 @@ function OrganisationSelection() {
   useEffect(() => {
     fetchOrganisations(page, searchTerm);
   }, []);
+  if(error)
+    {
+      return (
+        <Card>
+          <Card.Content>
+          <Text>Error: {error}</Text>)
 
+          </Card.Content>
+        </Card>)
+
+
+    } 
+  
   return (
     <ScrollView>
       <Card style={styles.cardContainer}>
@@ -180,14 +196,14 @@ function EscapeGameSelection() {
   const [category, setCategory] = useState<GetCategoryDto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFiltered, setIsFiltered] = useState(false);
-  const [selectCategory, setSelectCategory] = useState<number | null>(null);
-  const [selectPrice, setSelectPrice] = useState<number | null>(null);
-  const [selectDifficulty, setSelectDifficulty] = useState<number | null>(null);
+  const [selectCategory, setSelectCategory] = useState<number | null>(0);
+  const [selectPrice, setSelectPrice] = useState<number | null>(0);
+  const [selectDifficulty, setSelectDifficulty] = useState<number | null>(0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const httpAction = new UnitofAction();
   const router = useRouter();
-
+  const [error,setError] = useState<string | null>(null);
   const fetchEscapeGames = async () => {
     setIsLoading(true);
     try {
@@ -196,7 +212,11 @@ function EscapeGameSelection() {
         setEscapeGames(response.Data as GetEscapeGameDto[]);
         setTotalPages(response.TotalPage);
       }
+      else{
+        setError(response.Message);
+      }
     } catch (e) {
+      setError(e instanceof Error ? e.message : "An error occurred");
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -219,7 +239,7 @@ function EscapeGameSelection() {
         setTotalPages(response.TotalPage);
       }
     } catch (e) {
-      console.error(e);
+       setError(e instanceof Error ? e.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -250,6 +270,7 @@ function EscapeGameSelection() {
         const diffRes = await httpAction.escapeGameAction.GetDifficultyLevelDto();
         if (diffRes.Success) console.log(diffRes); setDifficulty(diffRes.Data as GetDifficultyLevelDto[]);
       } catch (e) {
+        setError('Error fetching escape games');
         console.error(e);
       }
       
@@ -272,6 +293,18 @@ function EscapeGameSelection() {
     setSelectDifficulty(null);
   };
 
+   if(error)
+    {
+      return (
+        <Card>
+          <Card.Content>
+          <Text>Error: {error}</Text>)
+
+          </Card.Content>
+        </Card>)
+
+
+    } 
   return (
     <ScrollView>
       <Card style={styles.cardContainer}>

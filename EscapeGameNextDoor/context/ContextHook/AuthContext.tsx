@@ -15,7 +15,7 @@ import { ServiceResponse } from "@/interfaces/ServiceResponse";
 // Constants
 const AUTH_TOKEN_KEY = "Token";
 const AUTH_STATUS_KEY = "isAuthenticated";
-
+const AUTH_REFRESH_TOKEN_KEY = "RefreshToken";
 // Types
 interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<void>;
@@ -81,6 +81,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const removeAuth = async () => {
     await deleteStorageItem(AUTH_TOKEN_KEY);
     await deleteStorageItem(AUTH_STATUS_KEY);
+     await deleteStorageItem(AUTH_REFRESH_TOKEN_KEY);
     setIsAuthenticated(false);
     setUser({
       username: "",
@@ -127,7 +128,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
         if (authData.token) {
           await setStorageItem(AUTH_TOKEN_KEY, authData.token);
           await setStorageItem(AUTH_STATUS_KEY, "true");
-
+          await setStorageItem(AUTH_REFRESH_TOKEN_KEY, authData.refreshToken);
           axios.defaults.headers.common["Authorization"] = `Bearer ${authData.token}`;
           await getUserInformation(authData.token);
           setIsAuthenticated(true);
@@ -150,6 +151,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await action.CredentialAction.Logout();
       if (!response.Success) {
+      
         console.warn("Logout failed:", response.Message);
       }
     } catch (error) {

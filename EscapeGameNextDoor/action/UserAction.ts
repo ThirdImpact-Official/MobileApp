@@ -111,24 +111,25 @@ export class UserAction
             }
         }
     }
-    public async UpdatePicture(update:UpdatePictureDto): Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>> {
+    public async UpdatePicture(update: FormData): Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>> {
         try 
         {
-            const response = await this._httpClient.PutRequestType("/picture").setData(update).execute<GetUserDto>();
-            if(response.Success)
-            {
-                return response;
-            }
-            throw new Error(response.Message);
+            const response = await this._httpClient
+            .PutRequestType("/picture")
+            .setFormData(update) // <--- utilise setFormData si c’est défini pour envoyer du multipart/form-data
+            .execute<GetUserDto>();
+
+        if (response.Success) {
+            return response;
         }
-        catch(error)
-        {
-            return {
-                Data: null,
-                Success: false,
-                Message: error instanceof Error ? error.message : 'An error occurred',
-                ErrorType: ErrorType.Bad,
-            }
+        throw new Error(response.Message);
+    } catch (error) {
+        return {
+            Data: null,
+            Success: false,
+            Message: error instanceof Error ? error.message : 'An error occurred',
+            ErrorType: ErrorType.Bad,
+        };
         }
     }
     public async DeleteUser(id: number): Promise<ServiceResponse<GetUserDto> | PaginationResponse<GetUserDto>> {

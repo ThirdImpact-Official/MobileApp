@@ -6,7 +6,15 @@ import FormUtils from '@/classes/FormUtils';
 import { UnitofAction } from '@/action/UnitofAction';
 import AppView from '@/components/ui/AppView';
 import { Card, Text, Button, Portal, Dialog, useTheme, IconButton } from 'react-native-paper';
-
+import { Colors } from '../../../constants/Colors';
+import { useColorScheme } from '../../../hooks/useColorScheme.web';
+import { ThemedText } from '@/components/ThemedText';
+import { styled } from '@mui/material/styles';
+import { RemoveFavorisDto } from '../../../interfaces/EscapeGameInterface/Favoris/removeFavoris';
+import { LinearGradient } from 'expo-linear-gradient';
+import LinearGradientWrap from '@/components/ui/linearGradientWrap';
+import LinearGradientWrapSynthwave from '@/components/ui/synthwaveGradienbt';
+import { ArrowLeft } from 'react-native-feather';
 export default function EscapeGameDetails() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
@@ -20,7 +28,22 @@ export default function EscapeGameDetails() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isErrorVisible, setIsErrorVisible] = useState(false);
+    const [isfavorit,setfavorite    ]= useState(false);
+    const [hasbeenComplete,setcompleted]= useState(false);  
 
+
+    const fetchFavorites = async () => {
+        const response = await action.favorisAction.Isfavoris(Number(id));
+        if(response.Success){
+            setfavorite(response.Data as boolean);
+        }
+    }
+    const fetchCompleted = async () => {
+        const response = await action.completegameAction.checkEscapeGameCompletion(Number(id));
+        if(response.Success){
+            setcompleted(response.Data as boolean);
+        }
+    }
     const fetchEscapeGame = async () => {
         try {
             setIsLoading(true);
@@ -30,7 +53,7 @@ export default function EscapeGameDetails() {
                 throw new Error('Invalid game ID');
             }
 
-            const response = await action.escapeGameAction.getEscapeGameById(numericId);
+            const response = await action.escapeGameAction.getEscapeGameById(numericId) as any;
 
             if (!response.Success || !response.Data) {
                 throw new Error(response.Message || 'Failed to load game details');
@@ -45,22 +68,35 @@ export default function EscapeGameDetails() {
         }
     };
 
-    const AddFavorite = async () => {
+    const AddFavoris = async () => {
         try {
-            const response = await action.favorisAction.addFavoris(state!.esgId);
+            const response = await action.favorisAction.addFavoris(state!.esgId) as any;
             if (response.Success) {
+                setfavorite(true);
                 showDialog('Success', 'Game added to favorites');
             }
         } catch (error) {
             showDialog('Error', 'Failed to add to favorites');
         }
     };
-
+    const RemoveFavoris = async () => {
+        try {
+            const response = await action.favorisAction.removeFavoris(state!.esgId) as any;
+            if (response.Success) {
+                setfavorite(false);
+                showDialog('Success', 'Game removed from favorites');
+            }
+        } catch (error) {
+            showDialog('Error', 'Failed to remove from favorites');
+        }
+    }
     const showDialog = (title: string, message: string) => {
         // Implement dialog showing logic here using react-native-paper Dialog
     };
 
     useEffect(() => {
+        fetchFavorites();
+        fetchCompleted();
         fetchEscapeGame();
     }, [numericId]);
 
@@ -92,18 +128,31 @@ export default function EscapeGameDetails() {
         <AppView>
             <ScrollView contentContainerStyle={styles.scrollViewContent}>
                 <Card style={styles.card}>
-                    <Card.Title
-                        title={state.esgNom || 'Untitled Game'}
-                        subtitle={`Created: ${formattedDate}`}
-                        right={(props) => (
-                            <IconButton
-                                {...props}
-                                icon="heart"
-                                onPress={AddFavorite}
-                            />
-                        )}
-                    />
+                    {
+                        hasbeenComplete? (
+                            <Card.Content style={{backgroundColor:'green'}}>
+                                <ThemedText style={{fontSize:20,textAlign:'center'}}>Vous avez Completer cette escapegame </ThemedText>
+                            </Card.Content>
+                        ):<></>
+                    }
+                    <LinearGradientWrapSynthwave>
+                        <Card.Title
+                            title={state.esgTitle || 'Untitled Game'}
+                            subtitle={`Created: ${formattedDate}`}
+                            left={(props) => <ThemedText><ArrowLeft {...props} onPress={() => router.back()}/></ThemedText> } 
+                            right={(props) => (
+                                <IconButton
+                                
+                                    {...props}
+                                    icon={isfavorit ? 'heart' : 'heart-outline'}
+                                    iconColor={isfavorit ? 'red' : 'black'}
+                                    onPress={isfavorit ? RemoveFavoris : AddFavoris}
+                                />
+                            )}
+                        />
 
+                    </LinearGradientWrapSynthwave>
+               
                     <Card.Cover
                         source={{ uri: state.esgImgResources || 'https://via.placeholder.com/300x200?text=No+Image' }}
                         style={styles.image}
@@ -125,7 +174,7 @@ export default function EscapeGameDetails() {
                             />
                             <DetailItem
                                 label="Difficulty"
-                                value={state.difficultyLevel?.dileName || 'Not specified'}
+                                value={state.difficultyLevel?.dileLevel || 'Not specified'}
                             />
                             <DetailItem
                                 label="Price"
@@ -135,6 +184,7 @@ export default function EscapeGameDetails() {
                     </Card.Content>
 
                     <Card.Actions style={styles.actions}>
+                 
                         <Button
                             mode="contained"
                             onPress={() => router.push(`/Organisation/SessionGame/SessionGameList?id=${state.esgId}`)}
@@ -143,7 +193,10 @@ export default function EscapeGameDetails() {
                         </Button>
                         <Button
                             mode="contained"
-                            onPress={() => router.push('/Organisation/ActivitityPlace/ActivityPlaceList')}
+                            onPress={() => router.push({
+                                pathname: '/Organisation/ActivitityPlace/ActivityPlaceList',
+                                params: { id: id }
+                            })}
                         >
                             Activities
                         </Button>
@@ -156,6 +209,16 @@ export default function EscapeGameDetails() {
                         >
                             Events
                         </Button>
+                        <Button
+                            mode="contained"
+                            onPress={() => router.push({
+                                pathname: '/Organisation/Rating/Ratinglist',
+                                params: { id: id }
+                            })}
+                        >
+                            Ratings
+                        </Button>
+                 
                     </Card.Actions>
                 </Card>
             </ScrollView>
@@ -211,6 +274,12 @@ const styles = StyleSheet.create({
     description: {
         marginBottom: 16,
     },
+     gradientHeader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
     detailsGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',

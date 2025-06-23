@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, TouchableOpacity } from "react-native";
-import { Card, Avatar, IconButton, ActivityIndicator } from "react-native-paper";
+import { StyleSheet, View, TouchableOpacity, Image } from 'react-native';
+import { Card, Avatar, IconButton, ActivityIndicator, Button } from "react-native-paper";
 import { GetEscapeGameDto } from "@/interfaces/EscapeGameInterface/EscapeGame/getEscapeGameDto";
 import { ThemedText } from '@/components/ThemedText';
 import AppView from "@/components/ui/AppView";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { UnitofAction } from "@/action/UnitofAction";
 import { useToasted } from "@/context/ContextHook/ToastedContext";
-
+import { LinearGradient } from "expo-linear-gradient";
 const PAGE_SIZE = 10;
 
 export default function EscapeGameOrganisation() {
@@ -108,18 +108,27 @@ const notif = useToasted();
             <TouchableOpacity key={game.esgId} onPress={() => navigateToDetails(game.esgId)}>
 
               <Card key={`${game.esgId}-${page}`} style={styles.card}>
-                <Card.Title
-                  title={game.esgNom || "Nom inconnu"}
-                  subtitle={game.esgContent|| "Pas de description"}
-                  left={(props) => <Avatar.Icon {...props} icon="gamepad" />}
-                  right={(props) => (
-                    <IconButton
-                      {...props}
-                      icon="chevron-right"
-                      onPress={() => navigateToDetails(game.esgId)}
-                  />
-                )}
-              />
+                 <LinearGradient
+                            style={styles.gradientHeader}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            colors={['#667eea', '#764ba2', '#f093fb']} // ✅ 3 couleurs pour un beau gradient
+                          >
+                            
+                  <Card.Title
+                    title={game.esgNom || "Nom inconnu"}
+                  
+                    titleStyle={{margin:16 }}
+                    left={(props) => <Avatar.Image   source={game.esgImgResources ? { uri: game.esgImgResources } : require("@/assets/images/react-logo.png")} />}
+                    right={(props) => (
+                      <IconButton
+                        {...props}
+                        icon="chevron-right"
+                        onPress={() => navigateToDetails(game.esgId)}
+                    />
+                  )}
+                />
+                          </LinearGradient>
               <Card.Content style={styles.cardContent}>
                 <View style={styles.gameInfo}>
                   <ThemedText style={styles.infoText}>
@@ -138,39 +147,30 @@ const notif = useToasted();
           ))}
 
           <View style={styles.pagination}>
-            <TouchableOpacity 
+            <Button 
+             mode="contained"
               onPress={handlePrevPage}
               disabled={page === 1}
               style={[styles.paginationButton, page === 1 && styles.disabledButton]}
             >
               <ThemedText style={styles.paginationText}>◀ Précédent</ThemedText>
-            </TouchableOpacity>
+            </Button>
             
             <ThemedText style={styles.pageText}>
               Page {page} / {totalPages}
             </ThemedText>
             
-            <TouchableOpacity 
+            <Button
               onPress={handleNextPage}
+              mode="contained"
               disabled={page === totalPages}
               style={[styles.paginationButton, page === totalPages && styles.disabledButton]}
             >
               <ThemedText style={styles.paginationText}>Suivant ▶</ThemedText>
-            </TouchableOpacity>
+            </Button>
           </View>
 
-          <Card style={styles.aboutCard}>
-            <Card.Title
-              title="Escape Game Next Door"
-              subtitle="Votre partenaire pour des aventures inoubliables !"
-              left={(props) => <Avatar.Icon {...props} icon="information" />}
-            />
-            <Card.Content>
-              <ThemedText>
-                Découvrez notre sélection de jeux d'évasion uniques et passionnants.
-              </ThemedText>
-            </Card.Content>
-          </Card>
+         
         </>
       ) : (
         <View style={styles.center}>
@@ -216,8 +216,14 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 10,
   },
+   gradientHeader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
   card: {
-    backgroundColor: "#FFFFFF",
+  
     borderRadius: 12,
     overflow: "hidden",
     elevation: 3,
@@ -236,12 +242,12 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 14,
-    color: "#666",
+   
     fontWeight: '500',
   },
   details: {
     fontSize: 14,
-    color: "#444",
+   
   },
   pagination: {
     flexDirection: "row",
@@ -254,14 +260,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 5,
-    backgroundColor: '#F0F0F0',
   },
   disabledButton: {
     opacity: 0.5,
   },
   paginationText: {
     fontSize: 14,
-    color: "#007AFF",
+   
   },
   pageText: {
     fontSize: 14,

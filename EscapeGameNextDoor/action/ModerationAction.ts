@@ -3,7 +3,8 @@ import { HttpClient } from './httpClient';
 import { ServiceResponse } from '@/interfaces/ServiceResponse';
 import { GetSignalementTypeDto } from '@/interfaces/EscapeGameInterface/Moderation/getSignalementTypeDto';
 import { GetSignalementDto } from '@/interfaces/Moderation/getSignalementDto';
-import { AddSignalementDto } from '@/interfaces/Moderation/addSignalementDto';
+import { AddSignalementDto } from '@/interfaces/EscapeGameInterface/Moderation/addSignalementDto';
+import { AddSignalementForumDto } from '@/interfaces/Moderation/addSignalementDto';
 export class ModerationAction{
     private httpclient : HttpClient
     private apibaseurl : string = "http://localhost:7159"
@@ -19,8 +20,8 @@ export class ModerationAction{
      *          a list of the signalement types for the user. If the request fails, the data property will be null and the
      *          success property will be false.
      */
-    public async GetSignalementTypeUser(): Promise<ServiceResponse<GetSignalementTypeDto>> {
-        const res = await this.httpclient.GetRequestType("/escape-game/moderation/typer").execute<GetSignalementTypeDto>();
+    public async GetSignalementTypeUser(): Promise<ServiceResponse<GetSignalementTypeDto[]>> {
+        const res = await this.httpclient.GetRequestType("/escape-game/moderation/type").execute<GetSignalementTypeDto[]>();
         return res;
     }
 /**
@@ -38,11 +39,11 @@ export class ModerationAction{
 
     // #endregion   
     // #region forum 
-    public async GetSignalementTypeForum(): Promise<ServiceResponse<GetSignalementTypeDto>> {
-        const res = await this.httpclient.GetRequestType("/escape-game/moderation/type").execute<GetSignalementTypeDto>();
+    public async GetSignalementTypeForum(): Promise<ServiceResponse<GetSignalementTypeDto[]>> {
+        const res = await this.httpclient.GetRequestType("/escape-game/moderation/type").execute<GetSignalementTypeDto[]>();
         return res;
     }
-    public async CreateSignalementForum(dto: AddSignalementDto): Promise<ServiceResponse<GetSignalementDto>> {
+    public async CreateSignalementForum(dto: AddSignalementForumDto): Promise<ServiceResponse<GetSignalementDto>> {
         const res = await this.httpclient.PostRequestType("/publication/moderation").setData(dto).execute<GetSignalementDto>();
         return res;
     }

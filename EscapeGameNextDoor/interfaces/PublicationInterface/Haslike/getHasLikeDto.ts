@@ -4,7 +4,7 @@ export interface GetHasLikeDto  {
     id: number;
     pubId: number;
     userId: string;
-    typeLIke: GetTypeLikeDto | null;
+    typeLike: GetTypeLikeDto | null;
     creationDate: string;
     updateDate: string;
 }

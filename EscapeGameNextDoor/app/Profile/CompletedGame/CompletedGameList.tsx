@@ -1,22 +1,26 @@
+import React from 'react';
 import { GetEscapeGameDto } from '../../../interfaces/EscapeGameInterface/EscapeGame/getEscapeGameDto';
 import { useState, useEffect } from 'react';
 import { UnitofAction } from '@/action/UnitofAction';
 import AppView from '@/components/ui/AppView';
-import { Card, ActivityIndicator, Text } from 'react-native-paper';
+import { Card, ActivityIndicator, Text,  } from 'react-native-paper';
 import ItemDisplay from '@/components/factory/GenericComponent/ItemDisplay';
-import { View } from 'react-native';
+import { ScrollView, View ,StyleSheet} from 'react-native';
+const PAGE_SIZE = 5;
 export default function CompletedList() {
     const [completedGames, setCompletedGames] = useState<GetEscapeGameDto[] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const action = new UnitofAction();
-
+    const [page,setpage]= useState<number>(1);
+    const [totalPages,setTotalPages] = useState<number>(0);
     useEffect(() => {
         const fetchCompletedGames = async () => {
             try {
-                const response = await action.escapeGameAction.getCompletedGames();
+                const response = await action.completegameAction.getUserCompletedGames(page,PAGE_SIZE);
                 if (response.Success) {
-                    setCompletedGames(response.Data);
+                    setCompletedGames(response.Data as GetEscapeGameDto[]);
+                    setTotalPages(response.TotalPage);
                 } else {
                     setError(response.Message);
                 }
@@ -31,7 +35,7 @@ export default function CompletedList() {
 
     if (isLoading) {
         return (
-            <AppView>
+            <ScrollView>
                 <Card>
                     <Card.Title title="Loading">
                     </Card.Title>
@@ -41,13 +45,13 @@ export default function CompletedList() {
                         </View>
                     </Card.Content>
                 </Card>
-            </AppView>
+            </ScrollView>
         );
     }
 
     if (error) {
         return (
-            <AppView>
+            <ScrollView>
                 <Card>
                     <Card.Title title="Error">
                     </Card.Title>
@@ -57,23 +61,36 @@ export default function CompletedList() {
                         </View>
                     </Card.Content>
                 </Card>
-            </AppView>
+            </ScrollView>
         );
     }
 
     return (
-        <AppView>
+        <ScrollView>
             <Card>
-                <Card.Title title="Completed Games">
-                </Card.Title>
+                <Card.Title title="Completed Games" titleStyle={styles.cardTitle}/>
+         
                 <Card.Content>
                     <View>
                         {completedGames?.map((game) => (
-                            <ItemDisplay key={game.Id} item={game} />
+                            <ItemDisplay key={game.esgId} header='' name={game.esgTitle} img={game.esgImgResources} />
                         ))}
                     </View>
                 </Card.Content>
             </Card>
-        </AppView>
+        </ScrollView>
     );
 }
+
+const styles = StyleSheet.create({
+    cardTitle:{
+        fontSize:20,
+        textAlign:'center'
+    },
+    carContainer:{
+        
+    },
+    cardFooter:{
+
+    },
+});

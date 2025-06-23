@@ -270,9 +270,13 @@ export default function LoginScreen() {
                 <View style={{flex:1}}>
               {/* Register link */}
               <View style={styles.linkContainer}>
+                    <Text>
+                      Vous n'avez pas encore de compte 
+                      </Text>
                 <Link href="/Authentication/Register" asChild>
                   <Button mode="text" disabled={isLoading}>
-                    Vous n'avez pas encore de compte ? Inscrivez-vous
+                     
+                    ? Inscrivez-vous
                   </Button>
                 </Link>
               </View> 
@@ -340,6 +344,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   linkContainer: {
+    flex:1,
     marginTop: 16,
     alignItems: 'center',
   },

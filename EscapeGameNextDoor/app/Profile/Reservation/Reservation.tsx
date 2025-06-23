@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { View } from "react-native";
-import { Card, Text, Avatar, Button, ActivityIndicator } from "react-native-paper";
+import { Card, Text, Avatar, Button, ActivityIndicator, List } from "react-native-paper";
 import { GetSessionReservedDto } from '@/interfaces/EscapeGameInterface/Reservation/getSessionReservedDto';
 import FormUtils from "@/classes/FormUtils";
 import { UnitofAction } from "@/action/UnitofAction";
+import { useAuth } from "@/context/ContextHook/AuthContext";
 
 const PAGE_SIZE = 5;
 
@@ -131,13 +132,15 @@ export default function ReservationListe() {
 
   return (
     <React.Fragment>
-      <Card>
+      <List.Section>
         {session?.map((item) => (
           <ReservationItem key={item.id} reservation={item} />
         ))}
-        <Card.Actions style={styles.actions}>
+        </List.Section>
+
+        <View style={styles.actions}>
           <View style={styles.paginationRow}>
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1,alignContent:"center", alignItems:"center",flexDirection:"column",justifyContent:"center" }}>
               <Button
                 disabled={page <= 1}
                 onPress={() => handlePageChange('prev')}
@@ -154,8 +157,8 @@ export default function ReservationListe() {
 
             </View>
           </View>
-        </Card.Actions>
-      </Card>
+        </View>
+     
     </React.Fragment>
   );
 }

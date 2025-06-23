@@ -7,7 +7,7 @@ import { PaginationResponse } from '@/interfaces/ServiceResponse';
 import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Card } from 'react-native-paper';
+import { Card, Text } from 'react-native-paper';
 
 const PAGE_SIZE = 5;
 const PLACEHOLDER_IMAGE = require('@/assets/images/react-logo.png');
@@ -60,12 +60,11 @@ export default function LatestEscapeGames() {
             style={styles.image}
             resizeMode="cover"
           />
+          <Card.Title title={item.esgTitle} titleStyle={styles.gameTitle} />
           <Card.Content style={styles.content}>
-            <ThemedText style={styles.gameTitle} numberOfLines={2}>
-              {item.esgNom}
-            </ThemedText>
+           
             <ThemedText style={styles.price}>
-              {item.price ? `${item.price} €` : 'Prix non disponible'}
+             { item.esgContent ? item.esgContent : 'infor non disponible'}
             </ThemedText>
           </Card.Content>
         </Card>
@@ -98,7 +97,11 @@ export default function LatestEscapeGames() {
       <ThemedText type="title" style={styles.header}>
         Les Derniers Escape Games
       </ThemedText>
-
+  <ThemedText >
+          <Text >
+           "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+          </Text>
+      </ThemedText>
       {games.length > 0 ? (
         <>
           <Carousel
@@ -180,8 +183,11 @@ const styles = StyleSheet.create({
   },
   cardContainer: {
     paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   card: {
+    backgroundColor: '#fff',
+    padding:4,
     borderRadius: 12,
     overflow: 'hidden',
     elevation: 3,
@@ -193,19 +199,24 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: 160,
+  resizeMode: 'cover',
   },
   content: {
-    padding: 16,
+    flex: 1,
+    padding: 0,
+    
   },
   gameTitle: {
+    textAlign: 'center',
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   price: {
-    fontSize: 16,
-    color: '#007AFF',
-    fontWeight: '600',
+   fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    textAlign: 'justify',
   },
   pagination: {
     flexDirection: 'row',
@@ -213,6 +224,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 16,
     gap: 16,
+  },
+  separator: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    marginVertical: 16,
+    marginBottom:10
   },
   paginationButton: {
     paddingHorizontal: 12,
@@ -228,6 +246,7 @@ const styles = StyleSheet.create({
   pageText: {
     fontSize: 16,
     minWidth: 60,
+    
     textAlign: 'center',
   },
   noGamesText: {

@@ -5,6 +5,7 @@ export interface GetNotificationDto {
     content: string;
     isRead: boolean;
     notificationTypeId: number;
+    link:string;
     notificationType: GetNotificationDto;
     userId: number;
     creationDate: string | null;

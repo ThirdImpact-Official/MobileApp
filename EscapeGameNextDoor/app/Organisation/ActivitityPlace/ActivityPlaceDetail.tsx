@@ -5,7 +5,10 @@ import { GetActivityPlaceDto } from "@/interfaces/EscapeGameInterface/ActivityPl
 import { UnitofAction } from "@/action/UnitofAction";
 import AppView from "@/components/ui/AppView";  // ton container custom si compatible RN
 import { useToasted } from "@/context/ContextHook/ToastedContext";
-
+import { Card } from "react-native-paper";
+import { ThemedText } from "@/components/ThemedText";
+import { GetAddressDto } from "@/interfaces/EscapeGameInterface/Address/getAddressDto";
+import { ArrowLeft } from "react-native-feather";
 interface ActivityDetailProps {
   data?: GetActivityPlaceDto;
 }
@@ -19,7 +22,7 @@ const ActivityPlaceDetail: FC<ActivityDetailProps> = ({ data }) => {
   const [activity, setActivity] = useState<GetActivityPlaceDto | null | undefined>(data !== undefined ? data : null);
   const [loading, setLoading] = useState(!data);
   const [error, setError] = useState<string | null>(null);
-
+  const [address,setAddress] = useState<GetAddressDto | null>(null);
   const buttonList = [
     { label: "Go to Map", onPress: () => Alert.alert("Navigation vers la carte") },
     { label: "Contact", onPress: () => Alert.alert("Contact") },
@@ -49,10 +52,24 @@ const ActivityPlaceDetail: FC<ActivityDetailProps> = ({ data }) => {
       setLoading(false);
     }
   };
-
+  const fetchAddress=async () =>{
+    try {
+      const response = await httpAction.addressAction.AddressByActivityId(Number(id));
+      if (response.Success) {
+        setAddress(response.Data as GetAddressDto);
+      } else {
+        setError(response.Message || "Failed to fetch address");
+      }
+    } catch (e) {
+      setError("An error occurred while fetching address");
+      console.error(e);
+    }
+    
+  };
   useEffect(() => {
     if (!data) {
       fetchActivity();
+      fetchAddress();
     }
   }, [id]);
 
@@ -92,27 +109,33 @@ const ActivityPlaceDetail: FC<ActivityDetailProps> = ({ data }) => {
 
   return (
     <AppView>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>{activity.name}</Text>
-        <Image
-          source={{ uri: activity.imgressources || "https://via.placeholder.com/400x200?text=No+Image" }}
-          style={styles.image}
-          resizeMode="cover"
-          onError={() => Alert.alert("Image not available")}
-        />
-        <View style={styles.content}>
-          <Text style={styles.label}><Text style={styles.bold}>Name: </Text>{activity.name}</Text>
-          <Text style={styles.label}><Text style={styles.bold}>Description: </Text>{activity.description || "No description available"}</Text>
-          <Text style={styles.label}><Text style={styles.bold}>Address: </Text>{activity.address || "No address provided"}</Text>
-        </View>
-        <View style={styles.buttons}>
-          {buttonList.map((btn, idx) => (
-            <TouchableOpacity key={idx} style={styles.button} onPress={btn.onPress}>
-              <Text style={styles.buttonText}>{btn.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+      <Card>
+        <Card.Title title={activity.name} left={(props) => <ThemedText><ArrowLeft {...props} onPress={() => router.back()}/></ThemedText> }  />
+            <Card.Cover
+              source={{ uri: activity.imgressources || "https://via.placeholder.com/400x200?text=No+Image" }}
+              style={styles.image}
+              resizeMode="cover"
+              onError={() => Alert.alert("Image not available")}
+            />
+        <Card.Content style={styles.content}>
+        
+            <Text style={styles.title}>{activity.name}</Text>
+            <View style={styles.content}>
+              <ThemedText style={styles.label}><Text style={styles.bold}>Name: </Text>{activity.name}</ThemedText>
+              <ThemedText style={styles.label}><Text style={styles.bold}>Description: </Text>{activity.description || "No description available"}</ThemedText>
+              <ThemedText style={styles.label}><Text style={styles.bold}>Address: </Text>{" "+address?.street+","+address?.city+" ,"+address?.country || "No address provided"}</ThemedText>
+            </View>
+          </Card.Content>    
+            <Card.Actions>
+            <View style={styles.buttons}>
+              {buttonList.map((btn, idx) => (
+                <TouchableOpacity key={idx} style={styles.button} onPress={btn.onPress}>
+                  <Text style={styles.buttonText}>{btn.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Card.Actions>
+      </Card>
     </AppView>
   );
 };

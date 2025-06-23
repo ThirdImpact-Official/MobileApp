@@ -7,7 +7,7 @@ import { PaginationResponse } from '@/interfaces/ServiceResponse';
 import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Card } from 'react-native-paper';
+import { Card,Text } from 'react-native-paper';
 
 const PAGE_SIZE = 5;
 const PLACEHOLDER_IMAGE = require('@/assets/images/react-logo.png');
@@ -97,7 +97,14 @@ export default function LatestEscapeGames() {
       <ThemedText type="title" style={styles.header}>
         Les Derniers Escape Games
       </ThemedText>
+      <View style={styles.separator}>
 
+       <ThemedText >
+               <Text >
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+               </Text>
+           </ThemedText>
+      </View>
       {games.length > 0 ? (
         <>
           <Carousel
@@ -172,6 +179,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
     textAlign: 'center',
+  },
+  separator: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    marginVertical: 16,
+    marginBottom:10
   },
   carousel: {
     alignSelf: 'center',

@@ -1,3 +1,4 @@
+import { AddRatingDto } from "@/interfaces/EscapeGameInterface/Rating/addRatingDto";
 import { HttpClient } from "./httpClient";
 import { GetRatingDto } from "@/interfaces/EscapeGameInterface/Rating/getRatingDto";
 import { ServiceResponse, PaginationResponse } from "@/interfaces/ServiceResponse";
@@ -34,7 +35,7 @@ export class RatingAction
         .GetRequestType(`user`+params)
         .executePagination<GetRatingDto>();
     }
-    public async CreateRating(rating: GetRatingDto): Promise<ServiceResponse<GetRatingDto> | PaginationResponse<GetRatingDto>> {
+    public async CreateRating(rating: AddRatingDto): Promise<ServiceResponse<GetRatingDto> | PaginationResponse<GetRatingDto>> {
         return this.HttpClient
             .PostRequestType("")
             .setData(rating)

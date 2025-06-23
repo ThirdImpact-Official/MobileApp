@@ -31,9 +31,9 @@ export class CompletegameAction {
      * Get completed games for the current user
      * @returns Promise with the list of completed games for the user
      */
-    public async getUserCompletedGames(): Promise<ServiceResponse<GetEscapeGameDto[]>> {
-      
-        return await this.httpClient.GetRequestType('/user').execute<GetEscapeGameDto[]>();
+    public async getUserCompletedGames(page:number,pageSize:number): Promise<PaginationResponse<GetEscapeGameDto>> {
+        const params=`?page=${page}&pageSize=${pageSize}`;
+        return await this.httpClient.GetRequestType('/user'+params).executePagination<GetEscapeGameDto>();
        
     }
  

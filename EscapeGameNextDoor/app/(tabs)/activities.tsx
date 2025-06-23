@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import AppView from '@/components/ui/AppView';
-import { ActivityIndicator, Button, Card, Divider, List, TextInput } from 'react-native-paper';
-import { View, Text, StyleSheet } from 'react-native';
+import { ActivityIndicator, Button, Card, Divider, List, TextInput, Modal, Surface } from 'react-native-paper';
+import { View, Text, StyleSheet, view } from 'react-native';
 import { GetForumDto } from '@/interfaces/PublicationInterface/Forum/getForumDto';
 import { UnitofAction } from '@/action/UnitofAction';
-import { PaginationResponse } from '@/interfaces/ServiceResponse';
+import { PaginationResponse, ServiceResponse } from '@/interfaces/ServiceResponse';
 import { ThemedText } from '@/components/ThemedText';
 import { GetOrganisationDto } from '@/interfaces/OrganisationInterface/Organisation/getOrganisationDto';
 import { Picker } from '@react-native-picker/picker';
 import FormatUtils from '@/classes/FormUtils';
 import { useRouter } from 'expo-router';
+import { AddForumDto } from "@/interfaces/PublicationInterface/Forum/addForumDto";
+import { PlusCircle } from 'react-native-feather';
 
 export default function ForumList() {
     // State management
@@ -21,10 +23,23 @@ export default function ForumList() {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
-    
+    const [modalSetVisibilit, setModalSetVisibilit] = useState(false);
+    const [addPost, setAddPost] = useState<AddForumDto>({
+        title: '',
+        content: '',
+        userId: 0
+    });
+
     const PAGE_SIZE = 5;
     const action = new UnitofAction();
     const router = useRouter();
+
+    const handleChangeInput = (name: string, value: string) => {
+        setAddPost((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
 
     // Fetch all forums with pagination
     const fetchAllForums = async (page: number = 1) => {
@@ -35,6 +50,7 @@ export default function ForumList() {
             const response = await action.forumAction.getAllForums(page, PAGE_SIZE) as PaginationResponse<GetForumDto>;
             
             if (response.Success) {
+                console.log(response.Data);
                 setForums(response.Data as GetForumDto[]);
                 setTotalPages(response.TotalPage);
             } else {
@@ -58,6 +74,7 @@ export default function ForumList() {
         try {
             const response = await action.forumAction.getOrganisationById(orgId, page, PAGE_SIZE) as PaginationResponse<GetForumDto>;
             if (response.Success) {
+                console.log(response.Data);
                 setForums(response.Data as GetForumDto[]);
                 setTotalPages(response.TotalPage || 1);
             } else {
@@ -96,9 +113,10 @@ export default function ForumList() {
         try {
             const response = await action.forumAction.getForumByName(searchValue, page, PAGE_SIZE) as PaginationResponse<GetForumDto>;
             if (response.Success) {
-                if(response.Data?.length === 0) {
+                if (response.Data?.length === 0) {
                     setForums([]);
                 } else {
+                    console.log(response.Data);
                     setForums(response.Data as GetForumDto[]);
                     setTotalPages(response.TotalPage || 1);
                 }
@@ -110,6 +128,43 @@ export default function ForumList() {
             const errorMessage = err instanceof Error ? err.message : String(err);
             setError(errorMessage);
             setForums([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleOpenModal = () => setModalSetVisibilit(true);
+    
+    const handleCloseModal = () => {
+        setModalSetVisibilit(false);
+        // Reset form when closing modal
+        setAddPost({
+            title: '',
+            content: '',
+            userId: 0
+        });
+    };
+
+    const handleCreateForum = async () => {
+        if (!addPost.title.trim() || !addPost.content.trim()) {
+            setError("Le titre et le contenu sont requis");
+            return;
+        }
+
+        setIsLoading(true);
+        setError("");
+        
+        try {
+            const response = await action.forumAction.createForum(addPost) as ServiceResponse<GetForumDto>;
+            if (response.Success) {
+                handleCloseModal();
+                fetchAllForums();
+            } else {
+                setError(response.Message);
+            }
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -140,7 +195,7 @@ export default function ForumList() {
             params: { id: forumId },
         });
     };
-   
+
     // Fetch data based on current filters
     useEffect(() => {
         if (searchTerm.trim().length > 0) {
@@ -195,11 +250,19 @@ export default function ForumList() {
     // Main content
     return (
         <AppView>
-            <Card>
-                <Card.Title title="Liste des Forums" titleStyle={styles.title} />
+            <Surface style={styles.surface} elevation={2}>
+                {/* Header with title and plus icon */}
+                <View style={styles.headerContainer}>
+                    <Text style={[styles.title, styles.headerTitle]}>Liste des Forums</Text>
+                    <PlusCircle
+                        color="#888"
+                        onPress={handleOpenModal}
+                        style={styles.plusIcon}
+                    />
+                </View>
                 
-                {/* Filters */}
-                <Card.Content>
+                {/* Filters Content */}
+                <View style={styles.contentContainer}>
                     <View style={styles.filtersContainer}>
                         <TextInput
                             label="Rechercher un forum"
@@ -212,7 +275,7 @@ export default function ForumList() {
                         <Button onPress={handleSearchChange} mode="contained">
                             Rechercher
                         </Button>
-                        <ThemedText style={styles.filterLabel}>Filtrer par organisation</ThemedText>
+                        <Text style={styles.filterLabel}>Filtrer par organisation</Text>
                         <View style={styles.pickerContainer}>
                             <Picker
                                 selectedValue={selectedOrganisation}
@@ -221,19 +284,21 @@ export default function ForumList() {
                             >
                                 <Picker.Item label="Toutes les organisations" value={undefined} />
                                 {organisations.map((org) => (
-                                    <Picker.Item 
-                                        key={org.orgId} 
-                                        label={org.name} 
-                                        value={org} 
+                                    <Picker.Item
+                                        key={org.orgId}
+                                        label={org.name}
+                                        value={org}
                                     />
                                 ))}
                             </Picker>
                         </View>
                     </View>
-                </Card.Content>
+                </View>
+            </Surface>
 
+            <Surface style={styles.forumListCard}>
                 {/* Forum List */}
-                <Card.Content>
+                <View style={styles.forumListTitleContainer}>
                     <View style={styles.listContainer}>
                         {forums.length === 0 ? (
                             <View style={styles.emptyContainer}>
@@ -260,22 +325,22 @@ export default function ForumList() {
                             </List.Section>
                         )}
                     </View>
-                </Card.Content>
+                </View>
 
                 {/* Pagination */}
                 {totalPages >= 1 && (
-                    <Card.Actions>
+                    <View>
                         <View style={styles.paginationContainer}>
-                            <View style={{flex:1}}>
+                            <View style={{ flex: 1 }}>
                                 <Button
                                     mode="outlined"
                                     onPress={() => handlePageChange(currentPage - 1)}
                                     disabled={currentPage <= 1}
                                     style={styles.paginationButton}
                                 >
-                                 <Text>
-                                      Précédent
-                                    </Text> 
+                                    <Text>
+                                        Précédent
+                                    </Text>
                                 </Button>
                                 
                                 <ThemedText style={styles.pageInfo}>
@@ -288,21 +353,86 @@ export default function ForumList() {
                                     disabled={currentPage >= totalPages}
                                     style={styles.paginationButton}
                                 >
-                                  <Text>
-                                      Suivant
+                                    <Text>
+                                        Suivant
                                     </Text>
                                 </Button>
-
                             </View>
                         </View>
-                    </Card.Actions>
+                    </View>
                 )}
-            </Card>
+            </Surface>
+
+            {/* Modal for Creating Forum */}
+            <Modal visible={modalSetVisibilit} onDismiss={handleCloseModal} contentContainerStyle={styles.modalContainer}>
+                <Card style={styles.modalCard}>
+                    <Card.Title title="Créer un Forum" titleStyle={styles.title} />
+                    <Card.Content>
+                        <View>
+                            <TextInput
+                                label="Titre"
+                                value={addPost.title}
+                                onChangeText={(text) => handleChangeInput('title', text)}
+                                mode="outlined"
+                                style={styles.searchInput}
+                                placeholder="Entrez le titre du forum"
+                            />
+                        </View>
+                        <View>
+                            <TextInput
+                                label="Contenu"
+                                value={addPost.content}
+                                onChangeText={(text) => handleChangeInput('content', text)}
+                                mode="outlined"
+                                multiline
+                                numberOfLines={4}
+                                style={styles.searchInput}
+                                placeholder="Entrez le contenu du forum"
+                            />
+                        </View>
+                    </Card.Content>
+                    <Card.Actions>
+                        <Button onPress={handleCreateForum} mode="contained">
+                            Créer un forum
+                        </Button>
+                        <Button onPress={handleCloseModal}>
+                            Fermer
+                        </Button>
+                    </Card.Actions>
+                </Card>
+            </Modal>
         </AppView>
     );
 }
 
 const styles = StyleSheet.create({
+    surface: {
+        margin: 16,
+        borderRadius: 8,
+        backgroundColor: '#ffffff',
+        marginBottom: 8,
+    },
+    headerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e0e0e0',
+    },
+    headerTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#333',
+    },
+    contentContainer: {
+        padding: 16,
+    },
+    forumListCard: {
+        margin: 16,
+        marginTop: 0,
+    },
     title: {
         textAlign: 'center',
         fontSize: 20,
@@ -324,7 +454,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     filtersContainer: {
-        marginBottom: 16,
+        marginBottom: 0,
     },
     searchInput: {
         marginBottom: 16,
@@ -333,6 +463,7 @@ const styles = StyleSheet.create({
         marginBottom: 8,
         fontSize: 16,
         fontWeight: '500',
+        color: '#666',
     },
     pickerContainer: {
         borderWidth: 1,
@@ -375,8 +506,28 @@ const styles = StyleSheet.create({
         minWidth: 100,
     },
     pageInfo: {
-        textAlign:"center",
+        textAlign: "center",
         fontSize: 14,
         fontWeight: '500',
     },
+      modalContainer: {
+     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)', // Optional: adds a semi-transparent background
+    margin: 0
+  },
+  plusICon: {
+    color: '#808080',
+    bottom: -90,
+    left: -35,
+    position: 'absolute',
+  },
+  modalCard: {
+     width: '90%', // Set a width that works for your design
+    maxWidth: 500, // Optional: set a maximum width
+    padding: 20,
+  
+    borderRadius: 12,
+  },
 });

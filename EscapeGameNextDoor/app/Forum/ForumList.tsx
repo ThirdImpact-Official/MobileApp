@@ -5,6 +5,9 @@ import { ActivityIndicator, Card, List } from 'react-native-paper';
 import { View, Text } from 'react-native'
 import { GetForumDto } from '@/interfaces/PublicationInterface/Forum/getForumDto';
 import ItemDisplay from '@/components/factory/GenericComponent/ItemDisplay';
+import { ThemedText } from '@/components/ThemedText';
+import { ArrowLeft } from 'react-native-feather';
+import { router } from 'expo-router';
 export default function ForumList()
 {
     const [error,setError] =useState<string>("");
@@ -47,7 +50,7 @@ export default function ForumList()
     {
         return (<AppView>
             <Card>
-                <Card.Title  title="" />
+                <Card.Title  title="" left={(props) => <ThemedText><ArrowLeft {...props} onPress={() => router.back()}/></ThemedText> }  />
                 <Card.Content>
                     <View>
                         

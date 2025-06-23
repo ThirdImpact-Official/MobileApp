@@ -46,4 +46,9 @@ export class NotificationAction {
             .PutRequestType(`/visibility/${id}`)
             .execute<GetNotificationDto>();
     }
+    public async GetNotificationcount(): Promise<ServiceResponse<number> | PaginationResponse<number>> {
+        return await this.httpClient
+            .GetRequestType('/number')
+            .execute<number>();
+    }
 }

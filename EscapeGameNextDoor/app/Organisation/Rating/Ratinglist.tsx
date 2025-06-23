@@ -1,345 +1,259 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  FlatList,
-  Dimensions,
-} from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { GetRatingDto } from '@/interfaces/EscapeGameInterface/Rating/getRatingDto';
-import { UnitofAction } from '../../../action/UnitofAction';
+import { UnitofAction } from "@/action/UnitofAction";
+import React from "react";
+import { GetRatingDto } from "@/interfaces/EscapeGameInterface/Rating/getRatingDto";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect,useState } from "react";
+import { User } from "react-native-feather";
+import { Card,Button, ActivityIndicator } from "react-native-paper";
+import { View,Text,StyleSheet } from "react-native";
+import AppView from "@/components/ui/AppView";
+import { GetUserDto } from "@/interfaces/User/GetUserDto";
+import { ThemedText } from "@/components/ThemedText";
+export const mockRatings: GetRatingDto[] = [
+  {
+    rateId: 1,
+    rateTitle: "Super expérience",
+    rateContent: "Le jeu était très bien pensé et immersif. On s'est éclatés !",
+    userId: 1,
+    notes: 5,
+    hasBeenDoneId: 1001,
+    creationDate: "2025-06-01T10:00:00Z",
+    updateDate: "2025-06-01T10:00:00Z"
+  },
+  {
+    rateId: 2,
+    rateTitle: "Assez bon",
+    rateContent: "Quelques énigmes trop faciles mais l’ambiance était sympa.",
+    userId: 102,
+    notes: 3,
+    hasBeenDoneId: 1002,
+    creationDate: "2025-06-02T12:15:00Z",
+    updateDate: "2025-06-02T12:15:00Z"
+  },
+  {
+    rateId: 3,
+    rateTitle: "Décevant",
+    rateContent: "Beaucoup d’attente, peu de contenu interactif.",
+    userId: 103,
+    notes: 2,
+    hasBeenDoneId: 1003,
+    creationDate: "2025-06-03T09:30:00Z",
+    updateDate: "2025-06-03T09:30:00Z"
+  },
+  {
+    rateId: 4,
+    rateTitle: "Très bien organisé",
+    rateContent: "Le personnel était accueillant et le scénario génial.",
+    userId: 104,
+    notes: 4,
+    hasBeenDoneId: 1004,
+    creationDate: "2025-06-04T14:45:00Z",
+    updateDate: "2025-06-04T14:45:00Z"
+  },
+  {
+    rateId: 5,
+    rateTitle: "Exceptionnel",
+    rateContent: "Meilleur escape game que j’ai fait jusqu’à présent.",
+    userId: 105,
+    notes: 5,
+    hasBeenDoneId: 1005,
+    creationDate: "2025-06-05T16:20:00Z",
+    updateDate: "2025-06-05T16:20:00Z"
+  },
+  {
+    rateId: 6,
+    rateTitle: "Sympa mais sans plus",
+    rateContent: "Correct pour passer une heure, mais manque de challenge.",
+    userId: 106,
+    notes: 3,
+    hasBeenDoneId: 1006,
+    creationDate: "2025-06-06T11:10:00Z",
+    updateDate: "2025-06-06T11:10:00Z"
+  },
+  {
+    rateId: 7,
+    rateTitle: "Médiocre",
+    rateContent: "Décor vieillissant et mécanismes cassés.",
+    userId: 107,
+    notes: 1,
+    hasBeenDoneId: 1007,
+    creationDate: "2025-06-07T17:30:00Z",
+    updateDate: "2025-06-07T17:30:00Z"
+  },
+  {
+    rateId: 8,
+    rateTitle: "Immersion totale",
+    rateContent: "On avait vraiment l’impression d’être dans une autre époque.",
+    userId: 108,
+    notes: 4,
+    hasBeenDoneId: 1008,
+    creationDate: "2025-06-08T13:40:00Z",
+    updateDate: "2025-06-08T13:40:00Z"
+  },
+  {
+    rateId: 9,
+    rateTitle: "Bien mais bruyant",
+    rateContent: "La salle voisine faisait beaucoup de bruit, dommage.",
+    userId: 109,
+    notes: 2,
+    hasBeenDoneId: 1009,
+    creationDate: "2025-06-09T18:05:00Z",
+    updateDate: "2025-06-09T18:05:00Z"
+  },
+  {
+    rateId: 10,
+    rateTitle: "Bon moment en famille",
+    rateContent: "Accessible pour tous les âges, très amusant.",
+    userId: 110,
+    notes: 4,
+    hasBeenDoneId: 1010,
+    creationDate: "2025-06-10T15:50:00Z",
+    updateDate: "2025-06-10T15:50:00Z"
+  }
+];
 
-const { width } = Dimensions.get('window');
+const PAGE_SIZE = 10;
+export default  function  RatinglistEscapegame()
+{
+    const [isLoading,setloading]=useState<boolean>(false);
+    const [Error,setError]=useState<string|null>(null);
+    const [data,setData]=useState<GetRatingDto[]>(mockRatings);
+    const {id} =useLocalSearchParams();
+    const [page,setPage]=useState<number>(1);
 
-type RatingItemProps = {
-  data?: GetRatingDto;
-  loading?: boolean;
-  onPress?: () => void;
-};
-
-// Composant Skeleton pour le loading
-const SkeletonLoader = ({ width: skeletonWidth = '100%' }: { width?: number | `${number}%` }) => (
-  <View style={[styles.skeleton, { width: skeletonWidth }]} />
-);
-
-// Composant Pagination simple
-const Pagination = ({ 
-  currentPage, 
-  totalPages, 
-  onPageChange 
-}: { 
-  currentPage: number; 
-  totalPages: number; 
-  onPageChange: (page: number) => void;
-}) => (
-  <View style={styles.paginationContainer}>
-    <TouchableOpacity
-      style={[styles.paginationButton, currentPage === 1 && styles.paginationButtonDisabled]}
-      onPress={() => onPageChange(currentPage - 1)}
-      disabled={currentPage === 1}
-    >
-      <Text style={[styles.paginationText, currentPage === 1 && styles.paginationTextDisabled]}>
-        Précédent
-      </Text>
-    </TouchableOpacity>
+    const action= new UnitofAction();
     
-    <Text style={styles.paginationInfo}>
-      {currentPage} / {totalPages}
-    </Text>
+      const fetchData = async () => {
+        setloading(true);
+        try {
+          const response = await action.ratingAction.GetAllRatingbyEscapeGameId(Number(id),page,PAGE_SIZE);
+          if (response.Success) {
+            setData(response.Data as GetRatingDto[]);
+          } else {
+            setError(response.Message || 'Failed to fetch data');
+          }
+        } catch (e) {
+          setError('An error occurred while fetching data');
+          console.error(e);
+        } finally {
+          setloading(false);
+        }
+      };
+      
+    useEffect(()=> {
+     fetchData();
+    }, [id,page]);
     
-    <TouchableOpacity
-      style={[styles.paginationButton, currentPage === totalPages && styles.paginationButtonDisabled]}
-      onPress={() => onPageChange(currentPage + 1)}
-      disabled={currentPage === totalPages}
-    >
-      <Text style={[styles.paginationText, currentPage === totalPages && styles.paginationTextDisabled]}>
-        Suivant
-      </Text>
-    </TouchableOpacity>
-  </View>
-);
+    if(Error){
+        return (
+            <AppView>
+                <Card>
+                  <Card.Content>
+                    <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+                        <ThemedText>{Error}</ThemedText>
+                    </View>
+                  </Card.Content>
+                </Card>
+            </AppView>
+        )
+    }
 
-export default function RatingList() {
-  const { id } = useLocalSearchParams();
-  const [rating, setRating] = React.useState<GetRatingDto[]>([]);
-  const [page, setPage] = React.useState<number>(1);
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const [totalPages, setTotalPages] = React.useState<number>(10);
+    if(isLoading){
 
-  const action = new UnitofAction();
+        return (
+            <AppView>
+              <Card>
+                <Card.Content>
+                  <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+                      <ThemedText>Loading</ThemedText>
+                  </View>
+                </Card.Content>
+              </Card>
+            </AppView>
+        )
+    }
 
-  const fetchRatings = async () => {
-    setLoading(true);
-    try {
-      const response = await action.ratingAction.GetAllRatingbyEscapeGameId(Number(id), page, 10);
-      if (response.Success) {
-        const data = response.Data as GetRatingDto[];
-        setRating(data);
-        // Supposons que vous avez une propriété totalPages dans la réponse
-        // setTotalPages(response.TotalPages || 10);
+    return (
+        <AppView>
+            {
+                data.map((rating) => (
+                    <RatingCard key={rating.rateId} {...rating} />
+                ))
+            }
+            <View style={{flexDirection:'row', flex:1,justifyContent:'space-between'}}>
+                <Button  onPress={() => setPage(page - 1)} disabled={page === 1} >Precedemment</Button>
+                <Button  onPress={() => setPage(page + 1)} disabled={data.length < PAGE_SIZE} >Suivant</Button>
+            </View>
+        </AppView>
+    )
+}
+
+function RatingCard(rating: GetRatingDto)
+{
+    const [getuser,setuser]= useState<GetUserDto|null>(null);
+    const [isLoading,setloading]=useState<boolean>(true);
+    const [Error,setError]=useState<string|null>(null);
+    const action= new UnitofAction();
+    const fetchData = async () => {
+      try {
+        const response = await action.userAction.GetUserById(rating.userId);
+        if (response.Success) {
+          setuser(response.Data as GetUserDto);
+        } else {
+          setError(response.Message || 'Failed to fetch data');
+        }
+      } catch (e) {
+        setError('An error occurred while fetching data');
+        console.error(e);
+      } finally {
+        setloading(false);
       }
-    } catch (error) {
-      console.error('Erreur lors du chargement des ratings:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  React.useEffect(() => {
-    fetchRatings();
-  }, [page]);
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
-    }
-  };
-
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Ratings List</Text>
-      </View>
-
-      {/* Content Card */}
-      <View style={styles.card}>
-        {loading ? (
-          // Loading state
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#007AFF" />
-            <Text style={styles.loadingText}>Chargement...</Text>
-          </View>
-        ) : (
-          <>
-            {/* Ratings List */}
-            <FlatList
-              data={rating}
-              keyExtractor={(item, index) => item?.rateId?.toString() || index.toString()}
-              renderItem={({ item, index }) => (
-                <RatingItem
-                  data={item}
-                  loading={false}
-                  onPress={() => {
-                    // Navigation vers les détails
-                  }}
-                />
-              )}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.listContent}
-            />
-
-            {/* Pagination */}
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          </>
-        )}
-      </View>
-    </View>
-  );
-}
-
-function RatingItem({ data, loading, onPress }: RatingItemProps) {
-  const router = useRouter();
-
-  const handlePress = () => {
-    if (data && !loading) {
-      router.push({
-        pathname: `/Organisation/Rating/RatingDetails`,
-        params: { id: data.rateId.toString() },
-      });
-    }
-    onPress?.();
-  };
-
-  return (
-    <TouchableOpacity
-      style={styles.listItem}
-      onPress={handlePress}
-      activeOpacity={0.7}
-      disabled={loading}
-    >
-      <View style={styles.listItemContent}>
-        {/* Avatar/Icon placeholder */}
-        <View style={styles.avatarPlaceholder}>
-          <Text style={styles.avatarText}>★</Text>
-        </View>
-
-        {/* Content */}
-        <View style={styles.textContent}>
-          <Text style={styles.itemTitle}>
-            {loading ? <SkeletonLoader width="60%" /> : data?.rateTitle || 'Titre non disponible'}
-          </Text>
-          <Text style={styles.itemSubtitle}>
-            {loading ? <SkeletonLoader width="80%" /> : data?.rateContent || 'Contenu non disponible'}
-          </Text>
+    };
+    useEffect(() => {
+      //  fetchData();
+      }, []);
+      if(Error){
+        return (
           
-          {/* Rating stars or note icon */}
-          <View style={styles.ratingContainer}>
-            <Text style={styles.noteIcon}>📝</Text>
-            {data?.notes && (
-              <Text style={styles.ratingValue}>{data.notes}/5</Text>
-            )}
-          </View>
-        </View>
+                <Card>
+                  <Card.Content>
+                      <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+                          <ThemedText>{Error}</ThemedText>
+                      </View>
+                    </Card.Content>
+                </Card>)
+        }
+        if(isLoading){
+            return (
+                <Card>
+                  <Card.Content>
+                    <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+                      <ActivityIndicator />
+                    </View>
+                  </Card.Content>
 
-        {/* Arrow indicator */}
-        <View style={styles.arrowContainer}>
-          <Text style={styles.arrow}>›</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+                </Card>)
+        }
+        if(!getuser){
+            return (
+                <Card>
+                  <Card.Content>
+                    <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+                        <Text>Loading</Text>
+                    </View>
+                    </Card.Content>
+                </Card>)
+        }
+    return (
+        <Card>
+            <Card.Title title={getuser.username} />
+            <Card.Content>
+                <Text>{rating.rateContent}</Text>
+            </Card.Content>
+        </Card>
+    )   
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  card: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
-  },
-  listContent: {
-    paddingBottom: 16,
-  },
-  listItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-  },
-  listItemContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatarPlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#007AFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  avatarText: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  textContent: {
-    flex: 1,
-  },
-  itemTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  itemSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-    lineHeight: 20,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  noteIcon: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  ratingValue: {
-    fontSize: 14,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  arrowContainer: {
-    padding: 8,
-  },
-  arrow: {
-    fontSize: 20,
-    color: '#ccc',
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#e0e0e0',
-    marginHorizontal: 16,
-  },
-  paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-  },
-  paginationButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#007AFF',
-    borderRadius: 6,
-    minWidth: 80,
-    alignItems: 'center',
-  },
-  paginationButtonDisabled: {
-    backgroundColor: '#ccc',
-  },
-  paginationText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  paginationTextDisabled: {
-    color: '#999',
-  },
-  paginationInfo: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
-  },
-  skeleton: {
-    height: 16,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 4,
-  },
+const styles =StyleSheet.create({
+
 });

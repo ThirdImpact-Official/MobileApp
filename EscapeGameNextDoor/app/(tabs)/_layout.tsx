@@ -13,7 +13,7 @@ import React from 'react';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
 import { Activity, Bell, User } from 'react-native-feather';
-
+import { LinearGradientWrap } from '@/components/ui/linearGradientWrap';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, isLoading } = useAuth();
@@ -41,8 +41,8 @@ export default function TabLayout() {
   else{
     return (
       <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+      screenOptions={{
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
           tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].tabIconDefault,
           headerShown: false,
           tabBarButton: HapticTab,
@@ -63,6 +63,7 @@ export default function TabLayout() {
           },
         }}
         >
+        
         <Tabs.Screen
           name="index"
           options={{
@@ -129,7 +130,9 @@ export default function TabLayout() {
             ),
           }}
           />
+      
       </Tabs>
+
       
     );
 

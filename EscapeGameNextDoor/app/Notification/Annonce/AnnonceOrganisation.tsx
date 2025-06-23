@@ -4,6 +4,12 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { UnitofAction } from "@/action/UnitofAction";
 import AppView from "@/components/ui/AppView";
 import { GetAnnonceDto } from "@/interfaces/NotificationInterface/Annonce/getAnnonceDto";
+import { Avatar, Button, Card } from "react-native-paper";
+import { ThemedText } from "@/components/ThemedText";
+import { LinearGradient } from "react-native-svg";
+import { ArrowLeft } from "react-native-feather";
+import { on } from 'events';
+import {LinearGradientWrap} from "@/components/ui/linearGradientWrap";
 
 export default function AnnonceOrganisation() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -13,17 +19,24 @@ export default function AnnonceOrganisation() {
   const [totalPages, setTotalPages] = useState(1); // À récupérer si API le fournit
   const action = new UnitofAction();
   const router = useRouter();
-
+  const [error,setError ]= useState<string | null>(null);
+  const [nodata,setNoData]= useState<boolean>(false);
   const fetchAnnonce = async () => {
     setIsLoading(true);
     try {
       const response = await action.annonceAction.GetAllAnnonceByOrganisationId(Number(id), page, 5);
       if (response.Success) {
+        if(response.Data ===null || !Array.isArray(response.Data) || response.Data.length === 0)
+          {
+            setNoData(true);
+          } 
+
         setAnnonces(response.Data as GetAnnonceDto[]);
         // Si l'API fournit total de pages, on peut faire : setTotalPages(response.TotalPages);
       }
     } catch (e) {
       console.log(e);
+      setError("an error has occured during the request");
     } finally {
       setIsLoading(false);
     }
@@ -46,67 +59,97 @@ export default function AnnonceOrganisation() {
   const onNextPage = () => {
     if (page < totalPages) setPage(page + 1);
   };
-
+  if(error)
+  {
+    return (
+      <AppView>
+        <Card>
+          <Card.Content style={{ alignItems: "center" , textAlign: "center"}}>
+              <Text>{error}</Text>
+          </Card.Content>
+        </Card>
+      </AppView>
+    )
+  }
+  if(nodata)
+    {
+      return (
+        <AppView>
+          <Card>
+              <Card.Content style={{ alignItems: "center" , textAlign: "center", padding: 20,fontSize:20}}>
+                <ThemedText>
+                  <Text>Aucune annonce</Text>
+                  </ThemedText> 
+              </Card.Content>
+          </Card>
+          </AppView>
+      )
+    }
+  
   return (
     <AppView>
-      {isLoading ? (
-        <ActivityIndicator size="large" />
-      ) : (
-        <>
-          <FlatList
-            data={annonces}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 20 }}
-          />
-          <View style={styles.pagination}>
-            <TouchableOpacity onPress={onPrevPage} disabled={page === 1} style={[styles.pageButton, page === 1 && styles.disabled]}>
-              <Text style={styles.pageButtonText}>Précédent</Text>
-            </TouchableOpacity>
-            <Text style={styles.pageNumber}>{page}</Text>
-            <TouchableOpacity onPress={onNextPage} disabled={page === totalPages} style={[styles.pageButton, page === totalPages && styles.disabled]}>
-              <Text style={styles.pageButtonText}>Suivant</Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
+     
+        {isLoading ? (
+          <ActivityIndicator size="large" />
+        ) : (
+          <>
+            <FlatList
+              data={annonces}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={renderItem}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            />
+            <View style={styles.pagination}>
+              <TouchableOpacity onPress={onPrevPage} disabled={page === 1} style={[styles.pageButton, page === 1 && styles.disabled]}>
+                <Text style={styles.pageButtonText}>Précédent</Text>
+              </TouchableOpacity>
+              <Text style={styles.pageNumber}>{page}</Text>
+              <TouchableOpacity onPress={onNextPage} disabled={page === totalPages} style={[styles.pageButton, page === totalPages && styles.disabled]}>
+                <Text style={styles.pageButtonText}>Suivant</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+
+     
     </AppView>
   );
 }
 
 function AnnonceItem({ organisation, router }: { organisation: GetAnnonceDto; router: ReturnType<typeof useRouter> }) {
   return (
-    <View style={styles.card}>
-      <Text style={styles.title}>{organisation.name}</Text>
-      {organisation.image ? (
-        <Image source={{ uri: organisation.image }} style={styles.image} />
-      ) : null}
-      <Text style={styles.description}>{organisation.description}</Text>
-
-      <View style={styles.actions}>
-        <TouchableOpacity style={styles.button} onPress={() => { /* Navigation Escape Game ici */ }}>
-          <Text style={styles.buttonText}>Escape Game</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
+   
+    <Card style={styles.card}>
+       <LinearGradientWrap>
+        <Card.Title
+          title={organisation.name}
+          titleStyle={styles.title}
+        
+          right={(props) => <Avatar.Image source={{ uri: organisation.image }} />}
+        />
+         </LinearGradientWrap>
+      <Card.Actions>
+        <Button
           style={styles.button}
+          mode="contained"
           onPress={() => {
             router.push({
-              pathname: "/Notification/Annonce/AnnonceOrganisation",
+              pathname: "/Notification/Annonce/AnnonceDetails",
               params: { id: organisation.id.toString() },
             });
           }}
-        >
+          >
           <Text style={styles.buttonText}>Annonce</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+        </Button>
+      </Card.Actions>
+    </Card>
+
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fff",
+   
     padding: 16,
     marginHorizontal: 12,
     marginVertical: 8,

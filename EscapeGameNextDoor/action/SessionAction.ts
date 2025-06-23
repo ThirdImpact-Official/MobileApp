@@ -86,7 +86,7 @@ export class SessionAction {
     }
     public async Iscancellable(id: number): Promise<ServiceResponse<boolean> | PaginationResponse<boolean>> {
         return await this.httpClient
-            .GetRequestType(`/reserved/cancellable/${id}`)
+            .GetRequestType(`/reserved/iscancellable?reservationId=${id}`)
             .execute<boolean>();
     }
 

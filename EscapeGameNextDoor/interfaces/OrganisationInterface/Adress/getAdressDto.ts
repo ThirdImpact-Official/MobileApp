@@ -1,6 +1,6 @@
 import FormUtils from "@/classes/FormUtils";
 
-export interface GetAdressDto {
+export interface GetAddressDto {
     adressId: number;
     street: string;
     postalCode: string;

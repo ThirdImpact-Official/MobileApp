@@ -19,7 +19,7 @@ export class FavorisAction {
      * @returns Promise<PaginationResponse<GetEscapeGameDto>>
      */
     public async getFavoris(page: number = 1, pageSize: number = 10): Promise<PaginationResponse<GetEscapeGameDto>> {
-        const url = `$page=${page}&pageSize=${pageSize}`;
+        const url = `?page=${page}&pageSize=${pageSize}`;
         
         return await this.httpClient
             .GetRequestType(url)

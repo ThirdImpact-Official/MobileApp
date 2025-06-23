@@ -9,6 +9,8 @@ import { UnitofAction } from "@/action/UnitofAction";
 import { Button, Card} from 'react-native-paper';
 import AppView from "@/components/ui/AppView";
 import { CardContent } from '@mui/material';
+import { ThemedText } from "@/components/ThemedText";
+
 export default function Reservation() {
     const { id } = useLocalSearchParams();
     const [state, setState] = useState<GetSessionReservedDto | undefined>(undefined);
@@ -79,18 +81,18 @@ export default function Reservation() {
                             <Text style={styles.subtitle}>{FormUtils.FormatDate(sessiongGame?.gameDate.toString())}</Text>
                         </View>
                         <Card.Content style={styles.cardContent}>
-                            <Text style={styles.label}>
+                            <ThemedText style={styles.label}>
                                 <Text style={styles.bold}>Date de réservation :</Text> {FormUtils.FormatDate(state?.creationDate.toString())}
-                            </Text>
-                            <Text style={styles.label}>
+                            </ThemedText>
+                            <ThemedText style={styles.label}>
                                 <Text style={styles.bold}>Game Name:</Text> {sessiongGame?.price}
-                            </Text>
-                            <Text style={styles.label}>
+                            </ThemedText>
+                            <ThemedText style={styles.label}>
                                 <Text style={styles.bold}>Place Available:</Text> {sessiongGame?.placeAvailable}
-                            </Text>
-                            <Text style={styles.label}>
+                            </ThemedText>
+                            <ThemedText style={styles.label}>
                                 <Text style={styles.bold}>Place Maximum:</Text> {sessiongGame?.placeMaximum}
-                            </Text>
+                            </ThemedText>
                             <Text style={styles.label}>{state?.content}</Text>
                         </Card.Content>
                         <Card.Actions style={styles.cardActions}>
@@ -106,13 +108,21 @@ export default function Reservation() {
                                 </Button>
                                 <Button
                                     style={styles.button}
-                                    onPress={() => rooter.push(`/Profile/Reservation/Reservation`)}
+                                    onPress={() => rooter.push({
+                                   pathname:`/Organisation/Rating/CreateRatings`,
+                                   params:{id:state?.id}
+
+                                    })}
                                 >
                                     <Text style={styles.buttonText}>Avis</Text>
                                 </Button>
                                 <Button
                                     style={styles.button}
-                                    onPress={() => rooter.push(`/Profile/Reservation/Reservation`)}
+                                    onPress={() => rooter.push(
+                                        {
+                                            pathname: `/Profile/Reservation/CancelReservation`,
+                                            params: { id: state?.id }
+                                        })}
                                 >
                                     <Text style={styles.buttonText}>Cancel</Text>
                                 </Button>
@@ -133,7 +143,7 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     card: {
-        backgroundColor: '#fff',
+      
         borderRadius: 12,
         padding: 20,
         width: '100%',
@@ -164,7 +174,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         marginBottom: 6,
-        color: '#333',
+       
     },
     bold: {
         fontWeight: 'bold',

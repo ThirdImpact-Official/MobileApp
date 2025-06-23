@@ -30,7 +30,67 @@ export class HttpClient {
             }
             return config;
         })
+
+       this.Axios.interceptors.response.use(
+    response => response, // Laisser passer les réponses valides
+    async error => {
+        // 1. Vérifier que l'erreur contient bien une réponse
+        if (!error.response) {
+            console.error('Erreur réseau ou serveur injoignable', error);
+            return Promise.reject(error);
+        }
+
+        // 2. Cas spécifique du 401 (token expiré)
+        if (error.response.status === 401 && !error.config._retry) {
+            error.config._retry = true; // Marquer la requête comme retentée
+            
+            try {
+                const refreshToken = await this.secureStore.getValueFor('RefreshToken');
+                if (!refreshToken) throw error;
+
+                // 3. Requête de refresh
+                const refreshResponse = await axios.post(
+                    `http://localhost:7159/escape-game/account/refreshtoken`, 
+                    {}, 
+                    { headers: { Authorization: `Bearer ${refreshToken}` } }
+                );
+
+                // 4. Vérification minimale de la réponse
+                if (!refreshResponse.data?.token) {
+                    throw new Error('Format de réponse invalide');
+                }
+
+                // 5. Mise à jour des tokens
+                await this.secureStore.save('Token', refreshResponse.data.token);
+                error.config.headers.Authorization = `Bearer ${refreshResponse.data.token}`;
+                
+                // 6. Renvoyer la requête originale
+                return this.Axios(error.config);
+                
+            } catch (refreshError) {
+                console.error('Échec du rafraîchissement', refreshError);
+                return Promise.reject(error); // Rejeter l'erreur originale
+            }
+        }
+
+        // 7. Pour toutes les autres erreurs
+        return Promise.reject(error);
     }
+);
+    }
+    /**
+     *  allow the httpcient to set data
+     * @param data 
+     * @returns 
+     */
+    public setFormData(data: FormData): HttpClient {
+    this.Data = data;
+
+    // Override Axios content-type for FormData (let the browser set the boundary)
+    this.Axios.defaults.headers['Content-Type'] = 'multipart/form-data';
+    
+    return this;
+}
 
     /**
      * Sends a request to the server and returns a promise that resolves with a ServiceResponse object.
@@ -61,7 +121,9 @@ export class HttpClient {
             }
             
             console.log(`Sending ${methodes} request to: ${actionurl}`, data);
-            
+            if (data instanceof FormData) {
+    delete this.Axios.defaults.headers['Content-Type']; // Let browser handle it with correct boundary
+}
             this.Axios
                 .request({
                     url: actionurl,

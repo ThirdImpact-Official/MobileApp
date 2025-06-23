@@ -50,7 +50,14 @@ export default function LatestAnnonces() {
       <ThemedText type="subtitle" style={styles.title}>
         Les Dernières Annonces
       </ThemedText>
+<View style={styles.separator}>
 
+      <ThemedText >
+          <Text >
+           "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+          </Text>
+      </ThemedText>
+      </View>
       <Carousel
         loop
         width={cardWidth}
@@ -72,19 +79,19 @@ export default function LatestAnnonces() {
               style={[styles.card, { width: cardWidth - 20 }]}
               activeOpacity={0.8}
             >
-              <Card style={styles.cardPaper}>
+              <Card style={styles.card}>
                 <Card.Cover
                   source={{ uri: item.image }}
                   style={styles.image}
                   resizeMode="cover"
                 />
                 
-                <Card.Content style={styles.cardContent}>
-                  <View style={styles.textContent}>
-                    <Text style={styles.annonceTitle} numberOfLines={2}>
+                <Card.Content style={styles.cardContainer}>
+                  <View style={styles.gameTitle}>
+                    <Text style={styles.gameTitle} numberOfLines={2}>
                       {item.name}
                     </Text>
-                    <Text style={styles.dateText}>
+                    <Text style={styles.pageText}>
                       {new Date(item.createdDate).toLocaleDateString()}
                     </Text>
                   </View>
@@ -101,7 +108,7 @@ export default function LatestAnnonces() {
           style={styles.paginationButton}
           disabled={page === 1}
         >
-          <ThemedText style={[styles.paginateBtn, page === 1 && styles.disabledBtn]}>
+          <ThemedText style={[styles.paginationButton, page === 1 && styles.disabledButton]}>
             ◀
           </ThemedText>
         </TouchableOpacity>
@@ -115,7 +122,7 @@ export default function LatestAnnonces() {
           style={styles.paginationButton}
           disabled={page === totalPages}
         >
-          <ThemedText style={[styles.paginateBtn, page === totalPages && styles.disabledBtn]}>
+          <ThemedText style={[styles.paginationButton, page === totalPages && styles.disabledButton]}>
             ▶
           </ThemedText>
         </TouchableOpacity>
@@ -126,83 +133,111 @@ export default function LatestAnnonces() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 20,
   },
-  title: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 10,
+  },
+  errorContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: '#FF3B30',
+    marginBottom: 10,
+  },
+  retryButton: {
+    padding: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 5,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
     marginBottom: 16,
     textAlign: 'center',
   },
   carousel: {
     alignSelf: 'center',
+    marginBottom: 20,
   },
   cardContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   card: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  cardPaper: {
     backgroundColor: '#fff',
+    padding:4,
     borderRadius: 12,
     overflow: 'hidden',
-    height: '100%',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   image: {
     width: '100%',
-    height: 120,
+    height: 160,
+    marginHorizontal: 4,  
   },
-  cardContent: {
+  content: {
+    flex: 1,
     padding: 0,
-    flex: 1,
+    
   },
-  textContent: {
-    padding: 16,
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  annonceTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+  gameTitle: {
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
     marginBottom: 8,
-    color: '#333',
-    lineHeight: 20,
   },
-  dateText: {
-    fontSize: 12,
+  price: {
+   fontSize: 14,
     color: '#666',
+    lineHeight: 20,
+    textAlign: 'justify',
   },
   pagination: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 16,
     gap: 16,
   },
+  separator: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 20,
+    marginVertical: 16,
+    marginBottom:10
+  },
   paginationButton: {
-    padding: 8,
+    paddingHorizontal: 12,
   },
-  pageText: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginHorizontal: 12,
+  disabledButton: {
+    opacity: 0.5,
   },
-  paginateBtn: {
-    fontSize: 24,
+  paginationText: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#007AFF',
   },
-  disabledBtn: {
-    color: '#ccc',
+  pageText: {
+    fontSize: 16,
+    minWidth: 60,
+    
+    textAlign: 'center',
+  },
+  noGamesText: {
+    textAlign: 'center',
+    marginVertical: 20,
+    color: '#666',
   },
 });
