@@ -138,6 +138,7 @@ export class OrganisationAction {
      * @throws {Error} If the request to remove the user from the organisation fails.
      */
     public async RemoveUserOrganisationDto(userOrganisation: UpdateUserOrganisationDto): Promise<ServiceResponse<GetOrganisationDto>|PaginationResponse<GetOrganisationDto>> {
+        console.log(userOrganisation);
         return await this._httpClient.DeleteRequestType("/user")
                             .setData<UpdateUserOrganisationDto>(userOrganisation)
                             .execute<GetOrganisationDto>();
