@@ -42,7 +42,7 @@ export default function LatestEscapeGamesNoted() {
     return <ActivityIndicator size="large" color="#000" style={{ marginTop: 20 }} />;
   }
 
-  const cardWidth = width * 0.85;
+  const cardWidth = width * 0.5;
   const cardHeight = 280;
 
   return (

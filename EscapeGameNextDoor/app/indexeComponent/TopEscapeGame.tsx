@@ -109,7 +109,7 @@ export default function LatestEscapeGames() {
         <>
           <Carousel
             loop
-            width={width * 0.85}
+            width={width * 0.5}
             height={250}
             autoPlay
             autoPlayInterval={4000}

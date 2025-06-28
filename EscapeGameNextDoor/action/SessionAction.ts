@@ -74,6 +74,24 @@ export class SessionAction {
             .execute<GetSessionGameDto>();
     }
     //#region reservation
+
+    //#region locked
+    /**
+     * allow a user to lick a session
+     * @param id 
+     * @returns 
+     */
+    public async LockSession(id: number): Promise<ServiceResponse<boolean>> {
+        return await this.httpClient
+            .PutRequestType('/lock/'+id)
+            .execute<boolean>();
+    }
+    public async unLockSession(id: number): Promise<ServiceResponse<boolean>> {
+        return await this.httpClient
+            .PutRequestType('/unlock/'+id)
+            .execute<boolean>();
+    }
+    //#endregion 
     /**
      * 
      * @param id 
@@ -86,7 +104,7 @@ export class SessionAction {
     }
     public async Iscancellable(id: number): Promise<ServiceResponse<boolean> | PaginationResponse<boolean>> {
         return await this.httpClient
-            .GetRequestType(`/reserved/iscancellable?reservationId=${id}`)
+            .GetRequestType(`/reserved/iscancellable/{id}`)
             .execute<boolean>();
     }
 

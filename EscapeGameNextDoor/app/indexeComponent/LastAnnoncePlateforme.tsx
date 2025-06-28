@@ -42,10 +42,11 @@ export default function LatestAnnonces() {
     return <ActivityIndicator size="large" color="#000" style={{ marginTop: 20 }} />;
   }
 
-  const cardWidth = width * 0.7;
-  const cardHeight = 220;
+  const cardWidth = width * 0.5;
+  const cardHeight = 300;
 
   return (
+    
     <ThemedView style={styles.container}>
       <ThemedText type="subtitle" style={styles.title}>
         Les Dernières Annonces
@@ -134,6 +135,13 @@ export default function LatestAnnonces() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+  },
+   pageContainer:
+  {
+    alignSelf:'center',
+    maxWidth:800,
+    width:"100%",
+    paddingHorizontal:16
   },
   loadingContainer: {
     flex: 1,

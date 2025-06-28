@@ -48,6 +48,7 @@ export default function TabTwoScreen() {
   } else {
     return (
       <AppView>
+        <View style={styles.pageContainer}>
         <View style={styles.switchContainer}>
           <TouchableOpacity style={styles.switchButton} onPress={() => setIsOrganisation(false)}>
             <Text style={styles.switchText}>Escapegames</Text>
@@ -58,6 +59,8 @@ export default function TabTwoScreen() {
         </View>
         <View style={{ flex: 1 }}>
           {isOrganisation ? <OrganisationSelection /> : <EscapeGameSelection />}
+        </View>
+
         </View>
       </AppView>
     );
@@ -404,6 +407,13 @@ function EscapeGameSelection() {
 }
 
 const styles = StyleSheet.create({
+  pageContainer:
+  {
+    alignSelf:'center',
+    maxWidth:800,
+    width:"100%",
+    paddingHorizontal:16
+  },
   headerImage: {
     color: '#808080',
     bottom: -90,

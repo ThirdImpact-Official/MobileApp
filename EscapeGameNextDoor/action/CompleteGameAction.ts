@@ -5,6 +5,7 @@ import { HttpClient } from './httpClient'; // Assurez-vous que le chemin est cor
 import { PaginationResponse, ServiceResponse } from '@/interfaces/ServiceResponse'; // Assurez-vous que le chemin est correct
 import { AddEscapeGameDto } from '../../../Webclient/webclient/src/interfaces/EscapeGameInterface/EscapeGame/addEscapeGameDto';
 import { GetEscapeGameDto } from '@/interfaces/EscapeGameInterface/EscapeGame/getEscapeGameDto';
+import { GetCompleteGameDto } from '@/interfaces/EscapeGameInterface/CompleteGame/getCompleteGameDto';
 
  // Assurez-vous que les DTOs sont correctement définis
 
@@ -36,5 +37,13 @@ export class CompletegameAction {
         return await this.httpClient.GetRequestType('/user'+params).executePagination<GetEscapeGameDto>();
        
     }
- 
+      /**
+     * Get completed games for the current user
+     * @returns Promise with the list of completed games for the user
+     */
+    public async getCompletedGameBysessionId(item: number): Promise<ServiceResponse<GetCompleteGameDto>> {
+      
+        return await this.httpClient.GetRequestType('/reserved/'+item).execute<GetCompleteGameDto>();
+       
+    }
 }

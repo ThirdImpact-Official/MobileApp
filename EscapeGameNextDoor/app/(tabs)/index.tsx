@@ -1,4 +1,4 @@
-import { StyleSheet, Platform, Image } from 'react-native';
+import { StyleSheet, Platform, Image, View } from 'react-native';
 import React from 'react';
 import { Surface, Text, useTheme } from 'react-native-paper';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -15,7 +15,7 @@ export default function HomeScreen() {
 
   return (
   <AppView>
-
+      <View style={styles.pageContainer}>
         <Surface style={styles.titleContainer} elevation={0}>
           <LinearGradientWrapSynthwave>
           <SynthwaveText>
@@ -47,6 +47,8 @@ export default function HomeScreen() {
         <Surface style={styles.stepContainer} elevation={0}>
             <LatestEscapeGamesNoted />
           </Surface>
+
+      </View>
   </AppView>
   
   );
@@ -57,6 +59,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
+  pageContainer:
+  {
+    alignSelf:'center',
+    maxWidth:800,
+    width:"100%",
+    paddingHorizontal:16
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -65,9 +74,12 @@ const styles = StyleSheet.create({
   stepContainer: {
     gap: 12,
     marginBottom: 16,
+     width:"100%",
   },
   contentContainer: {
     gap: 16,
+     width:"100%",
+     
   },
   reactLogo: {
     height: 178,

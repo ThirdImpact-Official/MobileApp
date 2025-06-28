@@ -5,7 +5,8 @@ import { UnitofAction } from '@/action/UnitofAction';
 import AppView from '@/components/ui/AppView';
 import { Card, ActivityIndicator, Text,  } from 'react-native-paper';
 import ItemDisplay from '@/components/factory/GenericComponent/ItemDisplay';
-import { ScrollView, View ,StyleSheet} from 'react-native';
+import { ScrollView, View ,StyleSheet, TouchableOpacity} from 'react-native';
+import { router } from 'expo-router';
 const PAGE_SIZE = 5;
 export default function CompletedList() {
     const [completedGames, setCompletedGames] = useState<GetEscapeGameDto[] | null>(null);
@@ -73,7 +74,19 @@ export default function CompletedList() {
                 <Card.Content>
                     <View>
                         {completedGames?.map((game) => (
-                            <ItemDisplay key={game.esgId} header='' name={game.esgTitle} img={game.esgImgResources} />
+                            <TouchableOpacity
+                            onPress={
+                               ()=> router.push({pathname:'/Session/Research/EscapegameDetail',params:{id:game.esgId.toString()}})
+                            }>
+                            <ItemDisplay
+                                 key={game.esgId} 
+                                 header={game.esgTitle} 
+                                 name={game.esgTitle} 
+                                 img={game.esgImgResources} 
+                                 onClick={()=> router.push({
+                                    pathname:'/Session/Research/EscapegameDetail',params:{id:game.esgId.toString()}
+                            })} />
+                            </TouchableOpacity>
                         ))}
                     </View>
                 </Card.Content>

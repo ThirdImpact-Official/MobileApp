@@ -66,27 +66,39 @@ const EventCard = ({ event, onPress }: { event: GetEventDto; onPress: () => void
             />
             <Card.Content>
                 {event.eventDescription && (
-                    <Text style={styles.eventDescription} numberOfLines={2}>
-                        {event.eventDescription}
-                    </Text>
+                    <ThemedText>
+                        <Text style={styles.eventDescription} numberOfLines={2}>
+                            {event.eventDescription}
+                        </Text>
+                    </ThemedText>
                 )}
                 
                 <View style={styles.eventDetailsRow}>
                     {event.startDate && (
                         <View style={styles.eventDetailItem}>
-                            <Text style={styles.eventDetailLabel}>Début:</Text>
-                            <Text style={styles.eventDetailValue}>
-                                {formatDate(event.startDate)}
-                            </Text>
+                            <ThemedText>
+                                <Text style={styles.eventDetailLabel}>Début:</Text>
+
+                            </ThemedText>
+                            <ThemedText>
+                                <Text style={styles.eventDetailValue}>
+                                    {formatDate(event.startDate)}
+                                </Text>
+                            </ThemedText>
                         </View>
                     )}
                     
                     {event.endDate && (
                         <View style={styles.eventDetailItem}>
-                            <Text style={styles.eventDetailLabel}>Fin:</Text>
+                            <ThemedText>
+                                <Text style={styles.eventDetailLabel}>Fin:</Text>
+                                </ThemedText>
+                           <ThemedText>
+                            
                             <Text style={styles.eventDetailValue}>
                                 {formatDate(event.endDate)}
                             </Text>
+                            </ThemedText>
                         </View>
                     )}
                 </View>
@@ -340,7 +352,7 @@ const styles = StyleSheet.create({
     },
     eventDescription: {
         fontSize: 14,
-        color: '#555',
+       
         marginBottom: 12,
         lineHeight: 20,
     },
@@ -353,12 +365,12 @@ const styles = StyleSheet.create({
     },
     eventDetailLabel: {
         fontSize: 12,
-        color: '#888',
+     
         fontWeight: '600',
     },
     eventDetailValue: {
         fontSize: 13,
-        color: '#333',
+      
         marginTop: 2,
     },
     footer: {

@@ -1,5 +1,5 @@
-import { View, Text,StyleSheet } from "react-native";
-import { Button, Card, TextInput  } from 'react-native-paper';
+import { View, Text,StyleSheet,Alert  } from "react-native";
+import { Button, Card, TextInput, } from 'react-native-paper';
 import AppView from '../../../components/ui/AppView';
 import React from "react";
 import { AirbnbRating } from "react-native-ratings";
@@ -11,6 +11,8 @@ import { useCallback } from "react";
 import { AddRatingDto } from "@/interfaces/EscapeGameInterface/Rating/addRatingDto";
 import { ThemedText } from "@/components/ThemedText";
 import { useLocalSearchParams } from "expo-router";
+import { GetCompleteGameDto } from "@/interfaces/EscapeGameInterface/CompleteGame/getCompleteGameDto";
+import { ServiceResponse } from "@/interfaces/ServiceResponse";
 export default function CreateRatings() {
     const{ id} = useLocalSearchParams();
     const [loading, setLoading] = React.useState(false);
@@ -22,6 +24,7 @@ export default function CreateRatings() {
        notes: 0,
        rateTitle: "",
        rateContent: "",
+       completedgameId:0,
        userId: 0  
     });
     const [validationErrors, setValidationErrors] = React.useState<{ [key: string]: string | undefined }>({});
@@ -49,8 +52,27 @@ export default function CreateRatings() {
         setLoading(false);
     }
 
-  
+    const fetchHandleCompletedGame=async()=> 
+    {
+        const response = await action.completegameAction.getCompletedGameBysessionId(Number(id)) as ServiceResponse<GetCompleteGameDto>;
+        if(response.Success)
+        {
+            if(response.Data !== null)
+            {
+                setNewRating((prev) => ({
+                  ...prev,
+                  completedgameId: response.Data.id,
+                  userId: response.Data.userId // si tu veux assigner l'utilisateur aussi ici
+              }));
+
+            }
+        }
+        else{
+            setError(response.Message)
+        }
+    }
     const handleRatingChange = (rating: number) => {
+        fetchHandleCompletedGame()
         setUserRating(rating);
         console.log('Selected rating:', rating);
     }
@@ -69,7 +91,22 @@ export default function CreateRatings() {
             </AppView>
         )
     }
-    
+    if(error)
+    {
+          return(
+            <AppView>
+                <Card>
+                    <Card.Title title="Create Rating" />
+                    <Card.Content>
+                        <View style={{flex:1}}>
+                            <Alert />
+                          
+                        </View>
+                    </Card.Content>
+                </Card>
+            </AppView>
+        )
+    }
     return (
         <AppView>
             <Card>

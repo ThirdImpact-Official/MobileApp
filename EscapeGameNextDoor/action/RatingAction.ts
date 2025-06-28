@@ -65,10 +65,10 @@ export class RatingAction
             .GetRequestType(`average/${id}`)
             .execute<GetRatingDto>();
     }
-    public async canRate(id: number): Promise<ServiceResponse<GetRatingDto> | PaginationResponse<GetRatingDto>> {
+    public async canRate(id: number): Promise<ServiceResponse<boolean> | PaginationResponse<boolean>> {
         return this.HttpClient
             .GetRequestType(`canrate/${id}`)
-            .execute<GetRatingDto>();
+            .execute<boolean>();
     }
 
 }

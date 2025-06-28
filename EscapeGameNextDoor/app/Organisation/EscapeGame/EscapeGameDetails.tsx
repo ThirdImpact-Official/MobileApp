@@ -126,115 +126,118 @@ export default function EscapeGameDetails() {
 
     return (
         <AppView>
-            <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                <Card style={styles.card}>
-                    {
-                        hasbeenComplete? (
-                            <Card.Content style={{backgroundColor:'green'}}>
-                                <ThemedText style={{fontSize:20,textAlign:'center'}}>Vous avez Completer cette escapegame </ThemedText>
-                            </Card.Content>
-                        ):<></>
-                    }
-                    <LinearGradientWrapSynthwave>
-                        <Card.Title
-                            title={state.esgTitle || 'Untitled Game'}
-                            subtitle={`Created: ${formattedDate}`}
-                            left={(props) => <ThemedText><ArrowLeft {...props} onPress={() => router.back()}/></ThemedText> } 
-                            right={(props) => (
-                                <IconButton
-                                
-                                    {...props}
-                                    icon={isfavorit ? 'heart' : 'heart-outline'}
-                                    iconColor={isfavorit ? 'red' : 'black'}
-                                    onPress={isfavorit ? RemoveFavoris : AddFavoris}
-                                />
-                            )}
+            <View style={styles.pageContainer}>
+                <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                    <Card style={styles.card}>
+                        {
+                            hasbeenComplete? (
+                                <Card.Content style={{backgroundColor:'green'}}>
+                                    <ThemedText style={{fontSize:20,textAlign:'center'}}>Vous avez Completer cette escapegame </ThemedText>
+                                </Card.Content>
+                            ):<></>
+                        }
+                        <LinearGradientWrapSynthwave>
+                            <Card.Title
+                                title={state.esgTitle || 'Untitled Game'}
+                                subtitle={`Created: ${formattedDate}`}
+                                left={(props) => <ThemedText><ArrowLeft {...props} onPress={() => router.back()}/></ThemedText> } 
+                                right={(props) => (
+                                    <IconButton
+                                    
+                                        {...props}
+                                        icon={isfavorit ? 'heart' : 'heart-outline'}
+                                        iconColor={isfavorit ? 'red' : 'black'}
+                                        onPress={isfavorit ? RemoveFavoris : AddFavoris}
+                                    />
+                                )}
+                            />
+
+                        </LinearGradientWrapSynthwave>
+                
+                        <Card.Cover
+                            source={{ uri: state.esgImgResources || 'https://via.placeholder.com/300x200?text=No+Image' }}
+                            style={styles.image}
                         />
 
-                    </LinearGradientWrapSynthwave>
-               
-                    <Card.Cover
-                        source={{ uri: state.esgImgResources || 'https://via.placeholder.com/300x200?text=No+Image' }}
-                        style={styles.image}
-                    />
+                        <Card.Content style={styles.content}>
+                            <Text variant="bodyLarge" style={styles.description}>
+                                {state.esgContent || 'No description available'}
+                            </Text>
 
-                    <Card.Content style={styles.content}>
-                        <Text variant="bodyLarge" style={styles.description}>
-                            {state.esgContent || 'No description available'}
-                        </Text>
+                            <View style={styles.detailsGrid}>
+                                <DetailItem
+                                    label="Child-friendly"
+                                    value={state.esg_IsForChildren ? "Yes" : "No"}
+                                />
+                                <DetailItem
+                                    label="Phone"
+                                    value={state.esgPhoneNumber || 'Not available'}
+                                />
+                                <DetailItem
+                                    label="Difficulty"
+                                    value={state.difficultyLevel?.dileLevel || 'Not specified'}
+                                />
+                                <DetailItem
+                                    label="Price"
+                                    value={state.price?.indicePrice.toString() || 'Not specified'}
+                                />
+                            </View>
+                        </Card.Content>
 
-                        <View style={styles.detailsGrid}>
-                            <DetailItem
-                                label="Child-friendly"
-                                value={state.esg_IsForChildren ? "Yes" : "No"}
-                            />
-                            <DetailItem
-                                label="Phone"
-                                value={state.esgPhoneNumber || 'Not available'}
-                            />
-                            <DetailItem
-                                label="Difficulty"
-                                value={state.difficultyLevel?.dileLevel || 'Not specified'}
-                            />
-                            <DetailItem
-                                label="Price"
-                                value={state.price?.indicePrice.toString() || 'Not specified'}
-                            />
-                        </View>
-                    </Card.Content>
+                        <Card.Actions style={styles.actions}>
+                    
+                            <Button
+                                mode="contained"
+                                onPress={() => router.push(`/Organisation/SessionGame/SessionGameList?id=${state.esgId}`)}
+                            >
+                                Game Sessions
+                            </Button>
+                            <Button
+                                mode="contained"
+                                onPress={() => router.push({
+                                    pathname: '/Organisation/ActivitityPlace/ActivityPlaceList',
+                                    params: { id: id }
+                                })}
+                            >
+                                Activities
+                            </Button>
+                            <Button
+                                mode="contained"
+                                onPress={() => router.push({
+                                    pathname: '/Organisation/Event/Eventlist',
+                                    params: { id: id }
+                                })}
+                            >
+                                Events
+                            </Button>
+                            <Button
+                                mode="contained"
+                                onPress={() => router.push({
+                                    pathname: '/Organisation/Rating/Ratinglist',
+                                    params: { id: id }
+                                })}
+                            >
+                                Ratings
+                            </Button>
+                    
+                        </Card.Actions>
+                    </Card>
+                </ScrollView>
 
-                    <Card.Actions style={styles.actions}>
-                 
-                        <Button
-                            mode="contained"
-                            onPress={() => router.push(`/Organisation/SessionGame/SessionGameList?id=${state.esgId}`)}
-                        >
-                            Game Sessions
-                        </Button>
-                        <Button
-                            mode="contained"
-                            onPress={() => router.push({
-                                pathname: '/Organisation/ActivitityPlace/ActivityPlaceList',
-                                params: { id: id }
-                            })}
-                        >
-                            Activities
-                        </Button>
-                        <Button
-                            mode="contained"
-                            onPress={() => router.push({
-                                pathname: '/Organisation/Event/Eventlist',
-                                params: { id: id }
-                            })}
-                        >
-                            Events
-                        </Button>
-                        <Button
-                            mode="contained"
-                            onPress={() => router.push({
-                                pathname: '/Organisation/Rating/Ratinglist',
-                                params: { id: id }
-                            })}
-                        >
-                            Ratings
-                        </Button>
-                 
-                    </Card.Actions>
-                </Card>
-            </ScrollView>
+                <Portal>
+                    <Dialog visible={isErrorVisible} onDismiss={() => setIsErrorVisible(false)}>
+                        <Dialog.Title>Error</Dialog.Title>
+                        <Dialog.Content>
+                            <Text variant="bodyMedium">{error}</Text>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={() => setIsErrorVisible(false)}>OK</Button>
+                            <Button onPress={fetchEscapeGame}>Retry</Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                </Portal>
 
-            <Portal>
-                <Dialog visible={isErrorVisible} onDismiss={() => setIsErrorVisible(false)}>
-                    <Dialog.Title>Error</Dialog.Title>
-                    <Dialog.Content>
-                        <Text variant="bodyMedium">{error}</Text>
-                    </Dialog.Content>
-                    <Dialog.Actions>
-                        <Button onPress={() => setIsErrorVisible(false)}>OK</Button>
-                        <Button onPress={fetchEscapeGame}>Retry</Button>
-                    </Dialog.Actions>
-                </Dialog>
-            </Portal>
+            </View>
         </AppView>
     );
 }
@@ -251,6 +254,13 @@ const styles = StyleSheet.create({
     scrollViewContent: {
         padding: 16,
     },
+    pageContainer:
+  {
+    alignSelf:'center',
+    maxWidth:800,
+    width:"100%",
+    paddingHorizontal:16
+  },
     container: {
         flex: 1,
         padding: 16,

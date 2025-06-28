@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView,Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import FormUtils from '@/classes/FormUtils';
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { GetSessionReservedDto } from '../../../interfaces/EscapeGameInterface/Reservation/getSessionReservedDto';
 import { GetSessionGameDto } from '../../../interfaces/EscapeGameInterface/Session/getSessionGameDto';
 import { UnitofAction } from "@/action/UnitofAction";
-import { Button, Card} from 'react-native-paper';
+import { Button, Card, Surface} from 'react-native-paper';
 import AppView from "@/components/ui/AppView";
 import { CardContent } from '@mui/material';
 import { ThemedText } from "@/components/ThemedText";
@@ -20,8 +20,31 @@ export default function Reservation() {
     );
     const action= new UnitofAction();
     const [error,setError] =useState<string>("");
+     const [errorRate,setErrorRate] =useState<string>("");
+       const [warningCancel,setWarning] =useState<string>("");
     const [isloading,setLoading]=useState<boolean>(false);
-
+    const [isAllowedToRate,setAllowedRate]=useState<boolean>(false);
+    const [isAllowedTocancel,setAllowedCancell]=useState<boolean>(false)
+    const canrate =async ()=>{
+        const response=await action.ratingAction.canRate(Number(id));
+        if(response.Success)
+        {
+            setAllowedRate(response.Data as boolean)
+        }
+        else{
+            setErrorRate("vous ne pouvez pas encore noté cette escapegame")
+        }
+    }
+    const iscancellable = async()=>{
+  const response = await action.sessionAction.Iscancellable(Number(id));
+        if(response.Success)
+        {
+            setAllowedRate(response.Data as boolean)
+        }
+        else{
+           setWarning("vous ne pouvez pas Annuler votre reservation")
+        }
+    }
     const FetchReservationById=async ()=> {
         try {
             setLoading(true);
@@ -29,6 +52,7 @@ export default function Reservation() {
             const Sessionrepsone= await action.sessionAction.getSessionById(state?.sessionGameId as number);
             if(resposne.Success)
             {
+                console.log(sessiongGame)
                 setState(resposne.Data as GetSessionReservedDto);
             }
             else{
@@ -54,6 +78,8 @@ export default function Reservation() {
     }
     useEffect(()=>{
         FetchReservationById();
+        canrate();
+        iscancellable();
     },[id]);
     if (isloading) {
         return (
@@ -73,7 +99,25 @@ export default function Reservation() {
     } else {
         return (
            <AppView>
-            
+                <Surface>
+                    {
+                        errorRate && (
+                            <ThemedText>
+                                {error}
+                            </ThemedText>
+
+                        )
+
+                    }
+                    { warningCancel &&(
+
+                        <ThemedText>
+                            {error}
+                        </ThemedText>
+                    )
+
+                    }
+                </Surface>
                 <ScrollView contentContainerStyle={styles.centered}>
                     <Card style={styles.card}>
                         <View style={styles.cardHeader}>
@@ -107,6 +151,7 @@ export default function Reservation() {
                                     <Text style={styles.buttonText}>Escape Game</Text>
                                 </Button>
                                 <Button
+                                    disabled={isAllowedToRate==false}
                                     style={styles.button}
                                     onPress={() => rooter.push({
                                    pathname:`/Organisation/Rating/CreateRatings`,
@@ -116,7 +161,9 @@ export default function Reservation() {
                                 >
                                     <Text style={styles.buttonText}>Avis</Text>
                                 </Button>
+                                
                                 <Button
+                                    disabled={isAllowedTocancel==false}
                                     style={styles.button}
                                     onPress={() => rooter.push(
                                         {

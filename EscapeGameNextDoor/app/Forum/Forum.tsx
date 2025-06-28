@@ -43,7 +43,7 @@ export default function Forum() {
   const action = new UnitofAction();
   //--menu
    const [visible, setVisible] = React.useState(false);
-
+  const forumId = id ? Number(id) : 0; // ou une valeur par défaut appropriée
   const openMenu = () => setVisible(true);
 
   const closeMenu = () => setVisible(false);
@@ -51,7 +51,7 @@ export default function Forum() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [addForum, setAddForum] = useState<AddPostForumDto>({
     content: '',
-    forumId: Number(id),
+    forumId: forumId,
     postparentId: null,
     userId: 0,
   });
@@ -227,7 +227,15 @@ export default function Forum() {
     });
   }
   const handleAddPost = async () => {
-    const response: ServiceResponse<GetPostForumDto> = await action.postAction.createPostForForum(forum?.id as number, addForum as AddPostForumDto) as ServiceResponse<GetPostForumDto>;
+
+    const forumId:number= Number(id);
+    const postData: AddPostForumDto = {
+      content: addForum.content.trim(),
+      forumId: forumId, // Utilisation directe de l'ID vérifié
+      postparentId: addForum.postparentId,
+      userId: addForum.userId
+    };
+    const response: ServiceResponse<GetPostForumDto> = await action.postAction.createPostForForum(forumId, postData) as ServiceResponse<GetPostForumDto>;
     if (response.Success) {
 
       notif.showToast("Post ajouté", "success");
@@ -293,185 +301,194 @@ export default function Forum() {
   if (!postMessage.length) {
     return (
       <AppView >
-        <ScrollView style={styles.scrollView}>
-          <Card style={styles.header}>
-            <Card.Title
-              title={forum?.title}
-              titleStyle={styles.headerTitle}
-              right={(props) => (
-                <View>
-                  <View style={[styles.addButtonContainer, { alignSelf: "flex-end" }]}>
-                    <PlusCircle onPress={handleopenModal} style={styles.addButton} />
-                    <View>
-                      <ThemedText>{FormUtils.FormatDate(forum?.creationDate)}</ThemedText>
+        <View style={styles.pageContainer} >
+          <ScrollView  style={{ flex: 1 }}
+                contentContainerStyle={{ flexGrow: 1 }}>
+            <Card style={styles.header}>
+              <Card.Title
+                title={forum?.title}
+                titleStyle={styles.headerTitle}
+                right={(props) => (
+                  <View>
+                    <View style={[styles.addButtonContainer, { alignSelf: "flex-end" }]}>
+                      <PlusCircle onPress={handleopenModal} style={styles.addButton} />
+                      <View>
+                        <ThemedText>{FormUtils.FormatDate(forum?.creationDate)}</ThemedText>
+                      </View>
                     </View>
                   </View>
-                </View>
-              )}
-            />
-          </Card>
-
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>Aucun post disponible</Text>
-            <Text style={styles.emptySubtext}>Soyez le premier à ajouter un post dans ce forum !</Text>
-          </View>
-        </ScrollView>
-
-        <Modal visible={isModalVisible} onDismiss={handleCloseModal}>
-          <View style={styles.modalContainer}>
-            <Card style={styles.modalCard}>
-              <Card.Title title="Ajouter un post" titleStyle={styles.modalTitle} />
+                )}
+              />
               <Card.Content>
-                <TextInput
-                  style={styles.textInput}
-                  mode="outlined"
-                  multiline
-                  numberOfLines={4}
-                  value={addForum.content}
-                  placeholder="Contenu"
-                  onChangeText={handleContentChange}
-                />
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyText}>Aucun post disponible</Text>
+                  <Text style={styles.emptySubtext}>Soyez le premier à ajouter un post dans ce forum !</Text>
+                </View>
+
               </Card.Content>
-              <Card.Actions style={styles.modalActions}>
-                <Button onPress={handleAddPost}>Ajouter</Button>
-                <Button onPress={handleCloseModal}>Annuler</Button>
-              </Card.Actions>
             </Card>
-          </View>
-        </Modal>
+
+          </ScrollView>
+
+          <Modal visible={isModalVisible} onDismiss={handleCloseModal}>
+            <View style={styles.modalContainer}>
+              <Card style={styles.modalCard}>
+                <Card.Title title="Ajouter un post" titleStyle={styles.modalTitle} />
+                <Card.Content>
+                  <TextInput
+                    style={styles.textInput}
+                    mode="outlined"
+                    multiline
+                    numberOfLines={4}
+                    value={addForum.content}
+                    placeholder="Contenu"
+                    onChangeText={handleContentChange}
+                  />
+                </Card.Content>
+                <Card.Actions style={styles.modalActions}>
+                  <Button onPress={handleAddPost}>Ajouter</Button>
+                  <Button onPress={handleCloseModal}>Annuler</Button>
+                </Card.Actions>
+              </Card>
+            </View>
+          </Modal>
+        </View>
       </AppView>
     );
   }
 
   return (
     <AppView >
-      <ScrollView style={styles.scrollView}>
-         <Card style={styles.postCard}>
-      <Card.Title
-        title={user?.username || 'Utilisateur'}
-        subtitle={forum?.title}
-        left={(props) => (
-          <Avatar.Icon
-            {...props}
-            icon="account"
-            style={styles.defaultAvatar}
-          />
-        )}
-        right={(props) => (
-          <Menu
-          visible={visible}
-          onDismiss={closeMenu}
-          anchor={<Button onPress={openMenu}>< AlignJustify/></Button>}>
-          <Menu.Item onPress={handlesignalement} title="Signalement" />
-          { isOwner && (
-            <Menu.Item onPress={handleDeleteopenModal} title="Supprimer" />
+      <View style={styles.pageContainer}>
+
+        <ScrollView style={styles.scrollView}>
+          <Card style={styles.postCard}>
+        <Card.Title
+          title={user?.username || 'Utilisateur'}
+          subtitle={forum?.title}
+          left={(props) => (
+            <Avatar.Icon
+              {...props}
+              icon="account"
+              style={styles.defaultAvatar}
+            />
           )}
-        </Menu>
-        )}
-      />
-      <Card.Content>
-        <Text style={styles.content}>{forum?.content}</Text>
+          right={(props) => (
+            <Menu
+            visible={visible}
+            onDismiss={closeMenu}
+            anchor={<Button onPress={openMenu}>< AlignJustify/></Button>}>
+            <Menu.Item onPress={handlesignalement} title="Signalement" />
+            { isOwner && (
+              <Menu.Item onPress={handleDeleteopenModal} title="Supprimer" />
+            )}
+          </Menu>
+          )}
+        />
+        <Card.Content>
+          <Text style={styles.content}>{forum?.content}</Text>
 
-        <View style={{ flexDirection: 'row',
-                      alignItems: 'center',
-                      marginBottom: 8,}}>
-          <IconButton
-            icon="heart-outline"
-            size={20}
-            onPress={() => handleLike(Number(id))}
-            style={styles.likeButton}
-          />
-          <IconButton
-            icon="heart-remove-outline"
-            size={20}
-            onPress={() => handleDisLike(Number(id))}
-            style={styles.dislikeButton}
-          />
-        </View>
+          <View style={{ flexDirection: 'row',
+                        alignItems: 'center',
+                        marginBottom: 8,}}>
+            <IconButton
+              icon="heart-outline"
+              size={20}
+              onPress={() => handleLike(Number(id))}
+              style={styles.likeButton}
+            />
+            <IconButton
+              icon="heart-remove-outline"
+              size={20}
+              onPress={() => handleDisLike(Number(id))}
+              style={styles.dislikeButton}
+            />
+          </View>
 
-        <View style={styles.footer}>
-          <Text style={styles.dateText}>
-            {FormUtils.FormatDate(forum?.creationDate)}
-          </Text>
+          <View style={styles.footer}>
+            <Text style={styles.dateText}>
+              {FormUtils.FormatDate(forum?.creationDate)}
+            </Text>
 
-          <TouchableOpacity onPress={handleopenModal} style={styles.replyButton}>
-            <PlusCircle stroke="black" width={16} height={16} style={styles.replyIcon} />
-            <Text style={styles.replyText}>Répondre</Text>
-          </TouchableOpacity>
-        </View>
-      </Card.Content>
-    </Card>
+            <TouchableOpacity onPress={handleopenModal} style={styles.replyButton}>
+              <PlusCircle stroke="black" width={16} height={16} style={styles.replyIcon} />
+              <Text style={styles.replyText}>Répondre</Text>
+            </TouchableOpacity>
+          </View>
+        </Card.Content>
+      </Card>
 
-        <View style={styles.repliesContainer}>
-          <PostsList forumId={Number(id)} postForumId={0} page={page} />
-        </View>
+          <View style={styles.repliesContainer}>
+            <PostsList forumId={Number(id)} postForumId={0} page={page} />
+          </View>
 
-        <View style={styles.paginationContainer}>
-          <Button
-            mode="outlined"
-            style={styles.paginationButton}
-            disabled={page === 1 || isLoading}
-            onPress={() => handlePageChange(page - 1)}
-          >
-            Précédent
-          </Button>
-          <ThemedText style={styles.pageIndicator}>Page {page}/{totalPage}</ThemedText>
-          <Button
-            mode="outlined"
-            style={styles.paginationButton}
-            disabled={page === totalPage || isLoading}
-            onPress={() => handlePageChange(page + 1)}
-          >
-            Suivant
-          </Button>
-        </View>
-      </ScrollView>
-
-      <Modal visible={isModalVisible} onDismiss={handleCloseModal} contentContainerStyle={styles.modalContainer}>
-        <ScrollView>
-          <View style={styles.modalContainer}>
-            <Card style={styles.modalCard}>
-              <Card.Title title="Ajouter un post" titleStyle={styles.modalTitle} />
-              <Card.Content>
-                <TextInput
-                  style={styles.textInput}
-                  mode="outlined"
-                  multiline
-                  numberOfLines={4}
-                  value={addForum.content}
-                  placeholder="Contenu"
-                  onChangeText={handleContentChange}
-                />
-              </Card.Content>
-              <Card.Actions style={styles.modalActions}>
-                <View style={{flex:1}}>
-                  <Button onPress={handleAddPost}>Ajouter</Button>
-                  <Button onPress={handleCloseModal}>Annuler</Button>
-                </View>
-              </Card.Actions>
-            </Card>
+          <View style={styles.paginationContainer}>
+            <Button
+              mode="outlined"
+              style={styles.paginationButton}
+              disabled={page === 1 || isLoading}
+              onPress={() => handlePageChange(page - 1)}
+            >
+              Précédent
+            </Button>
+            <ThemedText style={styles.pageIndicator}>Page {page}/{totalPage}</ThemedText>
+            <Button
+              mode="outlined"
+              style={styles.paginationButton}
+              disabled={page === totalPage || isLoading}
+              onPress={() => handlePageChange(page + 1)}
+            >
+              Suivant
+            </Button>
           </View>
         </ScrollView>
-      </Modal>
 
-      <Modal visible={isDeleteModalVisible} onDismiss={handleDeleteCloseModal} contentContainerStyle={styles.modalContainer}>
-        <ScrollView>
-          <View style={styles.modalContainer}>
-            <Card style={styles.modalCard}>
-              <Card.Title title="delete Modal " titleStyle={styles.modalTitle} />
-              <Card.Content>
-                <ThemedText>Are you sure you want to delete this forum?</ThemedText>
-              </Card.Content>
-              <Card.Actions style={styles.modalActions}>
-                <View style={{flex:1}}>
-                  <Button onPress={handleDelete}>supprimer</Button>
-                  <Button onPress={handleDeleteCloseModal}>Annuler</Button>
-                </View>
-              </Card.Actions>
-            </Card>
-          </View>
-        </ScrollView>
-      </Modal>
+        <Modal visible={isModalVisible} onDismiss={handleCloseModal} contentContainerStyle={styles.modalContainer}>
+          <ScrollView>
+            <View style={styles.modalContainer}>
+              <Card style={styles.modalCard}>
+                <Card.Title title="Ajouter un post" titleStyle={styles.modalTitle} />
+                <Card.Content>
+                  <TextInput
+                    style={styles.textInput}
+                    mode="outlined"
+                    multiline
+                    numberOfLines={4}
+                    value={addForum.content}
+                    placeholder="Contenu"
+                    onChangeText={handleContentChange}
+                  />
+                </Card.Content>
+                <Card.Actions style={styles.modalActions}>
+                  <View style={{flex:1}}>
+                    <Button onPress={handleAddPost}>Ajouter</Button>
+                    <Button onPress={handleCloseModal}>Annuler</Button>
+                  </View>
+                </Card.Actions>
+              </Card>
+            </View>
+          </ScrollView>
+        </Modal>
+
+        <Modal visible={isDeleteModalVisible} onDismiss={handleDeleteCloseModal} contentContainerStyle={styles.modalContainer}>
+          <ScrollView>
+            <View style={styles.modalContainer}>
+              <Card style={styles.modalCard}>
+                <Card.Title title="delete Modal " titleStyle={styles.modalTitle} />
+                <Card.Content>
+                  <ThemedText>Are you sure you want to delete this forum?</ThemedText>
+                </Card.Content>
+                <Card.Actions style={styles.modalActions}>
+                  <View style={{flex:1}}>
+                    <Button onPress={handleDelete}>supprimer</Button>
+                    <Button onPress={handleDeleteCloseModal}>Annuler</Button>
+                  </View>
+                </Card.Actions>
+              </Card>
+            </View>
+          </ScrollView>
+        </Modal>
+      </View>
 
     </AppView>
   );
@@ -489,6 +506,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     minWidth: 120, // Adjust as needed
+  },
+    pageContainer:
+  {
+    alignSelf:'center',
+    maxWidth:800,
+    width:"100%",
+    paddingHorizontal:16
   },
   scrollView: {
     flex: 1,
@@ -727,7 +751,6 @@ const styles = StyleSheet.create({
   },
 
   textInput: {
-    backgroundColor: '#ffffff',
     fontSize: 16,
   },
 

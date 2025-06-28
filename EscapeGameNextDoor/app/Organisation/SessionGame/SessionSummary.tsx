@@ -13,6 +13,7 @@ import { ChevronLeft, ChevronRight } from "react-native-feather";
 import { Card, Divider, TextInput, Button } from "react-native-paper";
 import { GetPaymentDto } from "@/interfaces/EscapeGameInterface/Payment/getPaymentDto";
 import { GetSessionReservedDto } from "@/interfaces/EscapeGameInterface/Reservation/getSessionReservedDto";
+import { ArrowLeft } from "react-native-feather";
 const unitOfAction = new UnitofAction();
 
 async function fetchSessionReservationById(params: string): Promise<ServiceResponse<GetSessionGameDto>> {
@@ -86,6 +87,19 @@ const SessionSummary: React.FC = () => {
 
         loadData();
     }, [id]);
+     const handUnlockedSession= async () => {
+    const response = await unitOfAction.sessionAction.unLockSession(Number(id));
+    if(response.Success)
+    {
+      router.push({
+                  pathname: "/Organisation/SessionGame/SessionGameDetails",
+                  params: { id: id },
+                });
+    }
+    else{
+      setError("an error has occured while unlocking the session")
+    }
+  };
 
     const handleReservationSubmit = async () => {
         if (!reservation.content.trim()) {
@@ -142,12 +156,21 @@ const SessionSummary: React.FC = () => {
             const response = await unitOfAction.sessionAction.addSessionReserved(reservation) as ServiceResponse<GetSessionReservedDto>;
             if(response.Success)
             {
-                setProceed(true);
-                setConfirmedPayment(response.Data as GetSessionReservedDto);
-                router.push({
-                    pathname:"/Organisation/Payment/MakePayment",
-                    params:{id:response.Data?.id}
-                })
+                console.log(response)
+                if(response.Data?.id !==0)
+                {
+                    setProceed(true);
+                    setConfirmedPayment(response.Data as GetSessionReservedDto);
+                    
+                    router.push({
+                        pathname:"/Organisation/Payment/MakePayment",
+                        params:{id:response.Data?.id }
+                    })
+                    
+                }
+                else{
+                    setError(response.Message);
+                }
             }
         
             else{
@@ -199,7 +222,9 @@ const SessionSummary: React.FC = () => {
         return (
             <AppView>
                 <Card style={styles.card}>
-                    <Card.Title title="Détails de la session" />
+                    <Card.Title title="Détails de la session"
+                    left={(props)=><TouchableOpacity onPress={handUnlockedSession}><ArrowLeft/> </TouchableOpacity>}
+                     />
 
                     <Divider style={styles.divider} />
                     <Card.Content>
@@ -275,7 +300,9 @@ const SessionSummary: React.FC = () => {
                     left={() => (
                         <TouchableOpacity onPress={handleUpdateReservation} style={styles.editButton}>
                             <ChevronRight color="#6200ee" />
-                            <Text style={styles.editButtonText}>Modifier</Text>
+                            <ThemedText>
+                                <Text style={styles.editButtonText}>Modifier</Text>
+                                </ThemedText>
                         </TouchableOpacity>
                     )}
                 />
@@ -436,7 +463,7 @@ const styles = StyleSheet.create({
         paddingLeft: 1,
     },
     editButtonText: {
-        color: '#6200ee',
+       
         marginLeft: 4,
     },
 });

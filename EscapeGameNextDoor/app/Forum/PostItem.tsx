@@ -94,7 +94,7 @@ console.log(userId);
     const redirectToForumPost = () => {
         router.push({
             pathname: '/Forum/PostForum',
-            params: { id: post.id },
+            params: { id: post.id ,forumid:post.forumId},
         });
     };
 
@@ -193,9 +193,9 @@ export const PostsList = ({ forumId, postForumId, page }: PostsListProps) => {
             let fetchedPosts: PaginationResponse<GetPostForumDto> | null = null;
 
             if (forumId) {
-                fetchedPosts = await action.postAction.getPostsByForumId(forumId, page, PAGE_SIZE);
+                fetchedPosts = await action.postAction.getPostsByForumId(forumId, page, PAGE_SIZE) as PaginationResponse<GetPostForumDto>;
             } else if (postForumId) {
-                fetchedPosts = await action.postAction.getPostsFromPostParentId(postForumId, page, PAGE_SIZE);
+                fetchedPosts = await action.postAction.getPostsFromPostParentId(postForumId, page, PAGE_SIZE)as PaginationResponse<GetPostForumDto>;
             } else {
                 setError('Aucun identifiant de forum ou postForum fourni.');
                 return;

@@ -9,6 +9,7 @@ import { GetSessionGameDto } from "@/interfaces/EscapeGameInterface/Session/getS
 import FormUtils from '@/classes/FormUtils';
 import { Card } from "react-native-paper";
 import { ThemedText } from "@/components/ThemedText";
+import { SessionAction } from '../../../action/SessionAction';
 /**
  * Page pour afficher les d tails d'une session
  * @param id - L'identifiant de la session
@@ -21,6 +22,7 @@ export default function SessionDetails() {
   const httpaction = React.useMemo(() => new UnitofAction(), []);
   const router = useRouter();
   const [error, setError] = useState<string>("");
+  const [isLocked,setLokced]= useState()
   const { width } = useWindowDimensions();
 
   const fetchSession = async () => {
@@ -34,6 +36,64 @@ export default function SessionDetails() {
       }
     } catch (err) {
       setError("Erreur de connexion au serveur");
+    }
+  };
+  const handleLOckSession=async()=>{
+    try{
+        const response = await httpaction.sessionAction.LockSession(Number(id));
+        if(response.Success)
+        {
+          if(response.Data)
+          {
+            router.push({
+                    pathname: "/Organisation/SessionGame/SessionSummary",
+                    params: { id: id },
+                  });
+
+          }
+          else{
+            setError("cette reservation est déja en cours de reservation veuillez en choisisr une autre ")
+          }
+        }
+        else{
+          setError(response.Message)
+        }
+    }
+    catch(error)
+    {
+      setError("an error has occured during the procedure ")
+    }
+  }
+  const IsLocked=async()=>{
+     try{
+        const response = await httpaction.sessionAction.LockSession(Number(id));
+        if(response.Success)
+        {
+          router.push({
+                  pathname: "/Organisation/SessionGame/SessionSummary",
+                  params: { id: id },
+                });
+        }
+        else{
+          setError(response.Message)
+        }
+    }
+    catch(error)
+    {
+      setError("an error has occured during the procedure ")
+    }
+  }
+  const handUnlockedSession= async () => {
+    const response = await httpaction.sessionAction.unLockSession(Number(id));
+    if(response.Success)
+    {
+      router.push({
+                  pathname: "/Organisation/SessionGame/SessionGameDetails",
+                  params: { id: id },
+                });
+    }
+    else{
+      setError("an error has occured while unlocking the session")
     }
   };
 
@@ -63,6 +123,17 @@ export default function SessionDetails() {
           <Card.Content>
             <Text style={styles.errorText}>{error}</Text>
           </Card.Content>
+          <Card.Actions>
+             <Button
+            mode="outlined"
+            style={styles.outlinedButton}
+            onPress={() => router.back()}
+          >
+            <ThemedText style={styles.buttontext}>
+              Autres Sessions
+              </ThemedText>
+          </Button>
+          </Card.Actions>
         </Card>
       </AppView>
     );
@@ -81,7 +152,7 @@ export default function SessionDetails() {
               <ThemedText><Text style={styles.label}>Prix : </Text>
                 {session?.price !== undefined && session?.price !== null ? `${session.price} €` : "-"}
               </ThemedText>
-              <ThemedText><Text style={styles.label}>Libre : </Text>{session?.isReserved ? "Oui" : "Non"}</ThemedText>
+              <ThemedText><Text style={styles.label}>Libre : </Text>{session?.isReserved ? "Non":"Oui"  }</ThemedText>
             </View>
           </Card.Content>
         </View>
@@ -90,10 +161,8 @@ export default function SessionDetails() {
           <Button
             mode="contained"
             style={styles.button}
-            onPress={() => router.push({
-              pathname: "/Organisation/SessionGame/SessionSummary",
-              params: { id: id },
-            })}
+            disabled={session?.isReserved}
+            onPress={handleLOckSession}
           >
             <ThemedText>
               Réserver

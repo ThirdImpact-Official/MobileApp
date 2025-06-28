@@ -162,7 +162,9 @@ const EventDetail: React.FC<EventDetailProps> = () => {
     const DetailRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
         <View style={styles.detailRow}>
             <ThemedText style={styles.detailLabel}>{label}</ThemedText>
-            <Text style={styles.detailValue}>{value}</Text>
+            <ThemedText>
+                <Text style={styles.detailValue}>{value}</Text>
+                </ThemedText>
         </View>
     );
 
@@ -234,12 +236,12 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 8,
-        color: '#333',
+        
     },
     descriptionText: {
         fontSize: 16,
         lineHeight: 24,
-        color: '#444',
+      
     },
     divider: {
         marginVertical: 16,
@@ -256,11 +258,11 @@ const styles = StyleSheet.create({
     detailLabel: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#555',
+       
     },
     detailValue: {
         fontSize: 16,
-        color: '#333',
+       
     },
     actions: {
         justifyContent: 'space-between',

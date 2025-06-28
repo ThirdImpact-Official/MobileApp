@@ -1,61 +1,58 @@
 import { ThemedText } from "@/components/ThemedText";
-import React, { useEffect } from "react"
-import { Card } from "react-native-paper";
+import React, { useEffect, useState } from "react"
+import { Button, Card } from "react-native-paper";
 import { View } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { UnitofAction } from "@/action/UnitofAction";
 import { ActivityIndicator } from "react-native";
-import { StyleSheet ,Text} from "react-native";
+import { StyleSheet, Text } from "react-native";
 import AppView from "@/components/ui/AppView";
-export default function Cancelreservation()
-{
-    const action=new UnitofAction();
-    const router=useRouter();
-    const {id}=useLocalSearchParams();
+import { GetSessionGameDto } from "@/interfaces/EscapeGameInterface/Session/getSessionGameDto";
+export default function Cancelreservation() {
+    const action = new UnitofAction();
+    const router = useRouter();
+    const { id } = useLocalSearchParams();
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState("");
     const [success, setSuccess] = React.useState("");
     const [isCancellable, setIsCancellable] = React.useState(false);
-    const cancelReservation=async()=>{
+    const [getsession, setsession] = useState<GetSessionGameDto | null>(null);
+    const cancelReservation = async () => {
         setLoading(true);
-        const response=await action.sessionAction.cancelSessionReserved(Number(id));
-        if(response.Success){
+        const response = await action.sessionAction.cancelSessionReserved(Number(id));
+        if (response.Success) {
             setSuccess(response.Message);
 
         }
-        else{
+        else {
             setError(response.Message);
         }
         setLoading(false);
     }
-    const verifyIfisCancellable= async () => {
-        try {
-            setLoading(true);
-      
-            const response = await action.sessionAction.Iscancellable(Number(id));
-            if (response.Success) {
-                setIsCancellable(response.Data as boolean);
-            } else {
-                setError(response.Message || "Failed to fetch activity");
-            }
-        } catch (e) {
-            setError("An error occurred while fetching activity");
-            console.error(e);
-        } finally {
-            setLoading(false);
+
+    const fetchReservationByd = async () => {
+        const response = await action.sessionAction.getSessionById(Number(id));
+        if (response.Success) {
+
         }
     };
     useEffect(() => {
-        (async () => {
-           await verifyIfisCancellable();
-            if (!isCancellable) {
-                router.back();
-            }
-        })();
-    }, []);
+        fetchReservationByd();
+        verifyIsCancellable();
+    }, [id]);
+    const verifyIsCancellable = async () => {
 
-    if(loading){
-        return(
+        const response = await action.sessionAction.Iscancellable(Number(id));
+        if (response.Success) {
+            setIsCancellable(response.Data as boolean)
+        }
+
+    }
+
+
+
+    if (loading) {
+        return (
             <AppView>
                 <Card>
                     <Card.Content>
@@ -66,12 +63,11 @@ export default function Cancelreservation()
                 </Card>
 
             </AppView>
-           
+
         )
     }
-    if(error)
-    {
-        return(
+    if (error) {
+        return (
             <AppView>
                 <Card>
                     <Card.Content>
@@ -82,12 +78,11 @@ export default function Cancelreservation()
                 </Card>
 
             </AppView>
-        
+
         )
     }
-    if(success)
-    {
-        return(
+    if (success) {
+        return (
             <AppView>
                 <Card>
                     <Card.Content>
@@ -100,36 +95,42 @@ export default function Cancelreservation()
             </AppView>
         )
     }
-    if(isCancellable){
-        return(
-            <Card>
-                <Card.Content>
-                    <View style={styles.container}>
-                        <ThemedText>Vous pouvez annuler votre reservation</ThemedText>
-                        <ThemedText onPress={cancelReservation}>Annuler la reservation</ThemedText>
-                    </View>
-                </Card.Content>
-            </Card>
+    if (isCancellable) {
+        return (
+            <AppView>
+                <Card>
+                    <Card.Content>
+                        <View style={styles.container}>
+                            <ThemedText>Vous pouvez annuler votre reservation</ThemedText>
+                            <ThemedText onPress={cancelReservation}>Annuler la reservation</ThemedText>
+                        </View>
+                    </Card.Content>
+                    <Card.Actions>
+                        <Button onPress={cancelReservation}>Annuler</Button>
+                    </Card.Actions>
+                </Card>
+            </AppView>
         )
     }
-    else
-    {
-        return(
-            <Card>
-                <Card.Content>
-                    <View style={styles.container}>
-                        <ThemedText>Vous ne pouvez pas annuler votre reservation</ThemedText>
-                    </View>
-                </Card.Content>
-            </Card>
+    else {
+        return (
+            <AppView>
+                <Card>
+                    <Card.Content>
+                        <View style={styles.container}>
+                            <ThemedText>Vous ne pouvez pas annuler votre reservation</ThemedText>
+                        </View>
+                    </Card.Content>
+                </Card>
+            </AppView>
         )
     }
 }
 
-const styles= StyleSheet.create({
+const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-  });
+});

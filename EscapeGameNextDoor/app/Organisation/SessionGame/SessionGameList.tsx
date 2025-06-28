@@ -96,12 +96,13 @@ export default function SessionGameList() {
     if (filter === '2') return sg.isReserved;
     return true;
   });
-
+  
   const renderSessionItem = ({ item, index }: { item: GetSessionGameDto; index: number }) => (
     <Card style={styles.sessionItem} key={item.segId}>
       <Card.Content>
         <ThemedView>
           <TouchableOpacity
+            disabled={item.isReserved}
             style={styles.sessionButton}
             onPress={() => router.push({
               pathname: `/Organisation/SessionGame/SessionGameDetails`,

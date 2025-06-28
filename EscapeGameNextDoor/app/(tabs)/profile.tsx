@@ -207,91 +207,94 @@ export default function ProfileScreen() {
 
   return (
     <AppView>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Integrated ProfileComponent directly */}
-        <Card style={styles.card}>
-          <Card.Title
-            title={user.username}
-            subtitle={new Date().toLocaleString()}
-          />
-          <Card.Content>
-            <View style={styles.authorContainer}>
-              <TouchableOpacity onPress={handleOpen}>
-                <Avatar.Image
-                  size={80}
-                  source={
-                    user.picture
-                      ? { uri: user.picture }
-                      : require("@/assets/images/react-logo.png")
-                  }
-                />
-              </TouchableOpacity>
-              <View style={styles.authorNameContainer}>
-                <ThemedText style={styles.text}>Nom</ThemedText>
-                <ThemedText style={styles.nameText}>
-                  {user.firstName} {user.lastName}
-                </ThemedText>
-                <Divider style={styles.divider} />
-                <ThemedText style={styles.text}>Mail</ThemedText>
-                <ThemedText style={styles.emailText}>{user.email}</ThemedText>
+      <View style={styles.pageContainer}>
+
+        <ScrollView contentContainerStyle={styles.container}>
+          {/* Integrated ProfileComponent directly */}
+          <Card style={styles.card}>
+            <Card.Title
+              title={user.username}
+              subtitle={new Date().toLocaleString()}
+            />
+            <Card.Content>
+              <View style={styles.authorContainer}>
+                <TouchableOpacity onPress={handleOpen}>
+                  <Avatar.Image
+                    size={80}
+                    source={
+                      user.picture
+                        ? { uri: user.picture }
+                        : require("@/assets/images/react-logo.png")
+                    }
+                  />
+                </TouchableOpacity>
+                <View style={styles.authorNameContainer}>
+                  <ThemedText style={styles.text}>Nom</ThemedText>
+                  <ThemedText style={styles.nameText}>
+                    {user.firstName} {user.lastName}
+                  </ThemedText>
+                  <Divider style={styles.divider} />
+                  <ThemedText style={styles.text}>Mail</ThemedText>
+                  <ThemedText style={styles.emailText}>{user.email}</ThemedText>
+                </View>
               </View>
-            </View>
-          </Card.Content>
-         
-        </Card>
+            </Card.Content>
+          
+          </Card>
 
-        <ThemedView style={styles.tabsWrapper}>
-          <GenericTabs 
-            tabs={TabItems} 
-            defaultTab={0} 
-            ChangeTab={goToTab} 
-            ref={tabsRef} 
-          />
-        </ThemedView>
-      </ScrollView>
+          <ThemedView style={styles.tabsWrapper}>
+            <GenericTabs 
+              tabs={TabItems} 
+              defaultTab={0} 
+              ChangeTab={goToTab} 
+              ref={tabsRef} 
+            />
+          </ThemedView>
+        </ScrollView>
 
-      <Modal 
-        visible={visible} 
-        onDismiss={handleClose} 
-        contentContainerStyle={styles.modal}
-      >
-        <Card>
-          <Card.Title 
-            title="Change Profile Picture" 
-            right={() => (
-              <Button onPress={handleClose}>Close</Button>
-            )}
-          />
-          <Card.Cover 
-            source={
-              selectedFile ? 
-              { uri: selectedFile.uri } : 
-              require('@/assets/images/react-logo.png')
-            }  
-          />
-          <Card.Content style={styles.modalContent}>
-            <Button 
-              mode="contained" 
-              onPress={pickImage}
-              style={styles.modalButton}
-            >
-              Choose Image
-            </Button>
-            {selectedFile && (
-              <Text style={styles.fileName}>{selectedFile.name}</Text>
-            )}
-          </Card.Content>
-          <Card.Actions>
-            <Button 
-              onPress={uploadImage}
-              disabled={!selectedFile}
-            >
-              Save
-            </Button>
-            <Button onPress={handleClose}>Cancel</Button>
-          </Card.Actions>
-        </Card>
-      </Modal>
+        <Modal 
+          visible={visible} 
+          onDismiss={handleClose} 
+          contentContainerStyle={styles.modal}
+        >
+          <Card>
+            <Card.Title 
+              title="Change Profile Picture" 
+              right={() => (
+                <Button onPress={handleClose}>Close</Button>
+              )}
+            />
+            <Card.Cover 
+              source={
+                selectedFile ? 
+                { uri: selectedFile.uri } : 
+                require('@/assets/images/react-logo.png')
+              }  
+            />
+            <Card.Content style={styles.modalContent}>
+              <Button 
+                mode="contained" 
+                onPress={pickImage}
+                style={styles.modalButton}
+              >
+                Choose Image
+              </Button>
+              {selectedFile && (
+                <Text style={styles.fileName}>{selectedFile.name}</Text>
+              )}
+            </Card.Content>
+            <Card.Actions>
+              <Button 
+                onPress={uploadImage}
+                disabled={!selectedFile}
+              >
+                Save
+              </Button>
+              <Button onPress={handleClose}>Cancel</Button>
+            </Card.Actions>
+          </Card>
+        </Modal>
+      </View>
     </AppView>
   );
 }
@@ -303,6 +306,13 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: "absolute",
+  },
+  pageContainer:
+  {
+    alignSelf:'center',
+    maxWidth:800,
+    width:"100%",
+    paddingHorizontal:16
   },
   container: {
     flexGrow: 1,

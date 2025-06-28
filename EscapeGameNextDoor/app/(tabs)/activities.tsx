@@ -250,157 +250,159 @@ export default function ForumList() {
     // Main content
     return (
         <AppView>
-            <Surface style={styles.surface} elevation={2}>
-                {/* Header with title and plus icon */}
-                <View style={styles.headerContainer}>
-                    <Text style={[styles.title, styles.headerTitle]}>Liste des Forums</Text>
-                    <PlusCircle
-                        color="#888"
-                        onPress={handleOpenModal}
-                        style={styles.plusIcon}
-                    />
-                </View>
-                
-                {/* Filters Content */}
-                <View style={styles.contentContainer}>
-                    <View style={styles.filtersContainer}>
-                        <TextInput
-                            label="Rechercher un forum"
-                            value={searchTerm}
-                            onChangeText={setSearchTerm}
-                            mode="outlined"
-                            style={styles.searchInput}
-                            onSubmitEditing={handleSearchChange}
+            <View style={styles.pageContainer}>
+                <Surface style={styles.surface} elevation={2}>
+                    {/* Header with title and plus icon */}
+                    <View style={styles.headerContainer}>
+                        <Text style={[styles.title, styles.headerTitle]}>Liste des Forums</Text>
+                        <PlusCircle
+                            color="#888"
+                            onPress={handleOpenModal}
+                            style={styles.plusIcon}
                         />
-                        <Button onPress={handleSearchChange} mode="contained">
-                            Rechercher
-                        </Button>
-                        <Text style={styles.filterLabel}>Filtrer par organisation</Text>
-                        <View style={styles.pickerContainer}>
-                            <Picker
-                                selectedValue={selectedOrganisation}
-                                onValueChange={handleOrganisationChange}
-                                style={styles.picker}
-                            >
-                                <Picker.Item label="Toutes les organisations" value={undefined} />
-                                {organisations.map((org) => (
-                                    <Picker.Item
-                                        key={org.orgId}
-                                        label={org.name}
-                                        value={org}
-                                    />
-                                ))}
-                            </Picker>
-                        </View>
                     </View>
-                </View>
-            </Surface>
-
-            <Surface style={styles.forumListCard}>
-                {/* Forum List */}
-                <View style={styles.forumListTitleContainer}>
-                    <View style={styles.listContainer}>
-                        {forums.length === 0 ? (
-                            <View style={styles.emptyContainer}>
-                                <ThemedText>Aucun forum trouvé</ThemedText>
-                            </View>
-                        ) : (
-                            <List.Section>
-                                {forums.map((forum, index) => (
-                                    <React.Fragment key={forum.id || index}>
-                                        <List.Item
-                                            title={forum.title}
-                                            titleStyle={styles.forumTitle}
-                                            onPress={() => handleForumPress(forum.id)}
-                                            right={() => (
-                                                <ThemedText style={styles.dateText}>
-                                                    {FormatUtils.FormatDate(forum.creationDate)}
-                                                </ThemedText>
-                                            )}
-                                            style={styles.forumItem}
+                    
+                    {/* Filters Content */}
+                    <View style={styles.contentContainer}>
+                        <View style={styles.filtersContainer}>
+                            <TextInput
+                                label="Rechercher un forum"
+                                value={searchTerm}
+                                onChangeText={setSearchTerm}
+                                mode="outlined"
+                                style={styles.searchInput}
+                                onSubmitEditing={handleSearchChange}
+                            />
+                            <Button onPress={handleSearchChange} mode="contained">
+                                Rechercher
+                            </Button>
+                            <Text style={styles.filterLabel}>Filtrer par organisation</Text>
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={selectedOrganisation}
+                                    onValueChange={handleOrganisationChange}
+                                    style={styles.picker}
+                                >
+                                    <Picker.Item label="Toutes les organisations" value={undefined} />
+                                    {organisations.map((org) => (
+                                        <Picker.Item
+                                            key={org.orgId}
+                                            label={org.name}
+                                            value={org}
                                         />
-                                        {index < forums.length - 1 && <Divider />}
-                                    </React.Fragment>
-                                ))}
-                            </List.Section>
-                        )}
-                    </View>
-                </View>
-
-                {/* Pagination */}
-                {totalPages >= 1 && (
-                    <View>
-                        <View style={styles.paginationContainer}>
-                            <View style={{ flex: 1 }}>
-                                <Button
-                                    mode="outlined"
-                                    onPress={() => handlePageChange(currentPage - 1)}
-                                    disabled={currentPage <= 1}
-                                    style={styles.paginationButton}
-                                >
-                                    <Text>
-                                        Précédent
-                                    </Text>
-                                </Button>
-                                
-                                <ThemedText style={styles.pageInfo}>
-                                    Page {currentPage} sur {totalPages}
-                                </ThemedText>
-                                
-                                <Button
-                                    mode="outlined"
-                                    onPress={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage >= totalPages}
-                                    style={styles.paginationButton}
-                                >
-                                    <Text>
-                                        Suivant
-                                    </Text>
-                                </Button>
+                                    ))}
+                                </Picker>
                             </View>
                         </View>
                     </View>
-                )}
-            </Surface>
+                </Surface>
 
-            {/* Modal for Creating Forum */}
-            <Modal visible={modalSetVisibilit} onDismiss={handleCloseModal} contentContainerStyle={styles.modalContainer}>
-                <Card style={styles.modalCard}>
-                    <Card.Title title="Créer un Forum" titleStyle={styles.title} />
-                    <Card.Content>
-                        <View>
-                            <TextInput
-                                label="Titre"
-                                value={addPost.title}
-                                onChangeText={(text) => handleChangeInput('title', text)}
-                                mode="outlined"
-                                style={styles.searchInput}
-                                placeholder="Entrez le titre du forum"
-                            />
+                <Surface style={styles.forumListCard}>
+                    {/* Forum List */}
+                    <View style={styles.forumListTitleContainer}>
+                        <View style={styles.listContainer}>
+                            {forums.length === 0 ? (
+                                <View style={styles.emptyContainer}>
+                                    <ThemedText>Aucun forum trouvé</ThemedText>
+                                </View>
+                            ) : (
+                                <List.Section>
+                                    {forums.map((forum, index) => (
+                                        <React.Fragment key={forum.id || index}>
+                                            <List.Item
+                                                title={forum.title}
+                                                titleStyle={styles.forumTitle}
+                                                onPress={() => handleForumPress(forum.id)}
+                                                right={() => (
+                                                    <ThemedText style={styles.dateText}>
+                                                        {FormatUtils.FormatDate(forum.creationDate)}
+                                                    </ThemedText>
+                                                )}
+                                                style={styles.forumItem}
+                                            />
+                                            {index < forums.length - 1 && <Divider />}
+                                        </React.Fragment>
+                                    ))}
+                                </List.Section>
+                            )}
                         </View>
+                    </View>
+
+                    {/* Pagination */}
+                    {totalPages >= 1 && (
                         <View>
-                            <TextInput
-                                label="Contenu"
-                                value={addPost.content}
-                                onChangeText={(text) => handleChangeInput('content', text)}
-                                mode="outlined"
-                                multiline
-                                numberOfLines={4}
-                                style={styles.searchInput}
-                                placeholder="Entrez le contenu du forum"
-                            />
+                            <View style={styles.paginationContainer}>
+                                <View style={{ flex: 1 }}>
+                                    <Button
+                                        mode="outlined"
+                                        onPress={() => handlePageChange(currentPage - 1)}
+                                        disabled={currentPage <= 1}
+                                        style={styles.paginationButton}
+                                    >
+                                        <Text>
+                                            Précédent
+                                        </Text>
+                                    </Button>
+                                    
+                                    <ThemedText style={styles.pageInfo}>
+                                        Page {currentPage} sur {totalPages}
+                                    </ThemedText>
+                                    
+                                    <Button
+                                        mode="outlined"
+                                        onPress={() => handlePageChange(currentPage + 1)}
+                                        disabled={currentPage >= totalPages}
+                                        style={styles.paginationButton}
+                                    >
+                                        <Text>
+                                            Suivant
+                                        </Text>
+                                    </Button>
+                                </View>
+                            </View>
                         </View>
-                    </Card.Content>
-                    <Card.Actions>
-                        <Button onPress={handleCreateForum} mode="contained">
-                            Créer un forum
-                        </Button>
-                        <Button onPress={handleCloseModal}>
-                            Fermer
-                        </Button>
-                    </Card.Actions>
-                </Card>
-            </Modal>
+                    )}
+                </Surface>
+
+                {/* Modal for Creating Forum */}
+                <Modal visible={modalSetVisibilit} onDismiss={handleCloseModal} contentContainerStyle={styles.modalContainer}>
+                    <Card style={styles.modalCard}>
+                        <Card.Title title="Créer un Forum" titleStyle={styles.title} />
+                        <Card.Content>
+                            <View>
+                                <TextInput
+                                    label="Titre"
+                                    value={addPost.title}
+                                    onChangeText={(text) => handleChangeInput('title', text)}
+                                    mode="outlined"
+                                    style={styles.searchInput}
+                                    placeholder="Entrez le titre du forum"
+                                />
+                            </View>
+                            <View>
+                                <TextInput
+                                    label="Contenu"
+                                    value={addPost.content}
+                                    onChangeText={(text) => handleChangeInput('content', text)}
+                                    mode="outlined"
+                                    multiline
+                                    numberOfLines={4}
+                                    style={styles.searchInput}
+                                    placeholder="Entrez le contenu du forum"
+                                />
+                            </View>
+                        </Card.Content>
+                        <Card.Actions>
+                            <Button onPress={handleCreateForum} mode="contained">
+                                Créer un forum
+                            </Button>
+                            <Button onPress={handleCloseModal}>
+                                Fermer
+                            </Button>
+                        </Card.Actions>
+                    </Card>
+                </Modal>
+            </View>
         </AppView>
     );
 }
@@ -412,6 +414,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffffff',
         marginBottom: 8,
     },
+    pageContainer:
+  {
+    alignSelf:'center',
+    maxWidth:800,
+    width:"100%",
+    paddingHorizontal:16
+  },
     headerContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',

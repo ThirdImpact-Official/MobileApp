@@ -98,6 +98,9 @@ export default function OrganisationDetails() {
   if (isError) {
     return (
       <AppView>
+        <View>
+
+        </View>
         <Card>
           <Card.Title title="Organisation" />
           <Card.Content>
@@ -113,6 +116,7 @@ else{
 
   return (
     <AppView >
+      <View style={styles.pageContainer}>
       <Card style={styles.card} >
         <LinearGradientWrap>
            <Card.Title title={organisation.name} titleStyle={styles.title} left={(props) => <ThemedText><ArrowLeft {...props} onPress={() => router.back()}/></ThemedText> }  />
@@ -158,6 +162,8 @@ else{
           </Button>
         </Card.Actions>
       </Card>
+
+      </View>
     </AppView>
   );
 }
@@ -166,6 +172,13 @@ else{
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+  },
+  pageContainer:
+  {
+    alignSelf:'center',
+    maxWidth:800,
+    width:"100%",
+    paddingHorizontal:16
   },
   center: {
     flex: 1,

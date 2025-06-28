@@ -11,52 +11,63 @@ import LinearGradientWrap from './linearGradientWrap';
 import { ThemedText } from "../ThemedText";
 import { UnitofAction } from "@/action/UnitofAction";
 import { Timer } from "@mui/icons-material";
+
 interface AppViewProps {
   children: React.ReactNode;
 }
 
 export default function AppView({ children }: AppViewProps) {
-  const { isAuthenticated, user,logout } = useAuth();
+
+  const { isAuthenticated, user, logout } = useAuth();
   const [getuser, setuser] = useState<GetUserDto | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [countNotification, setCountNotification] = useState(0);
-  const [getUser,setUser] = useState<GetUserDto | null>(null);
+  // Removed duplicate getUser state - you already have getuser above
+  
   const action = new UnitofAction();
   const router = useRouter();
+
+  useEffect(() => {
+    const handleNotificationCount = async () => {
+      const count = await action.notificationAction.GetNotificationcount();
+      if (count.Success) {
+        setCountNotification(count.Data as number);
+      }
+    }
+
+    // Only run if authenticated
+    if (isAuthenticated) {
+      handleNotificationCount();
+      
+      const interval = setInterval(() => {
+        handleNotificationCount();
+      }, 30000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]); // Add isAuthenticated as dependency
+
+
   const handleOpenModal = () => setModalVisible(true);
   const handleCloseModal = () => setModalVisible(false);
+  
   const handleLogout = () => {
-      logout();
-       router.replace('/Authentication/Login');  
-  }
-  if (!isAuthenticated) {
-    return <Redirect href='/Authentication/Login' />;
+    logout();
+    router.replace('/Authentication/Login');  
   }
 
   const HandleNotification = () => {
     router.push('/Profile/Notification');
   }
-  const handleNotificationCount=async()=> {
-    const count = await action.notificationAction.GetNotificationcount();
-    if(count.Success){
-      setCountNotification(count.Data as number);
-      
-    }
-  }
+
   const handleProfile = () => {
     router.push('/(tabs)/profile');
   }
-  useEffect(()=> {
- 
-      const interval =setInterval(() => {
-        handleNotificationCount();
-      },30000);
-      return () => clearInterval(interval);
-    }
-  ,[])
-  useEffect(() => {
-    handleNotificationCount();
-  },[]);
+
+
+  if (!isAuthenticated) {
+    return <Redirect href='/Authentication/Login' />;
+  }
 
   return (
     <View style={styles.container}>
@@ -87,27 +98,21 @@ export default function AppView({ children }: AppViewProps) {
                     icon="account"
                     onPress={handleProfile}
                     />
-        
-
                 </View>
                 <View>
-
                 <Appbar.Action
                   icon="bell"
-        
                   onPress={HandleNotification}
                   />
                   <Badge
                     size={18}
                     style={{ position: 'absolute', top: 0, right: 0, backgroundColor: 'red' }}    
                     visible={countNotification > 0}
-                
                   >
                     {countNotification}
                   </Badge>
                 </View>
                 <View>
-
                 <Appbar.Action
                   icon="logout"
                   onPress={() => {
